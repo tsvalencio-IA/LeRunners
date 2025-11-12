@@ -1,1 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeRunners - Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="login-page">
 
+    <div class="login-container">
+        <img src="https://via.placeholder.com/150/00008B/FFFFFF?text=LeRunners" alt="Logo LeRunners" class="logo">
+        
+        <form id="login-form">
+            <h2>Entrar na Plataforma</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <div class="input-icon">
+                    <i class="bx bx-envelope"></i>
+                    <input type="email" id="loginEmail" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Senha</label>
+                <div class="input-icon">
+                    <i class="bx bx-lock"></i>
+                    <input type="password" id="loginPassword" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+            <p id="login-error" class="error-message"></p>
+        </form>
+
+        <hr>
+
+        <form id="register-form" class="hidden">
+            <h2>Novo Atleta? Crie sua conta</h2>
+            <div class="form-group">
+                <label for="registerName">Nome Completo</label>
+                <div class="input-icon">
+                    <i class="bx bx-user"></i>
+                    <input type="text" id="registerName" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <div class="input-icon">
+                    <i class="bx bx-envelope"></i>
+                    <input type="email" id="registerEmail" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Senha (mínimo 6 caracteres)</label>
+                <div class="input-icon">
+                    <i class="bx bx-lock-alt"></i>
+                    <input type="password" id="registerPassword" required>
+                </div>
+            </div>
+            <button type="submit" class="btn">Criar Conta</button>
+            <p id="register-error" class="error-message"></p>
+        </form>
+
+        <p class="toggle-link">Não tem conta? <a href="#" id="toggleToRegister">Registre-se</a></p>
+        <p class="toggle-link hidden">Já tem conta? <a href="#" id="toggleToLogin">Entre</a></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
