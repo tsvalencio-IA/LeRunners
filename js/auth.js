@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-            const btn = registerForm.querySelector('button');
+S           const btn = registerForm.querySelector('button');
 
             if (password.length < 6) {
                 registerErrorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
