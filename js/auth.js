@@ -1,6 +1,6 @@
 // js/auth.js
 // Gerenciador de Autenticação para a tela de login (index.html)
-// VERSÃO CORRIGIDA (Removido o 'ka' e garantido o uid)
+// VERSÃO CORRIGIDA (Removido o erro 'ka' e garantido o uid)
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Configuração
