@@ -2,14 +2,14 @@
 // COLE AQUI AS CHAVES QUE VOCÊ COPIOU DO PASSO 1.3 (Fase 1)
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...COLE_SUA_CHAVE_AQUI",
-  authDomain: "lerunners-app.firebaseapp.com",
-  databaseURL: "https://lerunners-app-default-rtdb.firebaseio.com",
-  projectId: "lerunners-app",
-  storageBucket: "lerunners-app.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
-};
+    apiKey: "AIzaSyAfu5pWp01QwkCAtuX3XvVT686cojlS7g4",
+    authDomain: "lerunners-app.firebaseapp.com",
+    databaseURL: "https://lerunners-app-default-rtdb.firebaseio.com",
+    projectId: "lerunners-app",
+    storageBucket: "lerunners-app.firebasestorage.app",
+    messagingSenderId: "341500611045",
+    appId: "1:341500611045:web:634f56e09d21ef9e40070c"
+  };
 
 // --- Configuração da GOOGLE GEMINI API (MÓDULO 3 - FUTURO) ---
 // NÃO PODE SER USADA NO GITHUB PAGES (INSEGURO)
