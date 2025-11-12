@@ -1,14 +1,12 @@
 // js/auth.js
 // Gerenciador de Autenticação para a tela de login (index.html)
-// VERSÃO 4.0 (CORRIGIDA)
+// VERSÃO 5.0 (CORRIGIDA) - Removido o DOMContentLoaded
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Verificação de Configuração
-    if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
-        console.error("ERRO CRÍTICO: config.js não carregado ou chaves não preenchidas.");
-        alert("Erro de sistema: Configuração não encontrada. Preencha o js/config.js");
-        return;
-    }
+// 1. Verificação de Configuração
+if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
+    console.error("ERRO CRÍTICO: config.js não carregado ou chaves não preenchidas.");
+    alert("Erro de sistema: Configuração não encontrada. Preencha o js/config.js");
+} else {
 
     // 2. Inicialização do Firebase
     try {
@@ -18,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         console.error('Falha ao inicializar Firebase:', e);
         alert("Erro ao conectar com o sistema. Verifique o config.js");
-        return;
     }
 
     const auth = firebase.auth();
@@ -90,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Lógica de Registro (Botão Criar Conta) - ESTA É A CORREÇÃO
+    // 5. Lógica de Registro (Botão Criar Conta) - Esta é a correção
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -126,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         createdAt: new Date().toISOString()
                     };
 
-                    // CORREÇÃO 1: (Removido o 'ka')
                     // Passo 1: Criar o perfil
                     return db.ref('users/' + user.uid).set(userProfile);
                 })
@@ -134,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Usuário salvo no Database!
                     console.log("Perfil do usuário salvo no DB.");
                     
-                    // CORREÇÃO 2: (Usa 'createdUserUid' ao invés de 'auth.currentUser')
                     // Passo 2: Criar os dados (USANDO A VARIÁVEL GUARDADA)
                     return db.ref('data/' + createdUserUid).set({
                         workouts: {} // Inicializa o nó de treinos
@@ -174,4 +169,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-});
+} // Fim do 'else' da verificação de config
