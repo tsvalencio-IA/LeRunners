@@ -1,1 +1,344 @@
+/* =================================================================== */
+/* 1. RESET E VARIÁVEIS GLOBAIS
+/* =================================================================== */
+:root {
+    --primary-color: #00008B; /* Dark Blue */
+    --secondary-color: #4169E1; /* Royal Blue */
+    --danger-color: #DC3545;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --light-gray: #f4f5f7;
+    --text-color: #333;
+    --border-color: #e0e0e0;
+    --border-radius: 8px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.hidden {
+    display: none !important;
+}
+
+h2 { color: var(--primary-color); }
+hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5rem 0; }
+
+/* =================================================================== */
+/* 2. COMPONENTES REUTILIZÁVEIS (Botões, Formulários, etc)
+/* =================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.btn-primary { background-color: var(--primary-color); color: #fff; }
+.btn-primary:hover { background-color: #00005a; transform: translateY(-2px); }
+
+.btn-secondary { background-color: var(--secondary-color); color: #fff; }
+.btn-secondary:hover { background-color: #2a4ac8; }
+
+.btn-danger { background-color: var(--danger-color); color: #fff; }
+.btn-danger:hover { background-color: #a71d2a; }
+
+.btn-small { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+
+.panel {
+    background: #fff;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+.form-group textarea {
+    resize: vertical;
+}
+
+/* =================================================================== */
+/* 3. TELA DE LOGIN (index.html)
+/* =================================================================== */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 1.5rem auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+
+.login-container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.input-icon {
+    position: relative;
+}
+.input-icon i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+.input-icon input {
+    padding-left: 40px;
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 1rem;
+    min-height: 1.2em;
+}
+
+.toggle-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+.toggle-link a {
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* =================================================================== */
+/* 4. TELA DA PLATAFORMA (app.html)
+/* =================================================================== */
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.loader {
+    border: 6px solid var(--light-gray);
+    border-top: 6px solid var(--primary-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.app-header {
+    background-color: #fff;
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.app-header h1 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+.app-header nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.user-display {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.app-header #logoutButton {
+    width: auto;
+    padding: 0.5rem 1rem;
+}
+
+.app-main {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 1rem 2rem;
+}
+
+/* =================================================================== */
+/* 5. PAINEL ADMIN (Módulo 1)
+/* =================================================================== */
+.admin-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 1.5rem;
+}
+
+.athlete-list-container {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.athlete-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.athlete-list-item:hover {
+    background-color: var(--light-gray);
+}
+.athlete-list-item.selected {
+    background-color: var(--secondary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+.athlete-list-item span {
+    font-weight: 600;
+}
+.athlete-list-item .role-tag {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    background-color: var(--warning-color);
+    color: #fff;
+}
+.athlete-list-item.selected .role-tag {
+    background-color: #fff;
+    color: var(--text-color);
+}
+
+.form-minimal {
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+#workouts-list .workout-card,
+#atleta-workouts-list .workout-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.workout-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.workout-card-header .date {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+.workout-card-header .title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.workout-card-body p {
+    white-space: pre-wrap;
+    font-family: monospace;
+    background: var(--light-gray);
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* =================================================================== */
+/* 6. PAINEL ATLETA (Módulo 1)
+/* =================================================================== */
+.atleta-dashboard #atleta-workouts-container {
+    max-width: 800px;
+    margin: 1.5rem 0;
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+    .admin-layout {
+        grid-template-columns: 1fr;
+    }
+    .athlete-list-container {
+        max-height: 300px; /* Limita altura em telas pequenas */
+    }
+}
+
+@media (max-width: 600px) {
+    .app-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    .app-main {
+        padding: 1rem;
+    }
+    .login-container {
+        padding: 1.5rem;
+    }
+    .panel {
+        padding: 1rem;
+    }
+}
