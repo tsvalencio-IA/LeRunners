@@ -1,5 +1,6 @@
 // js/auth.js
 // Gerenciador de Autenticação para a tela de login (index.html)
+// VERSÃO CORRIGIDA (Removido o 'ka' e garantido o uid)
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Configuração
@@ -108,9 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.textContent = "Criando...";
             registerErrorMsg.textContent = "";
 
+            let createdUserUid = null; // Variável para guardar o UID
+
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
+                    // Usuário criado no Authentication
                     const user = userCredential.user;
+                    createdUserUid = user.uid; // Guarda o UID
                     console.log("Usuário criado no Auth:", user.uid);
 
                     // Estrutura de dados que definimos nas Regras de Segurança
@@ -121,23 +126,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         createdAt: new Date().toISOString()
                     };
 
+                    // CORREÇÃO 1: Linha corrigida (removido o 'ka')
                     // Nó /users/{uid} (Dados públicos/perfil)
-                    return db.ref('users/'ka + user.uid).set(userProfile);
+                    return db.ref('users/' + user.uid).set(userProfile);
                 })
                 .then(() => {
+                    // Usuário salvo no Database!
                     console.log("Perfil do usuário salvo no DB.");
+                    
+                    // CORREÇÃO 2: Garante que o UID está disponível para a segunda escrita
                     // Nó /data/{uid} (Dados privados/treinos)
-                    // Criamos um nó vazio para garantir que ele exista
-                    return db.ref('data/' + auth.currentUser.uid).set({
+                    return db.ref('data/' + createdUserUid).set({
                         workouts: {} // Inicializa o nó de treinos
                     });
                 })
                 .then(() => {
-                    console.log("Nó de dados privado criado.");
+                    // SÓ REDIRECIONA DEPOIS QUE TUDO DEU CERTO
+                    console.log("Nó de dados privado criado. Redirecionando...");
                     window.location.href = 'app.html';
                 })
                 .catch((error) => {
-                    console.error("Erro de registro:", error.code);
+                    console.error("Erro de registro:", error.code, error.message);
                     btn.disabled = false;
                     btn.textContent = "Criar Conta";
                     
@@ -148,16 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (error.code === 'auth/weak-password') {
                         registerErrorMsg.textContent = "Senha muito fraca.";
                     } else {
-                        registerErrorMsg.textContent = "Erro ao criar conta.";
+                        registerErrorMsg.textContent = "Erro ao criar conta. Verifique o console (F12).";
                     }
                 });
         });
     }
 
-    // 6. Verifica se o usuário JÁ está logado
+    // 6. Verifica se o usuário JÁ está logado (Não mude, está correto)
     auth.onAuthStateChanged((user) => {
         if (user) {
-            if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
+            // Se o usuário está logado e na tela de login, manda para o app
+            if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/LeRunners/')) {
                  window.location.href = 'app.html';
             }
         }
