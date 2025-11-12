@@ -1,6 +1,6 @@
 // js/auth.js
 // Gerenciador de Autenticação para a tela de login (index.html)
-// VERSÃO CORRIGIDA (Remove o bug 'auth.currentUser' e o erro 'ka')
+// VERSÃO 3.0 (CORRIGIDA)
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Configuração
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-            const btn = registerForm.querySelector('button');
+            const btn = registerForm.querySelector('button'); // Botão correto
 
             if (password.length < 6) {
                 registerErrorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         createdAt: new Date().toISOString()
                     };
 
+                    // CORREÇÃO 1: (Removido o 'ka')
                     // Passo 1: Criar o perfil
                     return db.ref('users/' + user.uid).set(userProfile);
                 })
@@ -133,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Usuário salvo no Database!
                     console.log("Perfil do usuário salvo no DB.");
                     
+                    // CORREÇÃO 2: (Usa 'createdUserUid' ao invés de 'auth.currentUser')
                     // Passo 2: Criar os dados (USANDO A VARIÁVEL GUARDADA)
                     return db.ref('data/' + createdUserUid).set({
                         workouts: {} // Inicializa o nó de treinos
@@ -144,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = 'app.html';
                 })
                 .catch((error) => {
+                    // O BOTÃO AGORA SERÁ RE-HABILITADO EM CASO DE ERRO
                     console.error("Erro de registro:", error.code, error.message);
                     btn.disabled = false;
                     btn.textContent = "Criar Conta";
