@@ -1,6 +1,6 @@
 // js/auth.js
 // Gerenciador de Autenticação para a tela de login (index.html)
-// VERSÃO CORRIGIDA (Removido o erro 'ka' e garantido o uid)
+// VERSÃO CORRIGIDA (Remove o bug 'auth.currentUser' e o erro 'ka')
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Configuração
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Lógica de Registro (Botão Criar Conta)
+    // 5. Lógica de Registro (Botão Criar Conta) - ESTA É A CORREÇÃO
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-S           const btn = registerForm.querySelector('button');
+            const btn = registerForm.querySelector('button');
 
             if (password.length < 6) {
                 registerErrorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
@@ -109,7 +109,8 @@ S           const btn = registerForm.querySelector('button');
             btn.textContent = "Criando...";
             registerErrorMsg.textContent = "";
 
-            let createdUserUid = null; // Variável para guardar o UID
+            // Variável para guardar o UID
+            let createdUserUid = null; 
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
@@ -118,7 +119,6 @@ S           const btn = registerForm.querySelector('button');
                     createdUserUid = user.uid; // Guarda o UID
                     console.log("Usuário criado no Auth:", user.uid);
 
-                    // Estrutura de dados que definimos nas Regras de Segurança
                     const userProfile = {
                         name: name,
                         email: email,
@@ -126,16 +126,14 @@ S           const btn = registerForm.querySelector('button');
                         createdAt: new Date().toISOString()
                     };
 
-                    // CORREÇÃO 1: Linha corrigida (removido o 'ka')
-                    // Nó /users/{uid} (Dados públicos/perfil)
+                    // Passo 1: Criar o perfil
                     return db.ref('users/' + user.uid).set(userProfile);
                 })
                 .then(() => {
                     // Usuário salvo no Database!
                     console.log("Perfil do usuário salvo no DB.");
                     
-                    // CORREÇÃO 2: Garante que o UID está disponível para a segunda escrita
-                    // Nó /data/{uid} (Dados privados/treinos)
+                    // Passo 2: Criar os dados (USANDO A VARIÁVEL GUARDADA)
                     return db.ref('data/' + createdUserUid).set({
                         workouts: {} // Inicializa o nó de treinos
                     });
@@ -163,7 +161,7 @@ S           const btn = registerForm.querySelector('button');
         });
     }
 
-    // 6. Verifica se o usuário JÁ está logado (Não mude, está correto)
+    // 6. Verifica se o usuário JÁ está logado
     auth.onAuthStateChanged((user) => {
         if (user) {
             // Se o usuário está logado e na tela de login, manda para o app
