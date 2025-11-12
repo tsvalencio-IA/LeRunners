@@ -1,9 +1,10 @@
 // js/app.js
 // Gerenciador Principal da Plataforma (app.html) - O "Roteador"
+// VERSÃO 5.0 (CORRIGIDA) - Removido o DOMContentLoaded
 
 // Objeto global da Aplicação
 const LeRunnersApp = {
-    // Estado global (vazio por enquanto)
+    // Estado global
     state: {
         currentUser: null,
         userData: null,
@@ -137,5 +138,5 @@ const LeRunnersApp = {
     }
 };
 
-// Inicia a aplicação quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', LeRunnersApp.init);
+// Inicia a aplicação IMEDIATAMENTE (pois o script está no fim do <body>)
+LeRunnersApp.init();
