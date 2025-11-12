@@ -1,6 +1,6 @@
 // js/auth.js
 // Gerenciador de Autenticação para a tela de login (index.html)
-// VERSÃO 3.0 (CORRIGIDA)
+// VERSÃO 4.0 (CORRIGIDA)
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Configuração
