@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeRunners - Plataforma</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- CORREÇÃO: O erro de digitação 'rel_manifest"' foi corrigido para 'rel="manifest"' -->
+    <!-- CORREÇÃO: O erro de digitação 'rel_manifest"' (do zip anterior) foi corrigido para 'rel="manifest"' -->
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
@@ -40,6 +40,7 @@
 
     <!-- 
       TEMPLATES HTML (Modelos que o JS vai usar para construir a tela) 
+      Baseados na arquitetura 'corri_rp'
     -->
 
     <!-- ========== Template do COACH (Admin) ========== -->
@@ -47,7 +48,7 @@
         <div class="admin-dashboard">
             <h2><i class="bx bx-shield-quarter"></i> Painel do Coach</h2>
             
-            <!-- Painel de Aprovações Pendentes -->
+            <!-- Painel de Aprovações Pendentes (do corri_rp) -->
             <div class="panel approval-panel">
                 <h3><i class='bx bx-user-check'></i> Aprovações Pendentes</h3>
                 <div id="pending-list">
