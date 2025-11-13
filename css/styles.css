@@ -39,6 +39,18 @@ h2 { color: var(--primary-color); }
     text-align: center;
 }
 hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5rem 0; }
+fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+legend {
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 0 0.5rem;
+    margin-left: 0.5rem;
+}
 
 /* =================================================================== */
 /* 2. COMPONENTES REUTILIZÁVEIS (Botões, Formulários, etc)
@@ -80,6 +92,24 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
     cursor: not-allowed;
 }
 
+/* NOVO: Botões de Navegação (V2) */
+.btn-nav {
+    background-color: transparent;
+    color: var(--text-light);
+    text-transform: none;
+    font-size: 0.9rem;
+    width: auto;
+    padding: 0.5rem 1rem;
+}
+.btn-nav.active,
+.btn-nav:hover {
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+}
+.btn-nav i {
+    font-size: 1.2rem;
+}
+
 .panel {
     background: #fff;
     border-radius: var(--border-radius);
@@ -99,12 +129,14 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
 }
 .form-group input,
 .form-group textarea,
+.form-group select,
 .search-input {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: 1rem;
+    background-color: #fff;
 }
 .form-group textarea {
     resize: vertical;
@@ -234,13 +266,16 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
 .app-header nav {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem; /* Reduzido */
 }
 .user-display {
     font-weight: 600;
     font-size: 0.9rem;
     color: var(--text-light);
     text-transform: capitalize;
+    margin-left: 1rem;
+    border-left: 1px solid var(--border-color);
+    padding-left: 1rem;
 }
 .app-header #logoutButton {
     width: auto;
@@ -254,16 +289,18 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
 }
 
 /* =================================================================== */
-/* 5. PAINEL ADMIN
+/* 5. PAINEL ADMIN (V2)
 /* =================================================================== */
 .admin-dashboard h2,
-.atleta-dashboard h2 {
+.atleta-dashboard h2,
+.feed-dashboard h2 {
     border-bottom: 2px solid var(--border-color);
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
 }
 .admin-dashboard h2 i,
-.atleta-dashboard h2 i {
+.atleta-dashboard h2 i,
+.feed-dashboard h2 i {
     margin-right: 0.5rem;
 }
 
@@ -294,7 +331,6 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
     display: flex;
     gap: 0.5rem;
 }
-
 
 /* Layout Admin */
 .admin-layout {
@@ -348,21 +384,43 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
     border: 1px solid var(--border-color);
 }
 
-#workouts-list .workout-card,
-#atleta-workouts-list .workout-card {
+/* =================================================================== */
+/* 6. PAINEL ATLETA (V2)
+/* =================================================================== */
+.atleta-dashboard #atleta-workouts-container {
+    max-width: 800px;
+    margin: 1.5rem 0;
+}
+.atleta-dashboard .subtitle {
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+/* =================================================================== */
+/* 7. CARD DE TREINO (V2 - Atualizado)
+/* =================================================================== */
+.workout-card {
     background: #fff;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 1rem;
     margin-bottom: 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+/* Deixa o card do atleta clicável */
+.atleta-dashboard .workout-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.atleta-dashboard .workout-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .workout-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    padding: 1rem 1rem 0.5rem 1rem;
 }
 .workout-card-header .date {
     font-weight: 700;
@@ -373,6 +431,9 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
     font-weight: 600;
     font-size: 1.1rem;
 }
+.workout-card-body {
+    padding: 0.5rem 1rem 1rem 1rem;
+}
 .workout-card-body p {
     white-space: pre-wrap;
     font-family: monospace;
@@ -381,30 +442,177 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
     border-radius: 4px;
     color: #333;
 }
+/* NOVO: Feedback do atleta (V2) */
+.workout-card-body .feedback-text {
+    border-left: 3px solid var(--secondary-color);
+    background: #f0f5ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    white-space: pre-wrap;
+    font-style: italic;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+}
 
-/* =================================================================== */
-/* 6. PAINEL ATLETA
-/* =================================================================== */
-.atleta-dashboard #atleta-workouts-container {
-    max-width: 800px;
-    margin: 1.5rem 0;
-}
-.atleta-dashboard .subtitle {
-    text-align: left;
-    margin-bottom: 0.5rem;
-}
-.atleta-dashboard .status-tag {
+.status-tag {
     font-size: 0.75rem;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
-    background-color: var(--secondary-color);
     color: #fff;
     text-transform: capitalize;
+    font-weight: 600;
+}
+.status-tag.planejado { background-color: var(--text-light); }
+.status-tag.realizado { background-color: var(--success-color); }
+.status-tag.realizado_parcial { background-color: var(--warning-color); }
+.status-tag.nao_realizado { background-color: var(--danger-color); }
+
+
+/* NOVO: Ações e Comentários (V2) */
+.workout-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem 0.75rem 1rem;
+    border-top: 1px solid var(--border-color);
+    background-color: #fdfdfd;
+}
+.workout-actions {
+    display: flex;
+    gap: 1rem;
+}
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.action-btn:hover {
+    color: var(--primary-color);
+}
+.action-btn i {
+    font-size: 1.2rem;
+}
+.action-btn.liked {
+    color: var(--danger-color);
+}
+
+/* =================================================================== */
+/* 8. FEED SOCIAL (V2)
+/* =================================================================== */
+.feed-dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.feed-list .workout-card {
+    /* O card de treino é reutilizado no feed */
+    cursor: default;
+}
+.feed-list .workout-card:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.feed-list .workout-card-header {
+    /* NOVO: Adiciona nome do atleta no feed */
+    display: block;
+}
+.feed-list .athlete-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--secondary-color);
 }
 
 
 /* =================================================================== */
-/* 7. RESPONSIVIDADE
+/* 9. MODAL (V2)
+/* =================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+.modal-content {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.modal-header h3 {
+    color: var(--primary-color);
+}
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-light);
+}
+.close-btn:hover {
+    color: var(--danger-color);
+}
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+/* Comentários (V2) */
+.comments-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+}
+.comment-item {
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.5rem 0;
+}
+.comment-item:last-child {
+    border-bottom: none;
+}
+.comment-item strong {
+    color: var(--primary-color);
+}
+.comment-item span {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-left: 0.5rem;
+}
+.comment-form {
+    display: flex;
+    gap: 0.5rem;
+}
+.comment-form input {
+    flex: 1;
+}
+.comment-form button {
+    width: auto;
+}
+
+/* =================================================================== */
+/* 10. RESPONSIVIDADE
 /* =================================================================== */
 @media (max-width: 900px) {
     .admin-layout {
@@ -420,6 +628,19 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
         flex-direction: column;
         gap: 0.5rem;
         padding: 1rem;
+    }
+    .app-header nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .user-display {
+        border-left: none;
+        padding-left: 0;
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+        border-top: 1px solid var(--border-color);
+        padding-top: 0.5rem;
     }
     .app-main {
         padding: 1rem;
@@ -441,5 +662,9 @@ hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5r
     }
     .pending-item-actions .btn {
         flex: 1;
+    }
+    /* Nav Botões Mobile */
+    .btn-nav span {
+        display: none; /* Esconde o texto, mostra só ícone */
     }
 }
