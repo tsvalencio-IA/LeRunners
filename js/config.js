@@ -11,6 +11,13 @@ const firebaseConfig = {
   appId: "1:24483751716:web:313b3013bd11c75e2eb5b1"
 };
 
-// --- Configuração da GOOGLE GEMINI API (MÓDULO 3 - FUTURO) ---
-// AVISO: Não é seguro usar no GitHub Pages. Precisará de um back-end.
-// const GEMINI_API_KEY = "AIzaSy...SUA_CHAVE_GEMINI";
+// --- Configuração da GOOGLE GEMINI API (MÓDULO 4 - IA) ---
+// ATENÇÃO: Chave exposta. Use restrições de API no Google Cloud.
+const GEMINI_API_KEY = "COLE_SUA_CHAVE_GEMINI_AQUI";
+
+// --- Configuração do CLOUDINARY (MÓDULO 4 - Fotos) ---
+// Crie uma conta no Cloudinary e um "Upload Preset"
+const CLOUDINARY_CONFIG = {
+    cloudName: "SEU_CLOUD_NAME_AQUI",
+    uploadPreset: "SEU_UPLOAD_PRESET_AQUI" 
+};
