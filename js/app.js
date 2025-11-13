@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.0 - MÓDULO SOCIAL)
+/* ARQUIVO DE LÓGICA UNIFICADO (V2.1 - MÓDULO SOCIAL CORRIGIDO)
 /* ARQUITETURA: corri_rp (com fluxo de aprovação)
 /* =================================================================== */
 
@@ -14,6 +14,7 @@ const AppPrincipal = {
         auth: null,
         listeners: {},     // Para limpar listeners do Firebase
         currentView: 'planilha', // 'planilha' ou 'feed'
+        adminUIDs: {},     // NOVO (V2.1): Cache dos UIDs de admins
         modal: {
             isOpen: false,
             currentWorkoutId: null,
@@ -22,7 +23,7 @@ const AppPrincipal = {
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2...");
+        console.log("Iniciando AppPrincipal V2.1...");
         
         if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
             console.error("ERRO CRÍTICO: config.js não carregado.");
@@ -100,6 +101,16 @@ const AppPrincipal = {
         AppPrincipal.state.auth.onAuthStateChanged(AppPrincipal.handlePlatformAuthStateChange);
     },
 
+    // NOVO (V2.1): Carrega o cache de UIDs de Admins
+    loadAdmins: () => {
+        const adminsRef = AppPrincipal.state.db.ref('admins');
+        adminsRef.once('value', snapshot => {
+            AppPrincipal.state.adminUIDs = snapshot.val() || {};
+            console.log("Cache de Admins carregado:", Object.keys(AppPrincipal.state.adminUIDs));
+        });
+        // (Nota: Em um app maior, isso deveria ser um listener 'on' se admins mudam dinamicamente)
+    },
+
     // O Guardião (só roda no app.html)
     handlePlatformAuthStateChange: (user) => {
         if (!user) {
@@ -111,6 +122,9 @@ const AppPrincipal = {
 
         AppPrincipal.state.currentUser = user;
         const uid = user.uid;
+        
+        // NOVO (V2.1): Carrega a lista de admins para lógica de privacidade
+        AppPrincipal.loadAdmins();
 
         // 1. É Admin?
         AppPrincipal.state.db.ref('admins/' + uid).once('value', adminSnapshot => {
@@ -125,7 +139,7 @@ const AppPrincipal = {
             }
 
             // 2. É Atleta Aprovado?
-            AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
+            AppPrincipal.state.db.ref('users/'/' + uid).once('value', userSnapshot => {
                 if (userSnapshot.exists()) {
                     AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
                     AppPrincipal.elements.userDisplay.textContent = `${AppPrincipal.state.userData.name}`;
@@ -193,7 +207,7 @@ const AppPrincipal = {
     },
     
     // ===================================================================
-    // MÓDULO 3: Lógica do Modal de Feedback/Comentários (V2)
+    // MÓDULO 3: Lógica do Modal de Feedback/Comentários (V2.1)
     // ===================================================================
     
     openFeedbackModal: (workoutId, ownerId, workoutTitle) => {
@@ -215,12 +229,23 @@ const AppPrincipal = {
         commentInput.value = '';
         
         // 1. Carrega os dados do treino (status e feedback)
+        // (Leitura do nó /data/ privado)
         const workoutRef = AppPrincipal.state.db.ref(`data/${ownerId}/workouts/${workoutId}`);
         workoutRef.once('value', snapshot => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 workoutStatusSelect.value = data.status || 'planejado';
                 workoutFeedbackText.value = data.feedback || '';
+            } else {
+                // Se não existir em /data/ (ex: admin vendo feed), tenta carregar de /publicWorkouts/
+                // (Nota: Isso só acontece se o admin não for dono do /data/)
+                AppPrincipal.state.db.ref(`publicWorkouts/${workoutId}`).once('value', publicSnapshot => {
+                     if (publicSnapshot.exists()) {
+                        const data = publicSnapshot.val();
+                        workoutStatusSelect.value = data.status || 'planejado';
+                        workoutFeedbackText.value = data.feedback || '';
+                     }
+                });
             }
         });
         
@@ -234,8 +259,23 @@ const AppPrincipal = {
                 commentsList.innerHTML = "<p>Nenhum comentário ainda.</p>";
                 return;
             }
+            
+            // NOVO (V2.1): Lógica de Filtro de Privacidade
+            // Eu sou admin? OU Eu sou o dono do treino?
+            const isCurrentUserAdmin = AppPrincipal.state.userData.role === 'admin';
+            const isCurrentUserManager = isCurrentUserAdmin || AppPrincipal.state.currentUser.uid === AppPrincipal.state.modal.currentOwnerId;
+
             snapshot.forEach(childSnapshot => {
                 const data = childSnapshot.val();
+                
+                // O comentário é de um admin? (Usa o cache)
+                const isCommentFromAdmin = AppPrincipal.state.adminUIDs.hasOwnProperty(data.uid);
+
+                // REGRA: Se eu NÃO sou o dono/admin E o comentário é de um admin -> PULAR
+                if (!isCurrentUserManager && isCommentFromAdmin) {
+                    return; // Esconde o comentário do coach
+                }
+
                 const item = document.createElement('div');
                 item.className = 'comment-item';
                 // Formata a data (simples)
@@ -248,9 +288,6 @@ const AppPrincipal = {
             });
             commentsList.scrollTop = commentsList.scrollHeight; // Rola para o final
         });
-        
-        // 3. Carrega Curtidas (V2 - Lógica de Curtir)
-        // (Será implementado no Card, não no modal por enquanto)
         
         feedbackModal.classList.remove('hidden');
     },
@@ -285,9 +322,36 @@ const AppPrincipal = {
         };
 
         const workoutRef = AppPrincipal.state.db.ref(`data/${currentOwnerId}/workouts/${currentWorkoutId}`);
+        
+        // 1. Atualiza o nó PRIVADO
         workoutRef.update(feedbackData)
             .then(() => {
-                console.log("Feedback salvo!");
+                // 2. NOVO (V2.1): Atualiza o nó PÚBLICO (/publicWorkouts/)
+                if (feedbackData.status !== 'planejado') {
+                    // Se o treino foi realizado, publica/atualiza no feed
+                    const publicRef = AppPrincipal.state.db.ref(`publicWorkouts/${currentWorkoutId}`);
+                    
+                    // Precisamos dos dados completos do treino (título, data, etc.)
+                    workoutRef.once('value', snapshot => {
+                        const workoutData = snapshot.val(); // Dados privados atualizados
+                        const publicData = {
+                            ownerId: currentOwnerId,
+                            ownerName: AppPrincipal.state.userData.name, // Nome do atleta
+                            date: workoutData.date,
+                            title: workoutData.title,
+                            description: workoutData.description,
+                            status: workoutData.status,
+                            feedback: workoutData.feedback, // Feedback do atleta
+                            realizadoAt: workoutData.realizadoAt
+                        };
+                        publicRef.set(publicData); // Publica no feed
+                    });
+                } else {
+                    // Se foi marcado de volta como "planejado", remove do feed
+                    AppPrincipal.state.db.ref(`publicWorkouts/${currentWorkoutId}`).remove();
+                }
+
+                console.log("Feedback salvo e feed atualizado!");
                 AppPrincipal.closeFeedbackModal();
             })
             .catch(err => alert("Erro ao salvar feedback: " + err.message));
@@ -321,8 +385,7 @@ const AppPrincipal = {
 // 2. AuthLogic (Lógica da index.html)
 // ===================================================================
 const AuthLogic = {
-    // ... (Sem alterações da V1.2 - O código é o mesmo da resposta anterior) ...
-    // ... (Este bloco inteiro é idêntico ao V1.2) ...
+    // ... (Sem alterações da V2. O código V2.0 estava correto) ...
     init: (auth, db) => {
         AuthLogic.auth = auth;
         AuthLogic.db = db;
@@ -457,11 +520,11 @@ const AuthLogic = {
 };
 
 // ===================================================================
-// 3. AdminPanel (Lógica do Painel Coach V2)
+// 3. AdminPanel (Lógica do Painel Coach V2.1)
 // ===================================================================
 const AdminPanel = {
     init: (user, db) => {
-        console.log("AdminPanel V2: Inicializado.");
+        console.log("AdminPanel V2.1: Inicializado.");
         AdminPanel.state = { db, currentUser: user, selectedAthleteId: null, athletes: {} };
 
         AdminPanel.elements = {
@@ -578,15 +641,13 @@ const AdminPanel = {
                 createdAt: new Date().toISOString()
             };
             
-            // NOVO (V2): Cria também o perfil público
             const newPublicProfile = {
                 name: pendingData.name,
-                // pic: "url_placeholder" // (Pode adicionar no futuro)
             };
             
             const updates = {};
             updates[`/users/${uid}`] = newUserProfile;
-            updates[`/publicProfiles/${uid}`] = newPublicProfile; // CRIA O PERFIL PÚBLICO
+            updates[`/publicProfiles/${uid}`] = newPublicProfile;
             updates[`/data/${uid}`] = { workouts: {} };     
             updates[`/pendingApprovals/${uid}`] = null; 
 
@@ -601,15 +662,12 @@ const AdminPanel = {
 
     rejectAthlete: (uid) => {
         if (!confirm("Tem certeza que deseja REJEITAR este atleta?")) return;
-        
-        // Remove apenas de pendingApprovals. O usuário ainda existe no Auth.
-        // O fluxo de login (AuthLogic) vai tratar isso como "Rejeitado"
         AdminPanel.state.db.ref('pendingApprovals/' + uid).remove()
             .then(() => console.log("Solicitação rejeitada."))
             .catch(err => alert("Falha ao rejeitar: " + err.message));
     },
 
-    // NOVO: Excluir Atleta (V2)
+    // ATUALIZADO (V2.1): Excluir Atleta
     deleteAthlete: () => {
         const { selectedAthleteId } = AdminPanel.state;
         if (!selectedAthleteId) return;
@@ -620,21 +678,27 @@ const AdminPanel = {
         }
 
         // Exclusão completa (multi-path update)
-        // Precisamos apagar o usuário de 'users', 'data' e 'publicProfiles'
         const updates = {};
         updates[`/users/${selectedAthleteId}`] = null;
         updates[`/data/${selectedAthleteId}`] = null;
         updates[`/publicProfiles/${selectedAthleteId}`] = null;
         
-        // (Opcional: Limpar comentários e curtidas - mais complexo, deixamos para V3)
-        // (Opcional: Excluir do Auth - requer Cloud Functions)
-
-        AdminPanel.state.db.ref().update(updates)
-            .then(() => {
-                console.log("Atleta excluído com sucesso.");
-                AdminPanel.selectAthlete(null, null); // Desseleciona
-            })
-            .catch(err => alert("Erro ao excluir atleta: " + err.message));
+        // NOVO (V2.1): Limpa os publicWorkouts dele (Client-side cleanup)
+        // Isso é necessário pois as regras não limpam automaticamente
+        const feedRef = AdminPanel.state.db.ref('publicWorkouts');
+        feedRef.orderByChild('ownerId').equalTo(selectedAthleteId).once('value', snapshot => {
+            snapshot.forEach(childSnapshot => {
+                updates[`/publicWorkouts/${childSnapshot.key}`] = null;
+            });
+            
+            // Executa a exclusão em massa DEPOIS de encontrar os workouts
+            AdminPanel.state.db.ref().update(updates)
+                .then(() => {
+                    console.log("Atleta e seus dados públicos foram excluídos.");
+                    AdminPanel.selectAthlete(null, null); // Desseleciona
+                })
+                .catch(err => alert("Erro ao excluir atleta: " + err.message));
+        });
     },
 
     selectAthlete: (uid, name) => {
@@ -712,7 +776,7 @@ const AdminPanel = {
             .catch(err => alert("Falha ao salvar o treino: " + err.message));
     },
     
-    // Card de Treino (Versão Admin V2)
+    // Card de Treino (Versão Admin V2.1)
     createWorkoutCard: (id, data, athleteId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -728,7 +792,6 @@ const AdminPanel = {
                 <p>${data.description || "Sem descrição."}</p>
                 ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
             </div>
-            <!-- NOVO: Footer com Ações (V2) -->
             <div class="workout-card-footer">
                 <div class="workout-actions">
                     <button class="action-btn btn-like"><i class='bx bx-heart'></i> <span class="like-count">0</span></button>
@@ -743,15 +806,18 @@ const AdminPanel = {
             AppPrincipal.openFeedbackModal(id, athleteId, data.title);
         });
         
-        // Deletar o treino (Coach)
+        // ATUALIZADO (V2.1): Deletar o treino (Coach)
         el.querySelector('[data-action="delete"]').addEventListener('click', () => {
             if (confirm("Tem certeza que deseja apagar este treino?")) {
+                // Apaga o privado
                 AdminPanel.state.db.ref(`data/${athleteId}/workouts/${id}`).remove()
                     .catch(err => alert("Falha ao deletar: " + err.message));
+                // Apaga o público (do feed)
+                AdminPanel.state.db.ref(`publicWorkouts/${id}`).remove();
             }
         });
         
-        // Carrega Likes e Comentários (V2)
+        // Carrega Likes e Comentários
         AdminPanel.loadWorkoutStats(el, id);
         
         return el;
@@ -802,11 +868,11 @@ const AdminPanel = {
 };
 
 // ===================================================================
-// 4. AtletaPanel (Lógica do Painel Atleta V2)
+// 4. AtletaPanel (Lógica do Painel Atleta V2.1)
 // ===================================================================
 const AtletaPanel = {
     init: (user, db) => {
-        console.log("AtletaPanel V2: Inicializado.");
+        console.log("AtletaPanel V2.1: Inicializado.");
         AtletaPanel.state = { db, currentUser: user };
         AtletaPanel.elements = { workoutsList: document.getElementById('atleta-workouts-list') };
         AtletaPanel.loadWorkouts(user.uid);
@@ -836,7 +902,7 @@ const AtletaPanel = {
         });
     },
 
-    // Card de Treino (Versão Atleta V2)
+    // Card de Treino (Versão Atleta V2.1)
     createWorkoutCard: (id, data, athleteId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -852,7 +918,6 @@ const AtletaPanel = {
                 <p>${data.description || "Sem descrição."}</p>
                 ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
             </div>
-            <!-- NOVO: Footer com Ações (V2) -->
             <div class="workout-card-footer">
                 <div class="workout-actions">
                     <button class="action-btn btn-like"><i class='bx bx-heart'></i> <span class="like-count">0</span></button>
@@ -877,7 +942,7 @@ const AtletaPanel = {
              }
         });
         
-        // Carrega Likes e Comentários (V2)
+        // Carrega Likes e Comentários
         AtletaPanel.loadWorkoutStats(el, id);
         
         return el;
@@ -930,68 +995,70 @@ const AtletaPanel = {
 };
 
 // ===================================================================
-// 5. FeedPanel (Lógica do Feed Social V2)
+// 5. FeedPanel (Lógica do Feed Social V2.1 - CORRIGIDO)
 // ===================================================================
 const FeedPanel = {
     init: (user, db) => {
-        console.log("FeedPanel V2: Inicializado.");
-        FeedPanel.state = { db, currentUser: user, users: {} };
+        console.log("FeedPanel V2.1: Inicializado.");
+        FeedPanel.state = { db, currentUser: user };
         FeedPanel.elements = { feedList: document.getElementById('feed-list') };
         
-        // 1. Carrega todos os perfis públicos para saber os nomes
-        const profilesRef = db.ref('publicProfiles');
-        AppPrincipal.state.listeners['feedProfiles'] = profilesRef;
-        profilesRef.once('value', snapshot => {
-            FeedPanel.state.users = snapshot.val() || {};
-            // 2. Depois que tem os nomes, carrega o feed
-            FeedPanel.loadFeed();
-        });
+        // 1. Carrega o feed
+        FeedPanel.loadFeed();
     },
 
     loadFeed: () => {
         const { feedList } = FeedPanel.elements;
-        feedList.innerHTML = "<p>Carregando feed...</p>";
+        feedList.innerHTML = "<p>Carregando feed da equipe...</p>";
         
-        // ERRO DE ARQUITETURA: As regras V2 não permitem ler /data/ de todos.
-        // SOLUÇÃO V2 (Limitada): O Feed por enquanto só mostrará os treinos
-        // do PRÓPRIO usuário (admin ou atleta).
-        // A V3 (com Cloud Functions) corrigirá isso.
-        
-        const myDataRef = FeedPanel.state.db.ref(`data/${FeedPanel.state.currentUser.uid}/workouts`);
-        AppPrincipal.state.listeners['feedData'] = myDataRef;
+        // ATUALIZADO (V2.1): Lê do nó PÚBLICO /publicWorkouts/
+        const feedRef = FeedPanel.state.db.ref('publicWorkouts');
+        AppPrincipal.state.listeners['feedData'] = feedRef;
 
-        myDataRef.orderByChild('realizadoAt').limitToLast(10).on('value', snapshot => {
+        // Ordena por 'realizadoAt' e pega os 20 mais recentes
+        feedRef.orderByChild('realizadoAt').limitToLast(20).on('value', snapshot => {
             feedList.innerHTML = "";
             if (!snapshot.exists()) {
-                feedList.innerHTML = "<p>Nenhum treino realizado encontrado.</p>";
+                feedList.innerHTML = "<p>Nenhum treino realizado encontrado na equipe.</p>";
                 return;
             }
             
+            let workouts = [];
             snapshot.forEach(childSnapshot => {
+                // Adiciona apenas treinos que tenham status e não sejam 'planejado'
                 const data = childSnapshot.val();
-                // Mostra apenas treinos com feedback (realizados)
                 if (data.status && data.status !== 'planejado') {
-                    const card = FeedPanel.createFeedCard(
-                        childSnapshot.key,
-                        data,
-                        FeedPanel.state.currentUser.uid
-                    );
-                    feedList.prepend(card);
+                    workouts.push({ id: childSnapshot.key, ...data });
                 }
             });
+            
+            // Inverte para mostrar os mais novos primeiro
+            workouts.reverse().forEach(workout => {
+                const card = FeedPanel.createFeedCard(
+                    workout.id,
+                    workout, // dados completos
+                    workout.ownerId
+                );
+                feedList.appendChild(card); // append (pois já invertemos)
+            });
+
+            if (workouts.length === 0) {
+                 feedList.innerHTML = "<p>Nenhum treino realizado encontrado na equipe.</p>";
+            }
         });
     },
     
-    // Card do Feed (V2)
+    // Card do Feed (V2.1)
     createFeedCard: (id, data, ownerId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
         
-        // Pega o nome do atleta do cache
-        const athleteName = FeedPanel.state.users[ownerId]?.name || "Atleta";
+        // ATUALIZADO (V2.1): Pega o nome do atleta dos dados do workout
+        const athleteName = data.ownerName || "Atleta";
         
         el.innerHTML = `
             <div class="workout-card-header">
+                <!-- Nome do atleta -->
                 <span class="athlete-name">${athleteName}</span>
                 <div>
                     <span class="date">${data.date}</span>
@@ -1000,8 +1067,9 @@ const FeedPanel = {
                 <span class="status-tag ${data.status || 'planejado'}">${data.status}</span>
             </div>
             <div class="workout-card-body">
+                <!-- Descrição foi removida do feed para ser mais limpo -->
                 <!-- <p>${data.description || "Sem descrição."}</p> -->
-                ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
+                ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : '<p class="feedback-text" style="opacity: 0.7;">Nenhum feedback deixado.</p>'}
             </div>
             <div class="workout-card-footer">
                 <div class="workout-actions">
@@ -1014,6 +1082,12 @@ const FeedPanel = {
         // Abre o Modal de Comentários
         el.querySelector('.btn-comment').addEventListener('click', () => {
             AppPrincipal.openFeedbackModal(id, ownerId, data.title);
+        });
+        // Clicar no card do feed também abre o modal
+        el.addEventListener('click', (e) => {
+             if (!e.target.closest('button')) {
+                 AppPrincipal.openFeedbackModal(id, ownerId, data.title);
+             }
         });
 
         // Carrega Likes e Comentários (V2)
@@ -1045,7 +1119,8 @@ const FeedPanel = {
         });
 
         // Ação de Curtir
-        likeBtn.addEventListener('click', () => {
+        likeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const myLikeRef = likesRef.child(FeedPanel.state.currentUser.uid);
             myLikeRef.once('value', snapshot => {
                 if (snapshot.exists()) {
@@ -1062,4 +1137,4 @@ const FeedPanel = {
 };
 
 // =l= Inicia o Cérebro Principal =l=
-document.addEventListener('DOMContentLoaded', AppPrincipal.init);
+document.addEventListener('DOMContentLoaded', AppPrin
