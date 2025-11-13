@@ -24,7 +24,7 @@
         <header class="app-header">
             <h1>LeRunners</h1>
             <nav>
-                <!-- NOVO: Botão de Navegação do Feed -->
+                <!-- Botão de Navegação do Feed -->
                 <button id="nav-planilha-btn" class="btn btn-nav active">
                     <i class='bx bx-calendar'></i> <span>Planilha</span>
                 </button>
@@ -77,11 +77,16 @@
                     
                     <div id="athlete-detail-content" class="hidden">
                         
-                        <!-- NOVO: Botão Excluir Aluno -->
+                        <!-- Botão Excluir Aluno -->
                         <button id="delete-athlete-btn" class="btn btn-danger btn-small" style="width: auto; float: right;">
                             <i class='bx bx-user-x'></i> Excluir Aluno
                         </button>
                         
+                        <!-- NOVO (V2.3): Botão Análise IA -->
+                        <button id="analyze-athlete-btn-ia" class="btn btn-secondary btn-small" style="width: auto; float: right; margin-right: 10px;">
+                            <i class='bx bxs-brain'></i> Analisar com IA
+                        </button>
+
                         <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
                         
                         <form id="add-workout-form" class="form-minimal">
@@ -119,6 +124,11 @@
             <h2><i class="bx bx-run"></i> Minha Planilha</h2>
             <p class="subtitle">Olá, <span id="atleta-welcome-name"></span>! Estes são seus próximos treinos.</p>
             
+            <!-- NOVO (V2.3): Botão de Log Manual -->
+            <button id="log-activity-btn" class="btn btn-success" style="width: 100%; max-width: 800px; margin: 0 auto 1rem auto;">
+                <i class='bx bx-plus-medical'></i> Registrar Atividade Manual
+            </button>
+
             <div id="atleta-workouts-container" class="panel">
                 <h4>Meus Treinos</h4>
                 <div id="atleta-workouts-list">
@@ -128,14 +138,13 @@
         </div>
     </template>
 
-    <!-- ========== NOVO: Template do FEED SOCIAL (Inspirado no corri_rp) ========== -->
+    <!-- ========== Template do FEED SOCIAL (Inspirado no corri_rp) ========== -->
     <template id="feed-panel-template">
         <div class="feed-dashboard">
             <h2><i class='bx bx-news'></i> Feed da Equipe</h2>
             <p class="subtitle">Veja o que a equipe está fazendo e deixe seu feedback.</p>
             <div id="feed-list" class="feed-list">
                 <!-- Cards de treinos realizados (do Módulo 2) e comentários (Módulo 3) aparecerão aqui -->
-                <p>O Feed Social está em construção. Em breve, os treinos realizados e comentários aparecerão aqui.</p>
             </div>
         </div>
     </template>
@@ -147,12 +156,12 @@
       ===================================================================
     -->
 
-    <!-- NOVO: Modal de Feedback/Comentários do Atleta -->
+    <!-- Modal de Feedback/Comentários do Atleta (ATUALIZADO V2.3) -->
     <div id="feedback-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="feedback-modal-title">Feedback do Treino</h3>
-                <button class.="close-btn" id="close-feedback-modal">&times;</button>
+                <button class="close-btn" id="close-feedback-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="feedback-form">
@@ -175,7 +184,14 @@
                             <label for="workout-feedback-text">Como você se sentiu? (Opcional)</label>
                             <textarea id="workout-feedback-text" rows="3" placeholder="Ex: Senti o joelho no final, mas o pace foi bom..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Salvar Feedback</button>
+                        
+                        <!-- NOVO (V2.3): Upload de Foto -->
+                        <div class="form-group">
+                            <label for="photo-upload-input">Anexar Foto (Opcional)</label>
+                            <input type="file" id="photo-upload-input" accept="image/*">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="save-feedback-btn">Salvar Feedback</button>
                     </fieldset>
                 </form>
                 
@@ -194,6 +210,76 @@
                         </button>
                     </form>
                 </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVO (V2.3): Modal de Registro Manual de Atividade -->
+    <div id="log-activity-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Nova Atividade</h3>
+                <button class="close-btn" id="close-log-activity-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="log-activity-form">
+                    <fieldset>
+                        <legend>Detalhes da Atividade</legend>
+                        <div class="form-group">
+                            <label for="log-activity-date">Data</label>
+                            <input type="date" id="log-activity-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="log-activity-type">Tipo de Atividade</label>
+                            <select id="log-activity-type" required>
+                                <option value="Corrida">Corrida</option>
+                                <option value="Academia">Academia</option>
+                                <option value="Bike">Bike</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="log-activity-title">Título</label>
+                            <input type="text" id="log-activity-title" placeholder="Ex: Academia - Pernas" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="log-activity-feedback">Como você se sentiu? (Feedback)</label>
+                            <textarea id="log-activity-feedback" rows="3" placeholder="Ex: Treino forte, boa percepção..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Salvar Atividade</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVO (V2.3): Modal "Quem Curtiu" -->
+    <div id="who-liked-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Curtidas</h3>
+                <button class="close-btn" id="close-who-liked-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul id="who-liked-list">
+                    <!-- Nomes de quem curtiu -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVO (V2.3): Modal "Análise IA" -->
+    <div id="ia-analysis-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Análise da IA (Gemini)</h3>
+                <button class="close-btn" id="close-ia-analysis-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="subtitle">Analisando dados do atleta. Aguarde...</p>
+                <div id="ia-analysis-output">
+                    <!-- Resultado da IA -->
+                </div>
             </div>
         </div>
     </div>
