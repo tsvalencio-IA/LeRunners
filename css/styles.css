@@ -1,130 +1,445 @@
-<!DOCTYPE html>
+/* =================================================================== */
+/* 1. RESET E VARIÁVEIS GLOBAIS
+/* =================================================================== */
+:root {
+    --primary-color: #00008B; /* Dark Blue */
+    --secondary-color: #4169E1; /* Royal Blue */
+    --danger-color: #DC3545;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --light-gray: #f4f5f7;
+    --text-color: #333;
+    --text-light: #667;
+    --border-color: #e0e0e0;
+    --border-radius: 8px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LeRunners - Plataforma</title>
-<link rel="stylesheet" href="css/styles.css">
-<link rel="manifest" href="manifest.json">
-<link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-<meta name="theme-color" content="#00008B">
-</head>
-<body class="app-page">
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
-<!-- Loader Inicial (O Guardião está checando o login) -->
-<div id="loader" class="loader-container">
-    <div class="loader"></div>
-    <p>Autenticando...</p>
-</div>
+body {
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    line-height: 1.6;
+}
 
-<!-- Container Principal do Aplicativo (Inicia escondido) -->
-<div id="app-container" class="hidden">
-    
-    <!-- Header Fixo -->
-    <header class="app-header">
-        <h1>LeRunners</h1>
-        <nav>
-            <span id="userDisplay" class="user-display"></span>
-            <button id="logoutButton" class="btn btn-danger">
-                <i class="bx bx-log-out"></i> Sair
-            </button>
-        </nav>
-    </header>
+.hidden {
+    display: none !important;
+}
 
-    <!-- Conteúdo Dinâmico (Carregado pelo app.js) -->
-    <main id="app-main-content" class="app-main">
-        <!-- O Painel do Admin ou do Atleta será injetado aqui -->
-    </main>
-</div>
+h2 { color: var(--primary-color); }
+.subtitle {
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+hr { border: 0; height: 1px; background-color: var(--border-color); margin: 1.5rem 0; }
 
-<!-- 
-  TEMPLATES HTML (Modelos que o JS vai usar para construir a tela) 
--->
+/* =================================================================== */
+/* 2. COMPONENTES REUTILIZÁVEIS (Botões, Formulários, etc)
+/* =================================================================== */
+.btn {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+}
 
-<!-- ========== Template do COACH (Admin) ========== -->
-<template id="admin-panel-template">
-    <div class="admin-dashboard">
-        <h2><i class="bx bx-shield-quarter"></i> Painel do Coach</h2>
-        
-        <!-- (NOVO) Painel de Aprovações Pendentes -->
-        <div class="panel approval-panel">
-            <h3><i class='bx bx-user-check'></i> Aprovações Pendentes</h3>
-            <div id="pending-list">
-                <!-- Lista de atletas aguardando aprovação -->
-            </div>
-        </div>
+.btn-primary { background-color: var(--primary-color); color: #fff; }
+.btn-primary:hover:not(:disabled) { background-color: #00005a; transform: translateY(-2px); }
 
-        <!-- Layout Principal do Coach -->
-        <div class="admin-layout">
-            <div class="athlete-list-container panel">
-                <h3><i class='bx bx-group'></i> Meus Atletas</h3>
-                <input type="text" id="athlete-search" class="search-input" placeholder="Pesquisar atleta...">
-                <div id="athlete-list" class="athlete-list">
-                    <!-- Lista de atletas aprovados -->
-                </div>
-            </div>
-            <div class="athlete-details-container panel">
-                <h3 id="athlete-detail-name">Selecione um Atleta</h3>
-                
-                <!-- Conteúdo do Atleta Selecionado -->
-                <div id="athlete-detail-content" class="hidden">
-                    <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
-                    
-                    <form id="add-workout-form" class="form-minimal">
-                        <div class="form-group">
-                            <label for="workout-date">Data</label>
-                            <input type="date" id="workout-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="workout-title">Título do Treino</label>
-                            <input type="text" id="workout-title" placeholder="Ex: Longo 10k Z2" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="workout-description">Descrição (Detalhes)</label>
-                            <textarea id="workout-description" rows="3" placeholder="Detalhes: 10min aquec. + 8km Z2..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-secondary">
-                            <i class="bx bx-plus"></i> Salvar Treino
-                        </button>
-                    </form>
-                    
-                    <hr>
-                    <h4><i class='bx bx-history'></i> Treinos Agendados</h4>
-                    <div id="workouts-list">
-                        <!-- Lista de treinos do atleta selecionado -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
+.btn-secondary { background-color: var(--secondary-color); color: #fff; }
+.btn-secondary:hover:not(:disabled) { background-color: #2a4ac8; }
 
-<!-- ========== Template do ATLETA ========== -->
-<template id="atleta-panel-template">
-    <div class="atleta-dashboard">
-        <h2><i class="bx bx-run"></i> Minha Planilha</h2>
-        <p class="subtitle">Olá, <span id="atleta-welcome-name"></span>! Estes são seus próximos treinos.</p>
-        
-        <div id="atleta-workouts-container" class="panel">
-            <h4>Meus Treinos</h4>
-            <div id="atleta-workouts-list">
-                <!-- Treinos prescritos pelo Coach -->
-            </div>
-        </div>
-    </div>
-</template>
+.btn-danger { background-color: var(--danger-color); color: #fff; }
+.btn-danger:hover:not(:disabled) { background-color: #a71d2a; }
+
+.btn-success { background-color: var(--success-color); color: #fff; }
+.btn-success:hover:not(:disabled) { background-color: #1e7e34; }
+
+.btn-small { padding: 0.35rem 0.6rem; font-size: 0.8rem; width: auto; }
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.panel {
+    background: #fff;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.form-group input,
+.form-group textarea,
+.search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+.form-group textarea {
+    resize: vertical;
+}
+
+/* =================================================================== */
+/* 3. TELA DE LOGIN (index.html)
+/* =================================================================== */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 1rem auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+}
+
+.login-container h2 {
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+
+.input-icon {
+    position: relative;
+}
+.input-icon i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+.input-icon input {
+    padding-left: 40px;
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 1rem;
+    min-height: 1.2em;
+}
+
+.toggle-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+.toggle-link a {
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Mensagem de Pendente */
+#pending-view {
+    text-align: center;
+    border-top: 4px solid var(--warning-color);
+}
+#pending-view h3 {
+    color: var(--warning-color);
+    margin-bottom: 1rem;
+}
+#pending-view button {
+    width: auto;
+    margin-top: 1rem;
+}
+
+/* =================================================================== */
+/* 4. TELA DA PLATAFORMA (app.html)
+/* =================================================================== */
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.loader {
+    border: 6px solid var(--light-gray);
+    border-top: 6px solid var(--primary-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.app-header {
+    background-color: #fff;
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.app-header h1 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+.app-header nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.user-display {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    text-transform: capitalize;
+}
+.app-header #logoutButton {
+    width: auto;
+    padding: 0.5rem 1rem;
+}
+
+.app-main {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem; 
+}
+
+/* =================================================================== */
+/* 5. PAINEL ADMIN
+/* =================================================================== */
+.admin-dashboard h2,
+.atleta-dashboard h2 {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+.admin-dashboard h2 i,
+.atleta-dashboard h2 i {
+    margin-right: 0.5rem;
+}
+
+/* Painel de Aprovação */
+.approval-panel {
+    border-left: 4px solid var(--warning-color);
+}
+.approval-panel h3 {
+    color: var(--warning-color);
+}
+.pending-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.pending-item:last-child {
+    border-bottom: none;
+}
+.pending-item-info {
+    font-size: 0.9rem;
+}
+.pending-item-info strong {
+    color: var(--primary-color);
+}
+.pending-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
 
 
-<!-- Scripts Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+/* Layout Admin */
+.admin-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
 
-<!-- Scripts da Aplicação (A ORDEM IMPORTA) -->
-<script src="js/config.js"></script>
-<script src="js/app.js"></script> <!-- Este é o novo "cérebro" -->
+.athlete-list-container {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.athlete-list-container h3 { margin-bottom: 1rem; }
+
+.search-input {
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.athlete-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border-left: 4px solid transparent;
+}
+.athlete-list-item:hover {
+    background-color: #fcfcfc;
+    border-left-color: var(--secondary-color);
+}
+.athlete-list-item.selected {
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+    border-color: var(--secondary-color);
+    border-left-width: 4px;
+}
+.athlete-list-item span {
+    font-weight: 600;
+}
+
+.form-minimal {
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+#workouts-list .workout-card,
+#atleta-workouts-list .workout-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.workout-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.workout-card-header .date {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+.workout-card-header .title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.workout-card-body p {
+    white-space: pre-wrap;
+    font-family: monospace;
+    background: var(--light-gray);
+    padding: 0.75rem;
+    border-radius: 4px;
+    color: #333;
+}
+
+/* =================================================================== */
+/* 6. PAINEL ATLETA
+/* =================================================================== */
+.atleta-dashboard #atleta-workouts-container {
+    max-width: 800px;
+    margin: 1.5rem 0;
+}
+.atleta-dashboard .subtitle {
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+.atleta-dashboard .status-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    background-color: var(--secondary-color);
+    color: #fff;
+    text-transform: capitalize;
+}
 
 
-</body>
-</html>
+/* =================================================================== */
+/* 7. RESPONSIVIDADE
+/* =================================================================== */
+@media (max-width: 900px) {
+    .admin-layout {
+        grid-template-columns: 1fr;
+    }
+    .athlete-list-container {
+        max-height: 300px; /* Limita altura em telas pequenas */
+    }
+}
+
+@media (max-width: 600px) {
+    .app-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    .app-main {
+        padding: 1rem;
+    }
+    .login-container {
+        padding: 1.5rem;
+    }
+    .panel {
+        padding: 1rem;
+    }
+    .pending-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .pending-item-actions {
+        width: 100%;
+        gap: 1rem;
+    }
+    .pending-item-actions .btn {
+        flex: 1;
+    }
+}
