@@ -1,101 +1,130 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeRunners - Plataforma</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeRunners - Plataforma</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.json">
+<link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+<meta name="theme-color" content="#00008B">
 </head>
 <body class="app-page">
 
-    <div id="loader" class="loader-container">
-        <div class="loader"></div>
-        <p>Autenticando...</p>
-    </div>
+<!-- Loader Inicial (O Guardião está checando o login) -->
+<div id="loader" class="loader-container">
+    <div class="loader"></div>
+    <p>Autenticando...</p>
+</div>
 
-    <div id="app-container" class="hidden">
-        
-        <header class="app-header">
-            <h1>LeRunners</h1>
-            <nav>
-                <span id="userDisplay" class="user-display"></span>
-                <button id="logoutButton" class="btn btn-danger">
-                    <i class="bx bx-log-out"></i> Sair
-                </button>
-            </nav>
-        </header>
-
-        <main id="app-main-content" class="app-main">
-            </main>
-    </div>
-
-    <template id="admin-panel-template">
-        <div class="admin-dashboard">
-            <h2><i class="bx bx-shield-quarter"></i> Painel do Coach</h2>
-            <div class="admin-layout">
-                <div class="athlete-list-container panel">
-                    <h3>Meus Atletas</h3>
-                    <div id="athlete-list" class="athlete-list">
-                        </div>
-                </div>
-                <div class="athlete-details-container panel">
-                    <h3 id="athlete-detail-name">Selecione um Atleta</h3>
-                    <div id="athlete-detail-content" class="hidden">
-                        <h4>Plano de Treino</h4>
-                        
-                        <form id="add-workout-form" class="form-minimal">
-                            <div class="form-group">
-                                <label for="workout-date">Data</label>
-                                <input type="date" id="workout-date" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="workout-title">Título do Treino (Ex: Longo 10k)</label>
-                                <input type="text" id="workout-title" placeholder="Ex: Longo 10k Z2" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="workout-description">Descrição (Detalhes)</label>
-                                <textarea id="workout-description" rows="3" placeholder="Detalhes: 10min aquec. + 8km Z2 + 5min desaq."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-secondary">
-                                <i class="bx bx-plus"></i> Adicionar Treino
-                            </button>
-                        </form>
-                        
-                        <hr>
-                        <h4>Treinos Agendados</h4>
-                        <div id="workouts-list">
-                            </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="atleta-panel-template">
-        <div class="atleta-dashboard">
-            <h2><i class="bx bx-run"></i> Minha Planilha</h2>
-            <p>Olá, <span id="atleta-welcome-name"></span>! Estes são seus próximos treinos.</p>
-            
-            <div id="atleta-workouts-container" class="panel">
-                <h4>Meus Treinos</h4>
-                <div id="atleta-workouts-list">
-                    </div>
-            </div>
-        </div>
-    </template>
-
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <script src="js/config.js"></script>
+<!-- Container Principal do Aplicativo (Inicia escondido) -->
+<div id="app-container" class="hidden">
     
-    <script src="js/admin.js"></script>
-    <script src="js/atleta.js"></script>
+    <!-- Header Fixo -->
+    <header class="app-header">
+        <h1>LeRunners</h1>
+        <nav>
+            <span id="userDisplay" class="user-display"></span>
+            <button id="logoutButton" class="btn btn-danger">
+                <i class="bx bx-log-out"></i> Sair
+            </button>
+        </nav>
+    </header>
 
-    <script src="js/app.js"></script>
+    <!-- Conteúdo Dinâmico (Carregado pelo app.js) -->
+    <main id="app-main-content" class="app-main">
+        <!-- O Painel do Admin ou do Atleta será injetado aqui -->
+    </main>
+</div>
+
+<!-- 
+  TEMPLATES HTML (Modelos que o JS vai usar para construir a tela) 
+-->
+
+<!-- ========== Template do COACH (Admin) ========== -->
+<template id="admin-panel-template">
+    <div class="admin-dashboard">
+        <h2><i class="bx bx-shield-quarter"></i> Painel do Coach</h2>
+        
+        <!-- (NOVO) Painel de Aprovações Pendentes -->
+        <div class="panel approval-panel">
+            <h3><i class='bx bx-user-check'></i> Aprovações Pendentes</h3>
+            <div id="pending-list">
+                <!-- Lista de atletas aguardando aprovação -->
+            </div>
+        </div>
+
+        <!-- Layout Principal do Coach -->
+        <div class="admin-layout">
+            <div class="athlete-list-container panel">
+                <h3><i class='bx bx-group'></i> Meus Atletas</h3>
+                <input type="text" id="athlete-search" class="search-input" placeholder="Pesquisar atleta...">
+                <div id="athlete-list" class="athlete-list">
+                    <!-- Lista de atletas aprovados -->
+                </div>
+            </div>
+            <div class="athlete-details-container panel">
+                <h3 id="athlete-detail-name">Selecione um Atleta</h3>
+                
+                <!-- Conteúdo do Atleta Selecionado -->
+                <div id="athlete-detail-content" class="hidden">
+                    <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
+                    
+                    <form id="add-workout-form" class="form-minimal">
+                        <div class="form-group">
+                            <label for="workout-date">Data</label>
+                            <input type="date" id="workout-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="workout-title">Título do Treino</label>
+                            <input type="text" id="workout-title" placeholder="Ex: Longo 10k Z2" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="workout-description">Descrição (Detalhes)</label>
+                            <textarea id="workout-description" rows="3" placeholder="Detalhes: 10min aquec. + 8km Z2..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="bx bx-plus"></i> Salvar Treino
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    <h4><i class='bx bx-history'></i> Treinos Agendados</h4>
+                    <div id="workouts-list">
+                        <!-- Lista de treinos do atleta selecionado -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- ========== Template do ATLETA ========== -->
+<template id="atleta-panel-template">
+    <div class="atleta-dashboard">
+        <h2><i class="bx bx-run"></i> Minha Planilha</h2>
+        <p class="subtitle">Olá, <span id="atleta-welcome-name"></span>! Estes são seus próximos treinos.</p>
+        
+        <div id="atleta-workouts-container" class="panel">
+            <h4>Meus Treinos</h4>
+            <div id="atleta-workouts-list">
+                <!-- Treinos prescritos pelo Coach -->
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<!-- Scripts Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- Scripts da Aplicação (A ORDEM IMPORTA) -->
+<script src="js/config.js"></script>
+<script src="js/app.js"></script> <!-- Este é o novo "cérebro" -->
+
 
 </body>
 </html>
