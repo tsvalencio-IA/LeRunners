@@ -1,6 +1,12 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V1.1 - corri_rp)
-/* CORREÇÃO: Adicionado .catch() na função approveAthlete.
+/* ARQUIVO DE LÓGICA UNIFICADO (V1.2 - corri_rp)
+/* CORREÇÃO: Corrigido bug de referência cruzada em AtletaPanel.loadWorkouts
+/* (Usava AdminPanel.state.db em vez de AtletaPanel.state.db)
+/* Contém:
+/* 1. AppPrincipal (O Guardião/Roteador)
+/* 2. AuthLogic (Lógica da index.html)
+/* 3. AdminPanel (Lógica do Painel Coach)
+/* 4. AtletaPanel (Lógica do Painel Atleta)
 /* =================================================================== */
 
 // ===================================================================
@@ -82,7 +88,6 @@ const AppPrincipal = {
                 // É ADMIN.
                 // Busca o perfil em /users/ SÓ para pegar o nome (se existir)
                 AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
-                    // Admins podem ou não ter um perfil em /users/. Usamos o email se não tiver.
                     let adminName = userSnapshot.exists() ? userSnapshot.val().name : user.email;
                     AppPrincipal.state.userData = { name: adminName, role: 'admin' };
                     AppPrincipal.elements.userDisplay.textContent = `${adminName} (Coach)`;
@@ -100,9 +105,8 @@ const AppPrincipal = {
                     AppPrincipal.routeBasedOnRole('atleta');
                 } else {
                     // 3. NÃO É ADMIN NEM ATLETA APROVADO
-                    // (Provavelmente pendente, mas não deveria estar em app.html)
                     console.warn("Status: PENDENTE/REJEITADO. Não deveria estar aqui. Voltando ao login.");
-                    AppPrincipal.handleLogout(); // Força o logout e redireciona
+                    AppPrincipal.handleLogout(); 
                 }
             });
         });
@@ -121,7 +125,6 @@ const AppPrincipal = {
         } else {
             const atletaTemplate = document.getElementById('atleta-panel-template').content.cloneNode(true);
             mainContent.appendChild(atletaTemplate);
-            // Garante que o elemento existe antes de setar o nome
             const welcomeEl = document.getElementById('atleta-welcome-name');
             if (welcomeEl) {
                 welcomeEl.textContent = AppPrincipal.state.userData.name;
@@ -136,11 +139,9 @@ const AppPrincipal = {
     handleLogout: () => {
         console.log("Saindo...");
         AppPrincipal.state.auth.signOut().catch(err => console.error("Erro ao sair:", err));
-        // O onAuthStateChanged vai pegar o logout e redirecionar para index.html
     },
 
     cleanupListeners: () => {
-        // Limpa todos os listeners 'on' do Firebase para evitar memory leaks
         Object.values(AppPrincipal.state.listeners).forEach(listener => {
             if (listener && typeof listener.off === 'function') {
                 listener.off();
@@ -159,7 +160,6 @@ const AuthLogic = {
         AuthLogic.auth = auth;
         AuthLogic.db = db;
 
-        // Referências aos Elementos DOM
         AuthLogic.elements = {
             loginForm: document.getElementById('login-form'),
             registerForm: document.getElementById('register-form'),
@@ -172,14 +172,12 @@ const AuthLogic = {
             toggleToLogin: document.getElementById('toggleToLogin')
         };
 
-        // Listeners
         AuthLogic.elements.toggleToRegister.addEventListener('click', AuthLogic.handleToggle);
         AuthLogic.elements.toggleToLogin.addEventListener('click', AuthLogic.handleToggle);
         AuthLogic.elements.btnLogoutPending.addEventListener('click', () => AuthLogic.auth.signOut());
         AuthLogic.elements.loginForm.addEventListener('submit', AuthLogic.handleLogin);
         AuthLogic.elements.registerForm.addEventListener('submit', AuthLogic.handleRegister);
 
-        // Inicia o Guardião da tela de login
         AuthLogic.auth.onAuthStateChanged(AuthLogic.handleLoginGuard);
     },
 
@@ -230,7 +228,6 @@ const AuthLogic = {
                     AuthLogic.elements.loginErrorMsg.textContent = "Erro ao tentar entrar.";
                 }
             });
-        // O onAuthStateChanged (handleLoginGuard) vai cuidar do redirecionamento
     },
 
     handleRegister: (e) => {
@@ -261,7 +258,6 @@ const AuthLogic = {
                     email: email,
                     requestDate: new Date().toISOString()
                 };
-                // Escreve no nó de aprovação pendente (como no corri_rp)
                 return AuthLogic.db.ref('pendingApprovals/' + user.uid).set(pendingData);
             })
             .catch((error) => {
@@ -274,47 +270,39 @@ const AuthLogic = {
                     AuthLogic.elements.registerErrorMsg.textContent = "Erro ao criar sua conta.";
                 }
             });
-        // O onAuthStateChanged (handleLoginGuard) vai pegar o novo usuário
-        // e mostrar a tela de "pendente"
     },
 
-    // O Guardião da tela de login (index.html)
     handleLoginGuard: (user) => {
         if (user) {
             const uid = user.uid;
 
-            // 1. É Admin?
             AuthLogic.db.ref('admins/' + uid).once('value', adminSnapshot => {
                 if (adminSnapshot.exists() && adminSnapshot.val() === true) {
                     console.log("Guardião (Login): Admin. Redirecionando...");
                     window.location.href = 'app.html';
                     return;
                 }
-                // 2. É Atleta Aprovado?
                 AuthLogic.db.ref('users/' + uid).once('value', userSnapshot => {
                     if (userSnapshot.exists()) {
                         console.log("Guardião (Login): Atleta Aprovado. Redirecionando...");
                         window.location.href = 'app.html';
                         return;
                     }
-                    // 3. Está Pendente?
                     AuthLogic.db.ref('pendingApprovals/' + uid).once('value', pendingSnapshot => {
                         if (pendingSnapshot.exists()) {
                             console.log("Guardião (Login): Pendente. Mostrando tela de espera.");
                             AuthLogic.elements.pendingEmailDisplay.textContent = user.email;
                             AuthLogic.showView('pending');
                         } else {
-                            // 4. Rejeitado/Órfão (Usuário existe no Auth mas em nenhum nó)
                             console.warn("Guardião (Login): Rejeitado/Órfão.");
                             AuthLogic.elements.loginErrorMsg.textContent = "Sua conta foi rejeitada ou excluída.";
-                            AuthLogic.auth.signOut(); // Força o logout
+                            AuthLogic.auth.signOut();
                             AuthLogic.showView('login');
                         }
                     });
                 });
             });
         } else {
-            // Deslogado, mostra login
             AuthLogic.showView('login');
         }
     }
@@ -338,18 +326,15 @@ const AdminPanel = {
             workoutsList: document.getElementById('workouts-list')
         };
 
-        // Bind de eventos
         AdminPanel.elements.addWorkoutForm.addEventListener('submit', AdminPanel.handleAddWorkout);
         AdminPanel.elements.athleteSearch.addEventListener('input', AdminPanel.renderAthleteList);
         
-        // Carregar dados
         AdminPanel.loadPendingApprovals();
         AdminPanel.loadAthletes();
     },
 
     loadPendingApprovals: () => {
         const pendingRef = AdminPanel.state.db.ref('pendingApprovals');
-        // Registra o listener para limpeza futura
         AppPrincipal.state.listeners['adminPending'] = pendingRef;
         
         pendingRef.on('value', snapshot => {
@@ -377,7 +362,6 @@ const AdminPanel = {
                 pendingList.appendChild(item);
             });
 
-            // Adiciona listeners aos botões
             pendingList.querySelectorAll('[data-action="approve"]').forEach(btn => 
                 btn.addEventListener('click', e => AdminPanel.approveAthlete(e.target.dataset.uid))
             );
@@ -403,9 +387,7 @@ const AdminPanel = {
         athleteList.innerHTML = "";
 
         Object.entries(AdminPanel.state.athletes).forEach(([uid, userData]) => {
-            // Não mostrar o próprio admin na lista (a menos que ele tenha perfil em /users/)
             if (uid === AdminPanel.state.currentUser.uid) return;
-            // Filtro de pesquisa
             if (searchTerm && !userData.name.toLowerCase().includes(searchTerm)) {
                 return;
             }
@@ -435,38 +417,34 @@ const AdminPanel = {
             const newUserProfile = {
                 name: pendingData.name,
                 email: pendingData.email,
-                role: "atleta", // Define o papel como atleta
+                role: "atleta", 
                 createdAt: new Date().toISOString()
             };
             
-            // Operação Atômica (Multi-path update)
             const updates = {};
-            updates[`/users/${uid}`] = newUserProfile;      // 1. Cria o perfil em /users/
-            updates[`/data/${uid}`] = { workouts: {} };     // 2. Cria o nó de treinos
-            updates[`/pendingApprovals/${uid}`] = null; // 3. Remove de pendentes
+            updates[`/users/${uid}`] = newUserProfile;      
+            updates[`/data/${uid}`] = { workouts: {} };     
+            updates[`/pendingApprovals/${uid}`] = null; 
 
-            // CORREÇÃO: Adicionado .catch() para reportar o erro que você viu.
             AdminPanel.state.db.ref().update(updates)
                 .then(() => {
                     console.log("Atleta aprovado e movido com sucesso.");
                 })
                 .catch(err => {
                     console.error("ERRO CRÍTICO AO APROVAR:", err);
-                    alert("Falha ao aprovar o atleta. Verifique as Regras de Segurança do Firebase. Detalhe: " + err.message);
+                    alert("Falha ao aprovar o atleta. Verifique as Regras de Segurança. Detalhe: " + err.message);
                 });
         });
     },
 
     rejectAthlete: (uid) => {
-        if (!confirm("Tem certeza que deseja REJEITAR este atleta? Ele será removido da lista de pendentes.")) {
+        if (!confirm("Tem certeza que deseja REJEITAR este atleta?")) {
             return;
         }
-        // Apenas remove a solicitação. O usuário ainda existe no Auth.
         AdminPanel.state.db.ref('pendingApprovals/' + uid).remove()
             .then(() => {
                 console.log("Solicitação rejeitada.");
             })
-            // CORREÇÃO: Adicionado .catch()
             .catch(err => {
                 console.error("ERRO AO REJEITAR:", err);
                 alert("Falha ao rejeitar o atleta. Verifique as Regras de Segurança. Detalhe: " + err.message);
@@ -478,7 +456,6 @@ const AdminPanel = {
         AdminPanel.elements.athleteDetailName.textContent = `Planejamento de: ${name}`;
         AdminPanel.elements.athleteDetailContent.classList.remove('hidden');
         
-        // Atualiza a classe 'selected' na lista
         document.querySelectorAll('.athlete-list-item').forEach(el => {
             el.classList.toggle('selected', el.dataset.uid === uid);
         });
@@ -490,13 +467,11 @@ const AdminPanel = {
         const { workoutsList } = AdminPanel.elements;
         workoutsList.innerHTML = "<p>Carregando treinos...</p>";
         
-        // Limpa listener antigo de treinos (se existir)
         if (AppPrincipal.state.listeners['adminWorkouts']) {
             AppPrincipal.state.listeners['adminWorkouts'].off();
         }
         
         const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
-        // Registra o novo listener
         AppPrincipal.state.listeners['adminWorkouts'] = workoutsRef;
 
         workoutsRef.orderByChild('date').on('value', snapshot => {
@@ -511,7 +486,7 @@ const AdminPanel = {
                     childSnapshot.key, 
                     athleteId
                 );
-                workoutsList.prepend(card); // Mais novos primeiro
+                workoutsList.prepend(card);
             });
         });
     },
@@ -532,7 +507,7 @@ const AdminPanel = {
             description: addWorkoutForm.querySelector('#workout-description').value,
             createdBy: AdminPanel.state.currentUser.uid,
             createdAt: new Date().toISOString(),
-            status: "planejado" // Status inicial
+            status: "planejado"
         };
 
         if (!workoutData.date || !workoutData.title) {
@@ -540,12 +515,10 @@ const AdminPanel = {
             return;
         }
 
-        // Salva no nó /data/{uid}/workouts
         AdminPanel.state.db.ref(`data/${selectedAthleteId}/workouts`).push(workoutData)
             .then(() => {
-                addWorkoutForm.reset(); // Limpa o formulário
+                addWorkoutForm.reset(); 
             })
-            // CORREÇÃO: Adicionado .catch()
             .catch(err => {
                 console.error("ERRO AO SALVAR TREINO:", err);
                 alert("Falha ao salvar o treino. Verifique as Regras de Segurança. Detalhe: " + err.message);
@@ -569,7 +542,6 @@ const AdminPanel = {
         el.querySelector('[data-action="delete"]').addEventListener('click', () => {
             if (confirm("Tem certeza que deseja apagar este treino?")) {
                 AdminPanel.state.db.ref(`data/${athleteId}/workouts/${id}`).remove()
-                    // CORREÇÃO: Adicionado .catch()
                     .catch(err => {
                         console.error("ERRO AO DELETAR TREINO:", err);
                         alert("Falha ao deletar o treino. Verifique as Regras de Segurança. Detalhe: " + err.message);
@@ -595,8 +567,12 @@ const AtletaPanel = {
         const { workoutsList } = AtletaPanel.elements;
         workoutsList.innerHTML = "<p>Carregando seus treinos...</p>";
         
-        const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
-        // Registra o listener
+        // ***** AQUI ESTÁ A CORREÇÃO *****
+        // O código antigo usava "AdminPanel.state.db.ref", o que é um erro.
+        // O correto é usar a instância de DB passada para o AtletaPanel.
+        const workoutsRef = AtletaPanel.state.db.ref(`data/${athleteId}/workouts`);
+        // **********************************
+
         AppPrincipal.state.listeners['atletaWorkouts'] = workoutsRef;
 
         workoutsRef.orderByChild('date').on('value', snapshot => {
@@ -607,7 +583,7 @@ const AtletaPanel = {
             }
             snapshot.forEach(childSnapshot => {
                 const card = AtletaPanel.createWorkoutCard(childSnapshot.val());
-                workoutsList.prepend(card); // Mais novos primeiro
+                workoutsList.prepend(card);
             });
         });
     },
@@ -630,5 +606,4 @@ const AtletaPanel = {
 };
 
 // =l= Inicia o Cérebro Principal =l=
-// Este listener garante que o script só rode após o HTML ser carregado.
 document.addEventListener('DOMContentLoaded', AppPrincipal.init);
