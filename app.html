@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeRunners - Plataforma</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- CORREÇÃO: O erro de digitação 'rel_manifest"' (do zip anterior) foi corrigido para 'rel="manifest"' -->
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
@@ -25,6 +24,13 @@
         <header class="app-header">
             <h1>LeRunners</h1>
             <nav>
+                <!-- NOVO: Botão de Navegação do Feed -->
+                <button id="nav-planilha-btn" class="btn btn-nav active">
+                    <i class='bx bx-calendar'></i> <span>Planilha</span>
+                </button>
+                <button id="nav-feed-btn" class="btn btn-nav">
+                    <i class='bx bx-news'></i> <span>Feed</span>
+                </button>
                 <span id="userDisplay" class="user-display"></span>
                 <button id="logoutButton" class="btn btn-danger">
                     <i class="bx bx-log-out"></i> Sair
@@ -34,13 +40,14 @@
 
         <!-- Conteúdo Dinâmico (Carregado pelo app.js) -->
         <main id="app-main-content" class="app-main">
-            <!-- O Painel do Admin ou do Atleta será injetado aqui -->
+            <!-- O Painel do Admin, Atleta ou Feed será injetado aqui -->
         </main>
     </div>
 
     <!-- 
+      ===================================================================
       TEMPLATES HTML (Modelos que o JS vai usar para construir a tela) 
-      Baseados na arquitetura 'corri_rp'
+      ===================================================================
     -->
 
     <!-- ========== Template do COACH (Admin) ========== -->
@@ -69,6 +76,12 @@
                     <h3 id="athlete-detail-name">Selecione um Atleta</h3>
                     
                     <div id="athlete-detail-content" class="hidden">
+                        
+                        <!-- NOVO: Botão Excluir Aluno -->
+                        <button id="delete-athlete-btn" class="btn btn-danger btn-small" style="width: auto; float: right;">
+                            <i class='bx bx-user-x'></i> Excluir Aluno
+                        </button>
+                        
                         <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
                         
                         <form id="add-workout-form" class="form-minimal">
@@ -114,6 +127,76 @@
             </div>
         </div>
     </template>
+
+    <!-- ========== NOVO: Template do FEED SOCIAL (Inspirado no corri_rp) ========== -->
+    <template id="feed-panel-template">
+        <div class="feed-dashboard">
+            <h2><i class='bx bx-news'></i> Feed da Equipe</h2>
+            <p class="subtitle">Veja o que a equipe está fazendo e deixe seu feedback.</p>
+            <div id="feed-list" class="feed-list">
+                <!-- Cards de treinos realizados (do Módulo 2) e comentários (Módulo 3) aparecerão aqui -->
+                <p>O Feed Social está em construção. Em breve, os treinos realizados e comentários aparecerão aqui.</p>
+            </div>
+        </div>
+    </template>
+
+
+    <!-- 
+      ===================================================================
+      MODAIS GLOBAIS (Pop-ups)
+      ===================================================================
+    -->
+
+    <!-- NOVO: Modal de Feedback/Comentários do Atleta -->
+    <div id="feedback-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="feedback-modal-title">Feedback do Treino</h3>
+                <button class.="close-btn" id="close-feedback-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="feedback-form">
+                    <input type="hidden" id="feedback-workout-id">
+                    <input type="hidden" id="feedback-workout-owner-id">
+                    
+                    <!-- Seção "Marcar como Feito" -->
+                    <fieldset>
+                        <legend>Status do Treino</legend>
+                        <div class="form-group">
+                            <label for="workout-status">Como foi o treino?</label>
+                            <select id="workout-status" required>
+                                <option value="planejado" selected>Planejado</option>
+                                <option value="realizado" style="color: var(--success-color);">Realizado</option>
+                                <option value="realizado_parcial" style="color: var(--warning-color);">Realizado Parcialmente</option>
+                                <option value="nao_realizado" style="color: var(--danger-color);">Não Realizado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="workout-feedback-text">Como você se sentiu? (Opcional)</label>
+                            <textarea id="workout-feedback-text" rows="3" placeholder="Ex: Senti o joelho no final, mas o pace foi bom..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Feedback</button>
+                    </fieldset>
+                </form>
+                
+                <hr>
+
+                <!-- Seção de Comentários (Coach e Atleta) -->
+                <fieldset>
+                    <legend>Comentários (Coach/Atleta)</legend>
+                    <div id="comments-list" class="comments-list">
+                        <!-- Comentários serão carregados aqui -->
+                    </div>
+                    <form id="comment-form" class="comment-form">
+                        <input type="text" id="comment-input" placeholder="Escreva um comentário..." required>
+                        <button type="submit" class="btn btn-secondary btn-small">
+                            <i class='bx bxs-send'></i>
+                        </button>
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Scripts Firebase -->
