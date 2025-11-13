@@ -85,6 +85,7 @@ const AppPrincipal = {
         AppPrincipal.state.db.ref('admins/' + uid).once('value', adminSnapshot => {
             if (adminSnapshot.exists() && adminSnapshot.val() === true) {
                 // É ADMIN.
+                // Busca o perfil em /users/ SÓ para pegar o nome (se existir)
                 AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
                     // Admins podem ou não ter um perfil em /users/. Usamos o email se não tiver.
                     let adminName = userSnapshot.exists() ? userSnapshot.val().name : user.email;
@@ -370,7 +371,7 @@ const AdminPanel = {
                 item.className = 'pending-item';
                 item.innerHTML = `
                     <div class="pending-item-info">
-                        <strong>${data.name}</strong>
+                        <strong>${data.name}</strong><br>
                         <span>${data.email}</span>
                     </div>
                     <div class="pending-item-actions">
