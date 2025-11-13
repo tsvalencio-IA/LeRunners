@@ -1,94 +1,91 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LeRunners - Plataforma de Treinos</title>
-<link rel="stylesheet" href="css/styles.css">
-<!-- CORREÇÃO: O erro de digitação 'rel_manifest"' foi corrigido para 'rel="manifest"' -->
-<link rel="manifest" href="manifest.json">
-<link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-<meta name="theme-color" content="#00008B">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeRunners - Plataforma de Treinos</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- CORREÇÃO: O erro de digitação 'rel_manifest"' foi corrigido para 'rel="manifest"' -->
+    <link rel="manifest" href="manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta name="theme-color" content="#00008B">
 </head>
 <body class="login-page">
 
-<div class="login-container">
-    <img src="https://via.placeholder.com/150/00008B/FFFFFF?text=LR" alt="Logo LeRunners" class="logo">
-    
-    <!-- Formulário de Login -->
-    <form id="login-form">
-        <h2>Plataforma LeRunners</h2>
-        <p class="subtitle">Acesse seu painel</p>
-        <div class="form-group">
-            <label for="loginEmail">Email</label>
-            <div class="input-icon">
-                <i class="bx bx-envelope"></i>
-                <input type="email" id="loginEmail" required>
+    <div class="login-container">
+        <img src="https://via.placeholder.com/150/00008B/FFFFFF?text=LR" alt="Logo LeRunners" class="logo">
+        
+        <!-- Formulário de Login -->
+        <form id="login-form">
+            <h2>Plataforma LeRunners</h2>
+            <p class="subtitle">Acesse seu painel</p>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <div class="input-icon">
+                    <i class="bx bx-envelope"></i>
+                    <input type="email" id="loginEmail" required>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="loginPassword">Senha</label>
-            <div class="input-icon">
-                <i class="bx bx-lock"></i>
-                <input type="password" id="loginPassword" required>
+            <div class="form-group">
+                <label for="loginPassword">Senha</label>
+                <div class="input-icon">
+                    <i class="bx bx-lock"></i>
+                    <input type="password" id="loginPassword" required>
+                </div>
             </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Entrar</button>
-        <p id="login-error" class="error-message"></p>
-    </form>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+            <p id="login-error" class="error-message"></p>
+        </form>
 
-    <!-- Formulário de Registro (Inicia escondido) -->
-    <form id="register-form" class="hidden">
-        <h2>Criar Nova Conta</h2>
-        <p class="subtitle">Solicite acesso à plataforma</p>
-        <div class="form-group">
-            <label for="registerName">Nome Completo (para seu Coach)</label>
-            <div class="input-icon">
-                <i class="bx bx-user"></i>
-                <input type="text" id="registerName" required>
+        <!-- Formulário de Registro (Inicia escondido) -->
+        <form id="register-form" class="hidden">
+            <h2>Criar Nova Conta</h2>
+            <p class="subtitle">Solicite acesso à plataforma</p>
+            <div class="form-group">
+                <label for="registerName">Nome Completo (para seu Coach)</label>
+                <div class="input-icon">
+                    <i class="bx bx-user"></i>
+                    <input type="text" id="registerName" required>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="registerEmail">Email</label>
-            <div class="input-icon">
-                <i class="bx bx-envelope"></i>
-                <input type="email" id="registerEmail" required>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <div class="input-icon">
+                    <i class="bx bx-envelope"></i>
+                    <input type="email" id="registerEmail" required>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="registerPassword">Senha (mínimo 6 caracteres)</label>
-            <div class="input-icon">
-                <i class="bx bx-lock-alt"></i>
-                <input type="password" id="registerPassword" required>
+            <div class="form-group">
+                <label for="registerPassword">Senha (mínimo 6 caracteres)</label>
+                <div class="input-icon">
+                    <i class="bx bx-lock-alt"></i>
+                    <input type="password" id="registerPassword" required>
+                </div>
             </div>
-        </div>
-        <button type="submit" class="btn">Solicitar Acesso</button>
-        <p id="register-error" class="error-message"></p>
-    </form>
+            <button type="submit" class="btn">Solicitar Acesso</button>
+            <p id="register-error" class="error-message"></p>
+        </form>
 
-    <!-- Mensagem de "Aprovação Pendente" -->
-    <div id="pending-view" class="hidden panel">
-        <h3><i class='bx bx-time-five'></i> Solicitação Enviada</h3>
-        <p>Sua solicitação de acesso foi enviada para o Coach. Você será notificado quando for aprovado.</p>
-        <p><strong>Email:</strong> <span id="pending-email-display"></span></p>
-        <button id="btn-logout-pending" class="btn btn-secondary">Sair</button>
+        <!-- Mensagem de "Aprovação Pendente" -->
+        <div id="pending-view" class="hidden panel">
+            <h3><i class='bx bx-time-five'></i> Solicitação Enviada</h3>
+            <p>Sua solicitação de acesso foi enviada para o Coach. Você será notificado quando for aprovado.</p>
+            <p><strong>Email:</strong> <span id="pending-email-display"></span></p>
+            <button id="btn-logout-pending" class="btn btn-secondary">Sair</button>
+        </div>
+
+        <!-- Links de Alternância -->
+        <p class="toggle-link">Não tem conta? <a href="#" id="toggleToRegister">Solicite seu acesso</a></p>
+        <p class="toggle-link hidden">Já tem conta? <a href="#" id="toggleToLogin">Entre</a></p>
     </div>
 
-    <!-- Links de Alternância -->
-    <p class="toggle-link">Não tem conta? <a href="#" id="toggleToRegister">Solicite seu acesso</a></p>
-    <p class="toggle-link hidden">Já tem conta? <a href="#" id="toggleToLogin">Entre</a></p>
-</div>
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<!-- Scripts Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<!-- Scripts da Aplicação (APENAS 2 ARQUIVOS) -->
-<script src="js/config.js"></script>
-<script src="js/app.js"></script> <!-- Cérebro unificado -->
-
-
+    <!-- Scripts da Aplicação (APENAS 2 ARQUIVOS) -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script> <!-- Cérebro unificado -->
 </body>
 </html>
