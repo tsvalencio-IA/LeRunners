@@ -1,212 +1,392 @@
-// js/auth.js
-// Gerenciador de Autenticação para a tela de login (index.html)
+// js/app.js
+// Gerenciador Principal da Plataforma (app.html)
 // ARQUITETURA "corri_rp" com fluxo de aprovação pendente
 
-document.addEventListener('DOMContentLoaded', () => {
-// 1. Verificação de Configuração
-if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
-console.error("ERRO CRÍTICO: config.js não carregado ou chaves não preenchidas.");
-alert("Erro de sistema: Configuração não encontrada. Preencha o js/config.js");
-return;
+// Objeto global da Aplicação
+const LeRunnersApp = {
+state: {
+currentUser: null,
+userData: null,
+db: null,
+auth: null,
+listeners: {} // Para limpar listeners do Firebase
+},
+
+// Ponto de entrada
+init: () => {
+    console.log("Iniciando LeRunners App...");
+    
+    if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
+        console.error("ERRO CRÍTICO: config.js não carregado.");
+        alert("Erro de sistema: Configuração não encontrada.");
+        window.location.href = 'index.html';
+        return;
+    }
+
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    } catch (e) {
+        console.error('Falha ao inicializar Firebase:', e);
+        window.location.href = 'index.html';
+        return;
+    }
+
+    LeRunnersApp.state.auth = firebase.auth();
+    LeRunnersApp.state.db = firebase.database();
+
+    LeRunnersApp.elements = {
+        loader: document.getElementById('loader'),
+        appContainer: document.getElementById('app-container'),
+        userDisplay: document.getElementById('userDisplay'),
+        logoutButton: document.getElementById('logoutButton'),
+        mainContent: document.getElementById('app-main-content')
+    };
+    
+    LeRunnersApp.elements.logoutButton.addEventListener('click', LeRunnersApp.handleLogout);
+    LeRunnersApp.state.auth.onAuthStateChanged(LeRunnersApp.handleAuthStateChange);
+},
+
+// O Guardião
+handleAuthStateChange: (user) => {
+    if (!user) {
+        // NÃO ESTÁ LOGADO
+        console.log("Guardião: Acesso negado. Redirecionando para login.");
+        LeRunnersApp.cleanupListeners();
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // ESTÁ LOGADO. Verificar status (Admin ou Atleta)
+    LeRunnersApp.state.currentUser = user;
+    const uid = user.uid;
+
+    // 1. É Admin?
+    LeRunnersApp.state.db.ref('admins/' + uid).once('value', adminSnapshot => {
+        if (adminSnapshot.exists() && adminSnapshot.val() === true) {
+            // É ADMIN. Carregar perfil de admin e painel.
+            LeRunnersApp.state.db.ref('users/' + uid).once('value', userSnapshot => {
+                let adminName = userSnapshot.exists() ? userSnapshot.val().name : user.email;
+                LeRunnersApp.state.userData = { name: adminName, role: 'admin' };
+                LeRunnersApp.elements.userDisplay.textContent = `${adminName} (Coach)`;
+                LeRunnersApp.routeBasedOnRole('admin');
+            });
+            return;
+        }
+
+        // 2. É Atleta Aprovado?
+        LeRunnersApp.state.db.ref('users/' + uid).once('value', userSnapshot => {
+            if (userSnapshot.exists()) {
+                // É ATLETA APROVADO
+                LeRunnersApp.state.userData = userSnapshot.val();
+                LeRunnersApp.elements.userDisplay.textContent = `${LeRunnersApp.state.userData.name}`;
+                LeRunnersApp.routeBasedOnRole('atleta');
+            } else {
+                // 3. NÃO É ADMIN NEM ATLETA APROVADO
+                // (Provavelmente pendente, mas não deveria estar em app.html)
+                console.warn("Status: PENDENTE. Não deveria estar aqui. Voltando ao login.");
+                LeRunnersApp.handleLogout();
+            }
+        });
+    });
+},
+
+// O Roteador
+routeBasedOnRole: (role) => {
+    const { mainContent, loader, appContainer } = LeRunnersApp.elements;
+    mainContent.innerHTML = ""; 
+    LeRunnersApp.cleanupListeners(); 
+
+    if (role === 'admin') {
+        const adminTemplate = document.getElementById('admin-panel-template').content.cloneNode(true);
+        mainContent.appendChild(adminTemplate);
+        AdminPanel.init(LeRunnersApp.state.currentUser, LeRunnersApp.state.db);
+    } else {
+        const atletaTemplate = document.getElementById('atleta-panel-template').content.cloneNode(true);
+        mainContent.appendChild(atletaTemplate);
+        document.getElementById('atleta-welcome-name').textContent = LeRunnersApp.state.userData.name;
+        AtletaPanel.init(LeRunnersApp.state.currentUser, LeRunnersApp.state.db);
+    }
+
+    loader.classList.add('hidden');
+    appContainer.classList.remove('hidden');
+},
+
+handleLogout: () => {
+    console.log("Saindo...");
+    LeRunnersApp.state.auth.signOut().catch(err => console.error("Erro ao sair:", err));
+},
+
+cleanupListeners: () => {
+    Object.values(LeRunnersApp.state.listeners).forEach(ref => ref.off());
+    LeRunnersApp.state.listeners = {};
+    console.log("Listeners do Firebase limpos.");
 }
 
-// 2. Inicialização do Firebase
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-} catch (e) {
-    console.error('Falha ao inicializar Firebase:', e);
-    alert("Erro ao conectar com o sistema. Verifique o config.js");
-    return;
-}
 
-const auth = firebase.auth();
-const db = firebase.database();
-
-// 3. Referências aos Elementos DOM
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('register-form');
-const pendingView = document.getElementById('pending-view');
-const pendingEmailDisplay = document.getElementById('pending-email-display');
-const btnLogoutPending = document.getElementById('btn-logout-pending');
-
-const loginErrorMsg = document.getElementById('login-error');
-const registerErrorMsg = document.getElementById('register-error');
-
-const toggleToRegister = document.getElementById('toggleToRegister');
-const toggleToLogin = document.getElementById('toggleToLogin');
-
-// Funções de UI
-const showView = (view) => {
-    loginForm.classList.add('hidden');
-    registerForm.classList.add('hidden');
-    pendingView.classList.add('hidden');
-    toggleToRegister.parentElement.classList.add('hidden');
-    toggleToLogin.parentElement.classList.add('hidden');
-
-    if (view === 'login') {
-        loginForm.classList.remove('hidden');
-        toggleToRegister.parentElement.classList.remove('hidden');
-    } else if (view === 'register') {
-        registerForm.classList.remove('hidden');
-        toggleToLogin.parentElement.classList.remove('hidden');
-    } else if (view === 'pending') {
-        pendingView.classList.remove('hidden');
-    }
 };
 
-// Listeners de Alternância
-toggleToRegister.addEventListener('click', (e) => {
-    e.preventDefault();
-    showView('register');
-    loginErrorMsg.textContent = "";
-    registerErrorMsg.textContent = "";
-});
+// ===================================================================
+// PAINEL DO ADMIN (COACH)
+// ===================================================================
+const AdminPanel = {
+init: (user, db) => {
+console.log("AdminPanel: Inicializado.");
+AdminPanel.state = { db, currentUser: user, selectedAthleteId: null, athletes: {} };
 
-toggleToLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    showView('login');
-    loginErrorMsg.textContent = "";
-    registerErrorMsg.textContent = "";
-});
+    AdminPanel.elements = {
+        pendingList: document.getElementById('pending-list'),
+        athleteList: document.getElementById('athlete-list'),
+        athleteSearch: document.getElementById('athlete-search'),
+        athleteDetailName: document.getElementById('athlete-detail-name'),
+        athleteDetailContent: document.getElementById('athlete-detail-content'),
+        addWorkoutForm: document.getElementById('add-workout-form'),
+        workoutsList: document.getElementById('workouts-list')
+    };
 
-// Listener de Logout (Tela Pendente)
-btnLogoutPending.addEventListener('click', () => auth.signOut());
-
-// 4. Lógica de Login (Botão Entrar)
-loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const btn = loginForm.querySelector('button');
+    AdminPanel.elements.addWorkoutForm.addEventListener('submit', AdminPanel.handleAddWorkout);
+    AdminPanel.elements.athleteSearch.addEventListener('input', AdminPanel.renderAthleteList);
     
-    btn.disabled = true;
-    btn.textContent = "Verificando...";
-    loginErrorMsg.textContent = "";
+    AdminPanel.loadPendingApprovals();
+    AdminPanel.loadAthletes();
+},
 
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Usuário logou. O Guardião (onAuthStateChanged)
-            // vai verificar o status (admin, user, pending)
-            // e redirecionar ou mostrar a tela de pendente.
-        })
-        .catch((error) => {
-            console.error("Erro de login:", error.code);
-            btn.disabled = false;
-            btn.textContent = "Entrar";
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                loginErrorMsg.textContent = "Email ou senha incorretos.";
-            } else {
-                loginErrorMsg.textContent = "Erro ao tentar entrar.";
-            }
+loadPendingApprovals: () => {
+    const pendingRef = AdminPanel.state.db.ref('pendingApprovals');
+    LeRunnersApp.state.listeners['adminPending'] = pendingRef;
+    
+    pendingRef.on('value', snapshot => {
+        const { pendingList } = AdminPanel.elements;
+        pendingList.innerHTML = "";
+        if (!snapshot.exists()) {
+            pendingList.innerHTML = "<p>Nenhuma solicitação pendente.</p>";
+            return;
+        }
+        snapshot.forEach(childSnapshot => {
+            const uid = childSnapshot.key;
+            const data = childSnapshot.val();
+            const item = document.createElement('div');
+            item.className = 'pending-item';
+            item.innerHTML = `
+                <div class="pending-item-info">
+                    <strong>${data.name}</strong><br>
+                    <span>${data.email}</span>
+                </div>
+                <div class="pending-item-actions">
+                    <button class="btn btn-success btn-small" data-action="approve" data-uid="${uid}">Aprovar</button>
+                    <button class="btn btn-danger btn-small" data-action="reject" data-uid="${uid}">Rejeitar</button>
+                </div>
+            `;
+            pendingList.appendChild(item);
         });
-});
 
-// 5. Lógica de Registro (Solicitar Acesso)
-registerForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+        // Adiciona listeners aos botões
+        pendingList.querySelectorAll('[data-action="approve"]').forEach(btn => 
+            btn.addEventListener('click', e => AdminPanel.approveAthlete(e.target.dataset.uid))
+        );
+        pendingList.querySelectorAll('[data-action="reject"]').forEach(btn => 
+            btn.addEventListener('click', e => AdminPanel.rejectAthlete(e.target.dataset.uid))
+        );
+    });
+},
+
+loadAthletes: () => {
+    const athletesRef = AdminPanel.state.db.ref('users');
+    LeRunnersApp.state.listeners['adminAthletes'] = athletesRef;
+    athletesRef.orderByChild('name').on('value', snapshot => {
+        AdminPanel.state.athletes = snapshot.val() || {};
+        AdminPanel.renderAthleteList();
+    });
+},
+
+renderAthleteList: () => {
+    const { athleteList, athleteSearch } = AdminPanel.elements;
+    const searchTerm = athleteSearch.value.toLowerCase();
+    athleteList.innerHTML = "";
+
+    Object.entries(AdminPanel.state.athletes).forEach(([uid, userData]) => {
+        if (uid === AdminPanel.state.currentUser.uid) return; // Não mostrar o próprio admin
+        if (searchTerm && !userData.name.toLowerCase().includes(searchTerm)) return;
+
+        const el = document.createElement('div');
+        el.className = 'athlete-list-item';
+        el.dataset.uid = uid;
+        el.innerHTML = `<span>${userData.name}</span>`;
+        el.addEventListener('click', () => AdminPanel.selectAthlete(uid, userData.name));
+        if (uid === AdminPanel.state.selectedAthleteId) el.classList.add('selected');
+        athleteList.appendChild(el);
+    });
+},
+
+approveAthlete: (uid) => {
+    console.log("Aprovando:", uid);
+    const pendingRef = AdminPanel.state.db.ref('pendingApprovals/' + uid);
     
-    const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const btn = registerForm.querySelector('button');
+    pendingRef.once('value', snapshot => {
+        if (!snapshot.exists()) return console.error("Usuário pendente não encontrado.");
+        
+        const pendingData = snapshot.val();
+        
+        // 1. Cria o perfil do usuário em /users/
+        const newUserProfile = {
+            name: pendingData.name,
+            email: pendingData.email,
+            role: "atleta",
+            createdAt: new Date().toISOString()
+        };
+        
+        // 2. Cria o nó de dados privados
+        const updates = {};
+        updates[`/users/${uid}`] = newUserProfile;
+        updates[`/data/${uid}`] = { workouts: {} }; // Cria nó de treinos
+        updates[`/pendingApprovals/${uid}`] = null; // 3. Remove de pendentes
 
-    if (password.length < 6) {
-        registerErrorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
+        AdminPanel.state.db.ref().update(updates)
+            .then(() => console.log("Atleta aprovado e movido."))
+            .catch(err => alert("Erro ao aprovar: " + err.message));
+    });
+},
+
+rejectAthlete: (uid) => {
+    if (!confirm("Tem certeza que deseja REJEITAR este atleta? Ele será removido da lista.")) {
         return;
     }
-    if (!name) {
-        registerErrorMsg.textContent = "O nome é obrigatório.";
-        return;
+    // NOTA: Isso NÃO remove o usuário do Firebase Auth. 
+    // Isso é mais complexo e requer Cloud Functions.
+    // Por enquanto, apenas removemos a solicitação.
+    AdminPanel.state.db.ref('pendingApprovals/' + uid).remove()
+        .then(() => console.log("Solicitação rejeitada."))
+        .catch(err => alert("Erro ao rejeitar: " + err.message));
+},
+
+selectAthlete: (uid, name) => {
+    AdminPanel.state.selectedAthleteId = uid;
+    AdminPanel.elements.athleteDetailName.textContent = `Planejamento de: ${name}`;
+    AdminPanel.elements.athleteDetailContent.classList.remove('hidden');
+    document.querySelectorAll('.athlete-list-item').forEach(el => {
+        el.classList.toggle('selected', el.dataset.uid === uid);
+    });
+    AdminPanel.loadWorkouts(uid);
+},
+
+loadWorkouts: (athleteId) => {
+    const { workoutsList } = AdminPanel.elements;
+    workoutsList.innerHTML = "Carregando treinos...";
+    
+    if (LeRunnersApp.state.listeners['adminWorkouts']) {
+        LeRunnersApp.state.listeners['adminWorkouts'].off();
     }
+    const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
+    LeRunnersApp.state.listeners['adminWorkouts'] = workoutsRef;
 
-    btn.disabled = true;
-    btn.textContent = "Enviando...";
-    registerErrorMsg.textContent = "";
-
-    auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            console.log("Usuário criado no Auth:", user.uid);
-
-            // CRIA A SOLICITAÇÃO EM "pendingApprovals" (Arquitetura corri_rp)
-            const pendingData = {
-                name: name,
-                email: email,
-                requestDate: new Date().toISOString()
-            };
-            
-            return db.ref('pendingApprovals/' + user.uid).set(pendingData);
-        })
-        .then(() => {
-            // Sucesso. O onAuthStateChanged vai pegar esse
-            // novo usuário e mostrar a tela "pendingView".
-            console.log("Solicitação de acesso enviada.");
-            // Não precisamos redirecionar, o guardião cuida disso.
-        })
-        .catch((error) => {
-            console.error("Erro de registro:", error.code);
-            btn.disabled = false;
-            btn.textContent = "Solicitar Acesso";
-            
-            if (error.code === 'auth/email-already-in-use') {
-                registerErrorMsg.textContent = "Este email já está cadastrado.";
-                // Se já estiver cadastrado, pode estar pendente ou aprovado
-                loginErrorMsg.textContent = "Email já cadastrado. Tente fazer login.";
-                showView('login');
-            } else {
-                registerErrorMsg.textContent = "Erro ao criar sua conta.";
-            }
+    workoutsRef.orderByChild('date').on('value', snapshot => {
+        workoutsList.innerHTML = ""; 
+        if (!snapshot.exists()) {
+            workoutsList.innerHTML = "<p>Nenhum treino agendado.</p>";
+            return;
+        }
+        snapshot.forEach(childSnapshot => {
+            const card = AdminPanel.createWorkoutCard(childSnapshot.val(), childSnapshot.key, athleteId);
+            workoutsList.prepend(card);
         });
-});
+    });
+},
 
-// 6. O GUARDIÃO (Verifica o status do usuário logado)
-// Este é o "cérebro" da tela de login.
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // Usuário está logADO. Precisamos saber quem ele é.
-        const uid = user.uid;
+handleAddWorkout: (e) => {
+    e.preventDefault();
+    const { selectedAthleteId } = AdminPanel.state;
+    const { addWorkoutForm } = AdminPanel.elements;
+    if (!selectedAthleteId) return alert("Selecione um atleta.");
 
-        // 1. Ele é Admin?
-        db.ref('admins/' + uid).once('value', adminSnapshot => {
-            if (adminSnapshot.exists() && adminSnapshot.val() === true) {
-                console.log("Status: ADMIN. Redirecionando para plataforma...");
-                window.location.href = 'app.html';
-                return;
-            }
+    const workoutData = {
+        date: addWorkoutForm.querySelector('#workout-date').value,
+        title: addWorkoutForm.querySelector('#workout-title').value,
+        description: addWorkoutForm.querySelector('#workout-description').value,
+        createdBy: AdminPanel.state.currentUser.uid,
+        createdAt: new Date().toISOString(),
+        status: "planejado"
+    };
+    if (!workoutData.date || !workoutData.title) return alert("Data e Título são obrigatórios.");
 
-            // 2. Ele é um Atleta Aprovado?
-            db.ref('users/' + uid).once('value', userSnapshot => {
-                if (userSnapshot.exists()) {
-                    console.log("Status: ATLETA APROVADO. Redirecionando...");
-                    window.location.href = 'app.html';
-                    return;
-                }
+    AdminPanel.state.db.ref(`data/${selectedAthleteId}/workouts`).push(workoutData)
+        .then(() => addWorkoutForm.reset())
+        .catch(err => alert("Erro ao salvar: " + err.message));
+},
 
-                // 3. Se não é Admin nem Atleta, ele está Pendente?
-                db.ref('pendingApprovals/' + uid).once('value', pendingSnapshot => {
-                    if (pendingSnapshot.exists()) {
-                        console.log("Status: PENDENTE. Mostrando tela de espera.");
-                        pendingEmailDisplay.textContent = user.email;
-                        showView('pending');
-                    } else {
-                        // 4. Status Desconhecido (Ex: Rejeitado e excluído)
-                        console.warn("Status: REJEITADO/ÓRFÃO. Usuário existe no Auth mas em nenhum nó.");
-                        loginErrorMsg.textContent = "Sua conta foi rejeitada ou excluída.";
-                        auth.signOut(); // Força o logout
-                        showView('login');
-                    }
-                });
-            });
+createWorkoutCard: (data, id, athleteId) => {
+    const el = document.createElement('div');
+    el.className = 'workout-card';
+    el.innerHTML = `
+        <div class="workout-card-header">
+            <div>
+                <span class="date">${data.date}</span>
+                <span class="title">${data.title}</span>
+            </div>
+            <button class="btn btn-danger btn-small" data-action="delete"><i class="bx bx-trash"></i></button>
+        </div>
+        <div class="workout-card-body"><p>${data.description || "Sem descrição."}</p></div>
+    `;
+    el.querySelector('[data-action="delete"]').addEventListener('click', () => {
+        if (confirm("Apagar este treino?")) {
+            AdminPanel.state.db.ref(`data/${athleteId}/workouts/${id}`).remove();
+        }
+    });
+    return el;
+}
+
+
+};
+
+// ===================================================================
+// PAINEL DO ATLETA
+// ===================================================================
+const AtletaPanel = {
+init: (user, db) => {
+console.log("AtletaPanel: Inicializado.");
+AtletaPanel.state = { db, currentUser: user };
+AtletaPanel.elements = { workoutsList: document.getElementById('atleta-workouts-list') };
+AtletaPanel.loadWorkouts(user.uid);
+},
+
+loadWorkouts: (athleteId) => {
+    const { workoutsList } = AtletaPanel.elements;
+    workoutsList.innerHTML = "Carregando seus treinos...";
+    
+    const workoutsRef = AtletaPanel.state.db.ref(`data/${athleteId}/workouts`);
+    LeRunnersApp.state.listeners['atletaWorkouts'] = workoutsRef;
+
+    workoutsRef.orderByChild('date').on('value', snapshot => {
+        workoutsList.innerHTML = ""; 
+        if (!snapshot.exists()) {
+            workoutsList.innerHTML = "<p>Nenhum treino encontrado. Fale com seu coach!</p>";
+            return;
+        }
+        snapshot.forEach(childSnapshot => {
+            const card = AtletaPanel.createWorkoutCard(childSnapshot.val());
+            workoutsList.prepend(card);
         });
+    });
+},
 
-    } else {
-        // Usuário está deslogADO.
-        console.log("Status: Deslogado. Mostrando tela de login.");
-        showView('login');
-    }
-});
+createWorkoutCard: (data) => {
+    const el = document.createElement('div');
+    el.className = 'workout-card';
+    el.innerHTML = `
+        <div class="workout-card-header">
+            <div>
+                <span class="date">${data.date}</span>
+                <span class="title">${data.title}</span>
+            </div>
+            <span class="role-tag" style="background-color: var(--secondary-color); text-transform: capitalize;">${data.status}</span>
+        </div>
+        <div class="workout-card-body"><p>${data.description || "Sem descrição."}</p></div>
+    `;
+    return el;
+}
 
 
-});
+};
+
+// Inicia a aplicação principal
+document.addEventListener('DOMContentLoaded', LeRunnersApp.init);
