@@ -1,10 +1,6 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V1.0 - corri_rp)
-/* Contém:
-/* 1. AppPrincipal (O Guardião/Roteador)
-/* 2. AuthLogic (Lógica da index.html)
-/* 3. AdminPanel (Lógica do Painel Coach)
-/* 4. AtletaPanel (Lógica do Painel Atleta)
+/* ARQUIVO DE LÓGICA UNIFICADO (V1.1 - corri_rp)
+/* CORREÇÃO: Adicionado .catch() na função approveAthlete.
 /* =================================================================== */
 
 // ===================================================================
@@ -24,7 +20,6 @@ const AppPrincipal = {
         
         if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
             console.error("ERRO CRÍTICO: config.js não carregado.");
-            // Não use alert() pois pode ser bloqueado
             document.body.innerHTML = "<h1>Erro Crítico: O arquivo js/config.js não foi configurado. Cole suas chaves do Firebase.</h1>";
             return;
         }
@@ -450,9 +445,15 @@ const AdminPanel = {
             updates[`/data/${uid}`] = { workouts: {} };     // 2. Cria o nó de treinos
             updates[`/pendingApprovals/${uid}`] = null; // 3. Remove de pendentes
 
+            // CORREÇÃO: Adicionado .catch() para reportar o erro que você viu.
             AdminPanel.state.db.ref().update(updates)
-                .then(() => console.log("Atleta aprovado e movido."))
-                .catch(err => alert("Erro ao aprovar: " + err.message));
+                .then(() => {
+                    console.log("Atleta aprovado e movido com sucesso.");
+                })
+                .catch(err => {
+                    console.error("ERRO CRÍTICO AO APROVAR:", err);
+                    alert("Falha ao aprovar o atleta. Verifique as Regras de Segurança do Firebase. Detalhe: " + err.message);
+                });
         });
     },
 
@@ -461,10 +462,15 @@ const AdminPanel = {
             return;
         }
         // Apenas remove a solicitação. O usuário ainda existe no Auth.
-        // Para excluir do Auth, precisaríamos de Cloud Functions (Módulo 4)
         AdminPanel.state.db.ref('pendingApprovals/' + uid).remove()
-            .then(() => console.log("Solicitação rejeitada."))
-            .catch(err => alert("Erro ao rejeitar: " + err.message));
+            .then(() => {
+                console.log("Solicitação rejeitada.");
+            })
+            // CORREÇÃO: Adicionado .catch()
+            .catch(err => {
+                console.error("ERRO AO REJEITAR:", err);
+                alert("Falha ao rejeitar o atleta. Verifique as Regras de Segurança. Detalhe: " + err.message);
+            });
     },
 
     selectAthlete: (uid, name) => {
@@ -539,7 +545,11 @@ const AdminPanel = {
             .then(() => {
                 addWorkoutForm.reset(); // Limpa o formulário
             })
-            .catch(err => alert("Erro ao salvar o treino: " + err.message));
+            // CORREÇÃO: Adicionado .catch()
+            .catch(err => {
+                console.error("ERRO AO SALVAR TREINO:", err);
+                alert("Falha ao salvar o treino. Verifique as Regras de Segurança. Detalhe: " + err.message);
+            });
     },
     
     createWorkoutCard: (data, id, athleteId) => {
@@ -558,7 +568,12 @@ const AdminPanel = {
         
         el.querySelector('[data-action="delete"]').addEventListener('click', () => {
             if (confirm("Tem certeza que deseja apagar este treino?")) {
-                AdminPanel.state.db.ref(`data/${athleteId}/workouts/${id}`).remove();
+                AdminPanel.state.db.ref(`data/${athleteId}/workouts/${id}`).remove()
+                    // CORREÇÃO: Adicionado .catch()
+                    .catch(err => {
+                        console.error("ERRO AO DELETAR TREINO:", err);
+                        alert("Falha ao deletar o treino. Verifique as Regras de Segurança. Detalhe: " + err.message);
+                    });
             }
         });
         return el;
@@ -580,7 +595,7 @@ const AtletaPanel = {
         const { workoutsList } = AtletaPanel.elements;
         workoutsList.innerHTML = "<p>Carregando seus treinos...</p>";
         
-        const workoutsRef = AtletaPanel.state.db.ref(`data/${athleteId}/workouts`);
+        const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
         // Registra o listener
         AppPrincipal.state.listeners['atletaWorkouts'] = workoutsRef;
 
