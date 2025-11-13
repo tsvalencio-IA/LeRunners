@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.1 - MÓDULO SOCIAL CORRIGIDO)
+/* ARQUIVO DE LÓGICA UNIFICADO (V2.2 - CORREÇÃO DE SINTAXE)
 /* ARQUITETURA: corri_rp (com fluxo de aprovação)
 /* =================================================================== */
 
@@ -23,7 +23,7 @@ const AppPrincipal = {
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2.1...");
+        console.log("Iniciando AppPrincipal V2.2...");
         
         if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
             console.error("ERRO CRÍTICO: config.js não carregado.");
@@ -139,7 +139,8 @@ const AppPrincipal = {
             }
 
             // 2. É Atleta Aprovado?
-            AppPrincipal.state.db.ref('users/'/' + uid).once('value', userSnapshot => {
+            // CORREÇÃO (V2.2): Removido o '/' extra
+            AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
                 if (userSnapshot.exists()) {
                     AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
                     AppPrincipal.elements.userDisplay.textContent = `${AppPrincipal.state.userData.name}`;
@@ -1137,4 +1138,4 @@ const FeedPanel = {
 };
 
 // =l= Inicia o Cérebro Principal =l=
-document.addEventListener('DOMContentLoaded', AppPrin
+document.addEventListener('DOMContentLoaded', AppPrincipal.init);
