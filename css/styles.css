@@ -544,7 +544,8 @@ legend {
     padding: 20px;
 }
 .modal-content {
-    background: var(--white);
+    /* CORREÇÃO V2.1: var(--white) não existia, trocado por #fff */
+    background: #fff;
     border-radius: var(--border-radius);
     width: 100%;
     max-width: 600px;
@@ -583,6 +584,7 @@ legend {
     overflow-y: auto;
     margin-bottom: 1rem;
     padding: 0.5rem;
+    background-color: #fdfdfd; /* Fundo leve para a lista */
 }
 .comment-item {
     font-size: 0.9rem;
