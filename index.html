@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeRunners - Plataforma de Treinos</title>
-    <!-- ATENÇÃO: Carregando V2.6 do CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
-</head>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="img/logo-192.png">
+    <link rel="apple-touch-icon" href="img/logo-192.png">
+    </head>
 <body class="login-page">
 
     <div class="login-container">
-        <!-- DIRETRIZ 1 (LOGO): Trocado placeholder por um logo real (URL de placeholder) -->
-        <!-- Troque 'https://placehold.co/150x150/00008B/FFFFFF?text=LR' pela URL da sua imagem de logo -->
-        <img src="https://placehold.co/150x150/00008B/FFFFFF?text=LR" alt="Logo LeRunners" class="logo">
-        
-        <!-- Formulário de Login -->
+        <img src="img/logo-512.png" alt="Logo LeRunners" class="logo">
         <form id="login-form">
             <h2>Plataforma LeRunners</h2>
             <p class="subtitle">Acesse seu painel</p>
@@ -39,7 +37,6 @@
             <p id="login-error" class="error-message"></p>
         </form>
 
-        <!-- Formulário de Registro (Inicia escondido) -->
         <form id="register-form" class="hidden">
             <h2>Criar Nova Conta</h2>
             <p class="subtitle">Solicite acesso à plataforma</p>
@@ -68,7 +65,6 @@
             <p id="register-error" class="error-message"></p>
         </form>
 
-        <!-- Mensagem de "Aprovação Pendente" (Baseado no corri_rp) -->
         <div id="pending-view" class="hidden panel">
             <h3><i class='bx bx-time-five'></i> Solicitação Enviada</h3>
             <p>Sua solicitação de acesso foi enviada para o Coach. Você será notificado quando for aprovado.</p>
@@ -76,24 +72,19 @@
             <button id="btn-logout-pending" class="btn btn-secondary">Sair</button>
         </div>
 
-        <!-- Links de Alternância -->
         <p class="toggle-link">Não tem conta? <a href="#" id="toggleToRegister">Solicite seu acesso</a></p>
         <p class="toggle-link hidden">Já tem conta? <a href="#" id="toggleToLogin">Entre</a></p>
     </div>
 
-    <!-- NOVO (V2.6): Rodapé (Diretriz 1) -->
     <footer class="app-footer">
         Desenvolvido com 🤖 por thIAguinho Soluções
     </footer>
 
-    <!-- Scripts Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    <!-- Scripts da Aplicação (ARQUITETURA V2.4) -->
     <script src="js/config.js"></script>
-    <!-- app.js agora contém AuthLogic e AppPrincipal -->
     <script src="js/app.js"></script> 
     
 </body>
