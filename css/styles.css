@@ -97,7 +97,7 @@ legend {
     cursor: not-allowed;
 }
 
-/* NOVO: Botões de Navegação (V2) */
+/* Botões de Navegação (V2) */
 .btn-nav {
     background-color: transparent;
     color: var(--text-light);
@@ -187,9 +187,9 @@ legend {
     margin: 0 auto 1rem auto;
     width: 120px;
     height: 120px;
-    /* ATUALIZADO (V3.0): Ajuste para o logo real */
-    border-radius: 0; /* Remove borda arredondada se o logo não for redondo */
-    object-fit: contain; /* Garante que o logo caiba sem distorcer */
+    /* (V3.0) */
+    border-radius: 0; 
+    object-fit: contain; 
 }
 
 .login-container h2 {
@@ -307,11 +307,10 @@ legend {
     padding: 0.5rem 1rem;
 }
 
-/* NOVO (V3.0): Esconde o botão de perfil para admins */
+/* (V3.0): Controle de View (Admin vs Atleta) */
 .admin-view #nav-profile-btn {
     display: none;
 }
-/* NOVO (V3.0): Mostra o botão de perfil para atletas */
 .atleta-view #nav-profile-btn {
     display: inline-flex;
 }
@@ -660,7 +659,7 @@ legend {
 }
 
 /* =================================================================== */
-/* 8. FEED SOCIAL (V2)
+/* 8. FEED SOCIAL (V3.2)
 /* =================================================================== */
 .feed-dashboard {
     max-width: 800px;
@@ -679,7 +678,7 @@ legend {
     position: relative; /* Para o avatar */
 }
 
-/* NOVO (V3.0): Avatar no Feed */
+/* Avatar no Feed (V3.0) */
 .feed-list .athlete-avatar {
     width: 40px;
     height: 40px;
@@ -689,7 +688,14 @@ legend {
     position: absolute;
     top: 1rem;
     left: 1rem;
+    /* NOVO (V3.2): Deixa o avatar clicável */
+    cursor: pointer;
+    transition: transform 0.2s ease;
 }
+.feed-list .athlete-avatar:hover {
+    transform: scale(1.1);
+}
+
 .feed-list .athlete-name {
     font-size: 1rem;
     font-weight: 600;
@@ -698,7 +704,15 @@ legend {
     margin-left: 55px;
     display: block;
     padding-top: 0.25rem;
+    /* NOVO (V3.2): Deixa o nome clicável */
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block; /* Para o hover funcionar bem */
 }
+.feed-list .athlete-name:hover {
+    text-decoration: underline;
+}
+
 .feed-list .workout-card-header .date {
     margin-left: 55px;
     font-size: 0.9rem;
@@ -715,7 +729,7 @@ legend {
 
 
 /* =================================================================== */
-/* 9. MODAIS (V3.0)
+/* 9. MODAIS (V3.2)
 /* =================================================================== */
 .modal-overlay {
     position: fixed;
@@ -842,10 +856,7 @@ legend {
     width: auto; /* Botão não ocupa 100% */
 }
 
-/* ===================================================================
-  NOVO (V3.0): Estilos do Modal de Perfil (Feature 3)
-  ===================================================================
-*/
+/* Estilos do Modal de Perfil (V3.0) */
 .profile-pic-container {
     display: flex;
     justify-content: center;
@@ -861,6 +872,30 @@ legend {
 }
 #profile-upload-feedback {
     color: var(--success-color); /* Feedback de upload de perfil */
+}
+
+/* ===================================================================
+  NOVO (V3.2): Estilos do Modal de Visualização de Perfil
+  ===================================================================
+*/
+#view-profile-modal .modal-content {
+    max-width: 500px; /* Um pouco menor */
+}
+.view-profile-name {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+}
+.view-profile-bio {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    white-space: pre-wrap; /* Respeita quebras de linha da bio */
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    min-height: 50px;
 }
 /* =================================================================== */
 
@@ -926,7 +961,7 @@ legend {
         justify-content: center; /* Centraliza o h2 e o botão */
     }
 
-    /* NOVO (V3.0): Ajuste do avatar do feed no mobile */
+    /* Ajuste do avatar do feed no mobile (V3.0) */
     .feed-list .athlete-name {
         margin-left: 50px;
     }
