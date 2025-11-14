@@ -143,14 +143,14 @@ legend {
     font-size: 1rem;
     background-color: #fff;
 }
-/* NOVO (V2.3): Estilo para input[type=file] */
+/* Estilo para input[type=file] (V2.3) */
 .form-group input[type="file"] {
     padding: 0.5rem;
     font-size: 0.9rem;
     background: var(--light-gray);
     cursor: pointer;
 }
-/* NOVO (V2.6): Feedback de Upload (IA Vision) */
+/* Feedback de Upload (V2.6) */
 .upload-feedback {
     font-size: 0.85rem;
     color: var(--strava-orange);
@@ -187,8 +187,9 @@ legend {
     margin: 0 auto 1rem auto;
     width: 120px;
     height: 120px;
-    border-radius: 50%;
-    object-fit: cover; /* NOVO (V2.6): Garante que o logo não distorça */
+    /* ATUALIZADO (V3.0): Ajuste para o logo real */
+    border-radius: 0; /* Remove borda arredondada se o logo não for redondo */
+    object-fit: contain; /* Garante que o logo caiba sem distorcer */
 }
 
 .login-container h2 {
@@ -306,6 +307,16 @@ legend {
     padding: 0.5rem 1rem;
 }
 
+/* NOVO (V3.0): Esconde o botão de perfil para admins */
+.admin-view #nav-profile-btn {
+    display: none;
+}
+/* NOVO (V3.0): Mostra o botão de perfil para atletas */
+.atleta-view #nav-profile-btn {
+    display: inline-flex;
+}
+
+
 .app-main {
     max-width: 1400px;
     margin: 2rem auto;
@@ -313,7 +324,7 @@ legend {
     width: 100%;
 }
 
-/* NOVO (V2.6): Rodapé */
+/* Rodapé (V2.6) */
 .app-footer {
     text-align: center;
     padding: 2rem 1rem 1.5rem 1rem;
@@ -421,7 +432,7 @@ legend {
     border: 1px solid var(--border-color);
 }
 
-/* NOVO (V2.6): Abas do Admin (Prescrição / Histórico IA) */
+/* Abas do Admin (V2.6) */
 .admin-tabs {
     display: flex;
     border-bottom: 2px solid var(--border-color);
@@ -475,7 +486,7 @@ legend {
 /* =================================================================== */
 /* 6. PAINEL ATLETA (V2.6)
 /* =================================================================== */
-/* NOVO (V2.6): Header do Atleta com botão */
+/* Header do Atleta com botão (V2.6) */
 .atleta-header {
     display: flex;
     justify-content: space-between;
@@ -568,7 +579,7 @@ legend {
     border: 1px solid var(--border-color);
 }
 
-/* NOVO (V2.6): Display de dados do Strava */
+/* Display de dados do Strava (V2.6) */
 .strava-data-display {
     background: #fcf4e8; /* Laranja claro do Strava */
     border: 1px solid var(--strava-orange);
@@ -631,13 +642,10 @@ legend {
 .action-btn:hover:not(:disabled) {
     color: var(--primary-color);
 }
-.action-btn i {
-    font-size: 1.2rem;
-}
 .action-btn.liked {
     color: var(--danger-color);
 }
-/* NOVO (V2.6): Dono do treino não pode curtir o próprio post */
+/* Dono do treino não pode curtir (V2.6) */
 .action-btn.btn-like:disabled {
     opacity: 1; /* Nao ficar cinza */
     color: var(--danger-color); /* Mantem vermelho */
@@ -668,16 +676,46 @@ legend {
 }
 .feed-list .workout-card-header {
     display: block;
+    position: relative; /* Para o avatar */
+}
+
+/* NOVO (V3.0): Avatar no Feed */
+.feed-list .athlete-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
 }
 .feed-list .athlete-name {
     font-size: 1rem;
     font-weight: 600;
     color: var(--secondary-color);
+    /* Ajuste para dar espaço ao avatar */
+    margin-left: 55px;
+    display: block;
+    padding-top: 0.25rem;
+}
+.feed-list .workout-card-header .date {
+    margin-left: 55px;
+    font-size: 0.9rem;
+}
+.feed-list .workout-card-header .title {
+    margin-left: 55px;
+    font-size: 0.9rem;
+}
+.feed-list .workout-card-header .status-tag {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
 }
 
 
 /* =================================================================== */
-/* 9. MODAIS (V2.6)
+/* 9. MODAIS (V3.0)
 /* =================================================================== */
 .modal-overlay {
     position: fixed;
@@ -781,8 +819,8 @@ legend {
 
 /* Modal Análise IA */
 #ia-analysis-output {
-    white-space: pre-wrap;  /* CORREÇÃO V2.6 (Diretriz 3) */
-    word-wrap: break-word; /* GARANTE A QUEBRA */
+    white-space: pre-wrap;  /* CORREÇÃO V2.6 */
+    word-wrap: break-word;
     background-color: var(--light-gray);
     border: 1px solid var(--border-color);
     padding: 1rem;
@@ -792,7 +830,7 @@ legend {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 0.9rem;
 }
-/* NOVO (V2.6): Footer do modal de IA com botão Salvar */
+/* Footer do modal de IA (V2.6) */
 .modal-footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-color);
@@ -803,6 +841,28 @@ legend {
 .modal-footer .btn {
     width: auto; /* Botão não ocupa 100% */
 }
+
+/* ===================================================================
+  NOVO (V3.0): Estilos do Modal de Perfil (Feature 3)
+  ===================================================================
+*/
+.profile-pic-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.profile-pic-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--border-color);
+    background-color: var(--light-gray);
+}
+#profile-upload-feedback {
+    color: var(--success-color); /* Feedback de upload de perfil */
+}
+/* =================================================================== */
 
 
 /* =================================================================== */
@@ -865,4 +925,19 @@ legend {
     .atleta-header {
         justify-content: center; /* Centraliza o h2 e o botão */
     }
+
+    /* NOVO (V3.0): Ajuste do avatar do feed no mobile */
+    .feed-list .athlete-name {
+        margin-left: 50px;
+    }
+    .feed-list .workout-card-header .date,
+    .feed-list .workout-card-header .title {
+        margin-left: 50px;
+        margin-right: 50px; /* Espaço para o status tag */
+    }
+    .feed-list .athlete-avatar {
+        width: 35px;
+        height: 35px;
+    }
+
 }
