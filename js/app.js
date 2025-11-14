@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.7 - CÉREBRO, AUTH E IA VISION - CORRIGIDO)
+/* ARQUIVO DE LÓGICA UNIFICADO (V2.8 - CÉREBRO, AUTH E CORREÇÃO LISTENERS)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -26,7 +26,7 @@ const AppPrincipal = {
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2.7 (Cérebro, IA Vision - CORRIGIDO)...");
+        console.log("Iniciando AppPrincipal V2.8 (Cérebro, IA Vision - CORREÇÃO LISTENERS)...");
         
         // V2.5: Verifica a chave no 'window'
         if (typeof window.firebaseConfig === 'undefined' || window.firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
@@ -148,13 +148,17 @@ const AppPrincipal = {
     // Carrega caches de Admins e Perfis Públicos
     loadCaches: () => {
         const adminsRef = AppPrincipal.state.db.ref('admins');
-        AppPrincipal.state.listeners['cacheAdmins'] = adminsRef.on('value', snapshot => {
+        // CORREÇÃO V2.8: Armazena a REF, não o callback
+        AppPrincipal.state.listeners['cacheAdmins'] = adminsRef;
+        adminsRef.on('value', snapshot => {
             AppPrincipal.state.adminUIDs = snapshot.val() || {};
             console.log("Cache de Admins carregado:", Object.keys(AppPrincipal.state.adminUIDs));
         });
 
         const profilesRef = AppPrincipal.state.db.ref('publicProfiles');
-        AppPrincipal.state.listeners['cacheProfiles'] = profilesRef.on('value', snapshot => {
+        // CORREÇÃO V2.8: Armazena a REF, não o callback
+        AppPrincipal.state.listeners['cacheProfiles'] = profilesRef;
+        profilesRef.on('value', snapshot => {
             AppPrincipal.state.publicProfiles = snapshot.val() || {};
             console.log("Cache de Perfis Públicos carregado.");
         });
@@ -164,7 +168,7 @@ const AppPrincipal = {
     handlePlatformAuthStateChange: (user) => {
         if (!user) {
             console.log("Guardião (Plataforma): Acesso negado. Redirecionando para login.");
-            AppPrincipal.cleanupListeners();
+            AppPrincipal.cleanupListeners(false); // Limpa TUDO ao deslogar
             window.location.href = 'index.html';
             return;
         }
@@ -172,7 +176,7 @@ const AppPrincipal = {
         AppPrincipal.state.currentUser = user;
         const uid = user.uid;
         
-        // Carrega caches
+        // Carrega caches (agora com listeners corretos)
         AppPrincipal.loadCaches();
 
         // 1. É Admin?
@@ -251,6 +255,7 @@ const AppPrincipal = {
         AppPrincipal.state.auth.signOut().catch(err => console.error("Erro ao sair:", err));
     },
 
+    // CORREÇÃO V2.8: Lógica de limpeza de listeners
     cleanupListeners: (panelOnly = false) => {
         Object.keys(AppPrincipal.state.listeners).forEach(key => {
             const listenerRef = AppPrincipal.state.listeners[key];
@@ -260,8 +265,9 @@ const AppPrincipal = {
                 return; 
             }
             
+            // Verifica se é uma referência válida do Firebase
             if (listenerRef && typeof listenerRef.off === 'function') {
-                listenerRef.off();
+                listenerRef.off(); // Desliga o listener
             }
             delete AppPrincipal.state.listeners[key];
         });
@@ -269,10 +275,10 @@ const AppPrincipal = {
     },
     
     // ===================================================================
-    // MÓDULO 3/4: Lógica dos Modais (V2.6)
+    // MÓDULO 3/4: Lógica dos Modais (V2.8 - CORREÇÃO LISTENER)
     // ===================================================================
     
-    // ----- Modal Feedback (V2.6) -----
+    // ----- Modal Feedback (V2.8) -----
     openFeedbackModal: (workoutId, ownerId, workoutTitle) => {
         const { feedbackModal, feedbackModalTitle, workoutStatusSelect, workoutFeedbackText, commentsList, commentInput, photoUploadInput, saveFeedbackBtn, photoUploadFeedback, stravaDataDisplay } = AppPrincipal.elements;
         
@@ -325,7 +331,11 @@ const AppPrincipal = {
         
         // 2. Carrega os Comentários (do nó /workoutComments/)
         const commentsRef = AppPrincipal.state.db.ref(`workoutComments/${workoutId}`);
-        AppPrincipal.state.listeners['modalComments'] = commentsRef.on('value', snapshot => {
+        
+        // CORREÇÃO V2.8: Armazena a REF, não o callback
+        AppPrincipal.state.listeners['modalComments'] = commentsRef; 
+        
+        commentsRef.orderByChild('timestamp').on('value', snapshot => {
             commentsList.innerHTML = "";
             if (!snapshot.exists()) {
                 commentsList.innerHTML = "<p>Nenhum comentário ainda.</p>";
@@ -359,12 +369,17 @@ const AppPrincipal = {
         feedbackModal.classList.remove('hidden');
     },
     
+    // CORREÇÃO V2.8: Limpa o listener corretamente
     closeFeedbackModal: () => {
         AppPrincipal.state.modal.isOpen = false;
         AppPrincipal.elements.feedbackModal.classList.add('hidden');
-        if (AppPrincipal.state.listeners['modalComments']) {
-            AppPrincipal.state.listeners['modalComments'].off();
-            delete AppPrincipal.state.listeners[String(`modalComments`)];
+        
+        // Pega a REF armazenada e chama .off() nela
+        const listenerRef = AppPrincipal.state.listeners['modalComments'];
+        if (listenerRef && typeof listenerRef.off === 'function') {
+            listenerRef.off();
+            delete AppPrincipal.state.listeners['modalComments'];
+            console.log("Listener do modal de comentários limpo.");
         }
     },
     
