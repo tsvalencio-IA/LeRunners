@@ -1,6 +1,6 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.2 - CORREÇÃO DE SINTAXE)
-/* ARQUITETURA: corri_rp (com fluxo de aprovação)
+/* ARQUIVO DE LÓGICA UNIFICADO (V2.6 - CÉREBRO, AUTH E IA VISION)
+/* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
 // ===================================================================
@@ -14,26 +14,31 @@ const AppPrincipal = {
         auth: null,
         listeners: {},     // Para limpar listeners do Firebase
         currentView: 'planilha', // 'planilha' ou 'feed'
-        adminUIDs: {},     // NOVO (V2.1): Cache dos UIDs de admins
+        adminUIDs: {},     // Cache dos UIDs de admins
+        publicProfiles: {}, // Cache dos perfis públicos
         modal: {
             isOpen: false,
             currentWorkoutId: null,
             currentOwnerId: null
-        }
+        },
+        stravaData: null, // NOVO (V2.6): Armazena dados extraídos da IA Vision
+        currentAnalysisData: null // NOVO (V2.6): Armazena a última análise da IA
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2.2...");
+        console.log("Iniciando AppPrincipal V2.6 (Cérebro, IA Vision)...");
         
-        if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
-            console.error("ERRO CRÍTICO: config.js não carregado.");
+        // V2.5: Verifica a chave no 'window'
+        if (typeof window.firebaseConfig === 'undefined' || window.firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
+            console.error("ERRO CRÍTICO: config.js não carregado ou chaves do Firebase não configuradas.");
             document.body.innerHTML = "<h1>Erro Crítico: O arquivo js/config.js não foi configurado. Cole suas chaves do Firebase.</h1>";
             return;
         }
 
         try {
+            // V2.5: Usa a chave do 'window'
             if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+                firebase.initializeApp(window.firebaseConfig);
             }
         } catch (e) {
             console.error('Falha ao inicializar Firebase:', e);
@@ -63,22 +68,41 @@ const AppPrincipal = {
             logoutButton: document.getElementById('logoutButton'),
             mainContent: document.getElementById('app-main-content'),
             
-            // Navegação V2
             navPlanilhaBtn: document.getElementById('nav-planilha-btn'),
             navFeedBtn: document.getElementById('nav-feed-btn'),
             
-            // Modal V2
+            // Modal Feedback (V2.6)
             feedbackModal: document.getElementById('feedback-modal'),
             closeFeedbackModal: document.getElementById('close-feedback-modal'),
             feedbackModalTitle: document.getElementById('feedback-modal-title'),
             feedbackForm: document.getElementById('feedback-form'),
             workoutStatusSelect: document.getElementById('workout-status'),
             workoutFeedbackText: document.getElementById('workout-feedback-text'),
+            photoUploadInput: document.getElementById('photo-upload-input'),
+            photoUploadFeedback: document.getElementById('photo-upload-feedback'), // V2.6
+            stravaDataDisplay: document.getElementById('strava-data-display'), // V2.6
+            saveFeedbackBtn: document.getElementById('save-feedback-btn'),
             
             // Comentários V2
             commentForm: document.getElementById('comment-form'),
             commentInput: document.getElementById('comment-input'),
-            commentsList: document.getElementById('comments-list')
+            commentsList: document.getElementById('comments-list'),
+
+            // Modal Log Atividade (V2.3)
+            logActivityModal: document.getElementById('log-activity-modal'),
+            closeLogActivityModal: document.getElementById('close-log-activity-modal'),
+            logActivityForm: document.getElementById('log-activity-form'),
+
+            // Modal Quem Curtiu (V2.3)
+            whoLikedModal: document.getElementById('who-liked-modal'),
+            closeWhoLikedModal: document.getElementById('close-who-liked-modal'),
+            whoLikedList: document.getElementById('who-liked-list'),
+
+            // Modal Análise IA (V2.6)
+            iaAnalysisModal: document.getElementById('ia-analysis-modal'),
+            closeIaAnalysisModal: document.getElementById('close-ia-analysis-modal'),
+            iaAnalysisOutput: document.getElementById('ia-analysis-output'),
+            saveIaAnalysisBtn: document.getElementById('save-ia-analysis-btn'), // V2.6
         };
         
         // Listeners de Navegação
@@ -86,29 +110,54 @@ const AppPrincipal = {
         AppPrincipal.elements.navPlanilhaBtn.addEventListener('click', () => AppPrincipal.navigateTo('planilha'));
         AppPrincipal.elements.navFeedBtn.addEventListener('click', () => AppPrincipal.navigateTo('feed'));
         
-        // Listeners do Modal
+        // Listeners do Modal Feedback
         AppPrincipal.elements.closeFeedbackModal.addEventListener('click', AppPrincipal.closeFeedbackModal);
         AppPrincipal.elements.feedbackForm.addEventListener('submit', AppPrincipal.handleFeedbackSubmit);
         AppPrincipal.elements.commentForm.addEventListener('submit', AppPrincipal.handleCommentSubmit);
-        // Clicar fora do modal para fechar
         AppPrincipal.elements.feedbackModal.addEventListener('click', (e) => {
-            if (e.target === AppPrincipal.elements.feedbackModal) {
-                AppPrincipal.closeFeedbackModal();
-            }
+            if (e.target === AppPrincipal.elements.feedbackModal) AppPrincipal.closeFeedbackModal();
         });
+        // NOVO (V2.6): Listener para IA Vision do Strava
+        AppPrincipal.elements.photoUploadInput.addEventListener('change', AppPrincipal.handlePhotoUpload);
+
+        // Listeners Modal Log Atividade (V2.3)
+        AppPrincipal.elements.closeLogActivityModal.addEventListener('click', AppPrincipal.closeLogActivityModal);
+        AppPrincipal.elements.logActivityForm.addEventListener('submit', AppPrincipal.handleLogActivitySubmit);
+        AppPrincipal.elements.logActivityModal.addEventListener('click', (e) => {
+            if (e.target === AppPrincipal.elements.logActivityModal) AppPrincipal.closeLogActivityModal();
+        });
+
+        // Listeners Modal Quem Curtiu (V2.3)
+        AppPrincipal.elements.closeWhoLikedModal.addEventListener('click', AppPrincipal.closeWhoLikedModal);
+        AppPrincipal.elements.whoLikedModal.addEventListener('click', (e) => {
+            if (e.target === AppPrincipal.elements.whoLikedModal) AppPrincipal.closeWhoLikedModal();
+        });
+
+        // Listeners Modal IA (V2.6)
+        AppPrincipal.elements.closeIaAnalysisModal.addEventListener('click', AppPrincipal.closeIaAnalysisModal);
+        AppPrincipal.elements.iaAnalysisModal.addEventListener('click', (e) => {
+            if (e.target === AppPrincipal.elements.iaAnalysisModal) AppPrincipal.closeIaAnalysisModal();
+        });
+        AppPrincipal.elements.saveIaAnalysisBtn.addEventListener('click', AppPrincipal.handleSaveIaAnalysis);
+
 
         // O Guardião do app.html
         AppPrincipal.state.auth.onAuthStateChanged(AppPrincipal.handlePlatformAuthStateChange);
     },
 
-    // NOVO (V2.1): Carrega o cache de UIDs de Admins
-    loadAdmins: () => {
+    // Carrega caches de Admins e Perfis Públicos
+    loadCaches: () => {
         const adminsRef = AppPrincipal.state.db.ref('admins');
-        adminsRef.once('value', snapshot => {
+        AppPrincipal.state.listeners['cacheAdmins'] = adminsRef.on('value', snapshot => {
             AppPrincipal.state.adminUIDs = snapshot.val() || {};
             console.log("Cache de Admins carregado:", Object.keys(AppPrincipal.state.adminUIDs));
         });
-        // (Nota: Em um app maior, isso deveria ser um listener 'on' se admins mudam dinamicamente)
+
+        const profilesRef = AppPrincipal.state.db.ref('publicProfiles');
+        AppPrincipal.state.listeners['cacheProfiles'] = profilesRef.on('value', snapshot => {
+            AppPrincipal.state.publicProfiles = snapshot.val() || {};
+            console.log("Cache de Perfis Públicos carregado.");
+        });
     },
 
     // O Guardião (só roda no app.html)
@@ -123,8 +172,8 @@ const AppPrincipal = {
         AppPrincipal.state.currentUser = user;
         const uid = user.uid;
         
-        // NOVO (V2.1): Carrega a lista de admins para lógica de privacidade
-        AppPrincipal.loadAdmins();
+        // Carrega caches
+        AppPrincipal.loadCaches();
 
         // 1. É Admin?
         AppPrincipal.state.db.ref('admins/' + uid).once('value', adminSnapshot => {
@@ -139,7 +188,6 @@ const AppPrincipal = {
             }
 
             // 2. É Atleta Aprovado?
-            // CORREÇÃO (V2.2): Removido o '/' extra
             AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
                 if (userSnapshot.exists()) {
                     AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
@@ -157,15 +205,21 @@ const AppPrincipal = {
     navigateTo: (page) => {
         const { mainContent, loader, appContainer, navPlanilhaBtn, navFeedBtn } = AppPrincipal.elements;
         mainContent.innerHTML = ""; 
-        AppPrincipal.cleanupListeners();
+        AppPrincipal.cleanupListeners(true); // Limpa listeners de painel
         AppPrincipal.state.currentView = page;
 
         // Atualiza botões de navegação
         navPlanilhaBtn.classList.toggle('active', page === 'planilha');
         navFeedBtn.classList.toggle('active', page === 'feed');
 
+        // VERIFICA SE OS PAINÉIS (de panels.js) ESTÃO CARREGADOS
+        if (typeof AdminPanel === 'undefined' || typeof AtletaPanel === 'undefined' || typeof FeedPanel === 'undefined') {
+            console.error("ERRO CRÍTICO: js/panels.js não foi carregado a tempo.");
+            mainContent.innerHTML = "<h1>Erro ao carregar módulos. Recarregue a página.</h1>";
+            return;
+        }
+
         if (page === 'planilha') {
-            // Rota da Planilha (depende da role)
             const role = AppPrincipal.state.userData.role;
             if (role === 'admin') {
                 const adminTemplate = document.getElementById('admin-panel-template').content.cloneNode(true);
@@ -182,7 +236,6 @@ const AppPrincipal = {
             }
         } 
         else if (page === 'feed') {
-            // Rota do Feed (igual para todos)
             const feedTemplate = document.getElementById('feed-panel-template').content.cloneNode(true);
             mainContent.appendChild(feedTemplate);
             FeedPanel.init(AppPrincipal.state.currentUser, AppPrincipal.state.db);
@@ -194,25 +247,34 @@ const AppPrincipal = {
 
     handleLogout: () => {
         console.log("Saindo...");
+        AppPrincipal.cleanupListeners(false); // Limpa TODOS os listeners
         AppPrincipal.state.auth.signOut().catch(err => console.error("Erro ao sair:", err));
     },
 
-    cleanupListeners: () => {
-        Object.values(AppPrincipal.state.listeners).forEach(listener => {
-            if (listener && typeof listener.off === 'function') {
-                listener.off();
+    cleanupListeners: (panelOnly = false) => {
+        Object.keys(AppPrincipal.state.listeners).forEach(key => {
+            const listenerRef = AppPrincipal.state.listeners[key];
+            
+            // Se for 'panelOnly', só limpa listeners que NÃO são os caches
+            if (panelOnly && (key === 'cacheAdmins' || key === 'cacheProfiles')) {
+                return; 
             }
+            
+            if (listenerRef && typeof listenerRef.off === 'function') {
+                listenerRef.off();
+            }
+            delete AppPrincipal.state.listeners[key];
         });
-        AppPrincipal.state.listeners = {};
-        console.log("Listeners do Firebase limpos.");
+        console.log(panelOnly ? "Listeners de painel limpos." : "TODOS os listeners limpos.");
     },
     
     // ===================================================================
-    // MÓDULO 3: Lógica do Modal de Feedback/Comentários (V2.1)
+    // MÓDULO 3/4: Lógica dos Modais (V2.6)
     // ===================================================================
     
+    // ----- Modal Feedback (V2.6) -----
     openFeedbackModal: (workoutId, ownerId, workoutTitle) => {
-        const { feedbackModal, feedbackModalTitle, workoutStatusSelect, workoutFeedbackText, commentsList, commentInput } = AppPrincipal.elements;
+        const { feedbackModal, feedbackModalTitle, workoutStatusSelect, workoutFeedbackText, commentsList, commentInput, photoUploadInput, saveFeedbackBtn, photoUploadFeedback, stravaDataDisplay } = AppPrincipal.elements;
         
         console.log(`Abrindo modal para treino: ${workoutId} (Dono: ${ownerId})`);
         
@@ -220,31 +282,42 @@ const AppPrincipal = {
         AppPrincipal.state.modal.isOpen = true;
         AppPrincipal.state.modal.currentWorkoutId = workoutId;
         AppPrincipal.state.modal.currentOwnerId = ownerId;
+        AppPrincipal.state.stravaData = null; // Limpa dados do Strava
         
         feedbackModalTitle.textContent = workoutTitle || "Feedback do Treino";
         
         // Limpa o modal
         workoutStatusSelect.value = 'planejado';
         workoutFeedbackText.value = '';
+        photoUploadInput.value = null;
+        photoUploadFeedback.textContent = "";
+        stravaDataDisplay.classList.add('hidden');
         commentsList.innerHTML = "<p>Carregando...</p>";
         commentInput.value = '';
+        saveFeedbackBtn.disabled = false;
+        saveFeedbackBtn.textContent = "Salvar Feedback";
         
         // 1. Carrega os dados do treino (status e feedback)
-        // (Leitura do nó /data/ privado)
         const workoutRef = AppPrincipal.state.db.ref(`data/${ownerId}/workouts/${workoutId}`);
         workoutRef.once('value', snapshot => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 workoutStatusSelect.value = data.status || 'planejado';
                 workoutFeedbackText.value = data.feedback || '';
+                // NOVO (V2.6): Se já tiver dados do Strava, exibe
+                if (data.stravaData) {
+                    AppPrincipal.displayStravaData(data.stravaData);
+                }
             } else {
-                // Se não existir em /data/ (ex: admin vendo feed), tenta carregar de /publicWorkouts/
-                // (Nota: Isso só acontece se o admin não for dono do /data/)
+                // Tenta buscar nos publicWorkouts se for um treino manual
                 AppPrincipal.state.db.ref(`publicWorkouts/${workoutId}`).once('value', publicSnapshot => {
                      if (publicSnapshot.exists()) {
                         const data = publicSnapshot.val();
                         workoutStatusSelect.value = data.status || 'planejado';
                         workoutFeedbackText.value = data.feedback || '';
+                        if (data.stravaData) {
+                            AppPrincipal.displayStravaData(data.stravaData);
+                        }
                      }
                 });
             }
@@ -252,34 +325,27 @@ const AppPrincipal = {
         
         // 2. Carrega os Comentários (do nó /workoutComments/)
         const commentsRef = AppPrincipal.state.db.ref(`workoutComments/${workoutId}`);
-        AppPrincipal.state.listeners['modalComments'] = commentsRef; // Registra o listener
-        
-        commentsRef.orderByChild('timestamp').on('value', snapshot => {
+        AppPrincipal.state.listeners['modalComments'] = commentsRef.on('value', snapshot => {
             commentsList.innerHTML = "";
             if (!snapshot.exists()) {
                 commentsList.innerHTML = "<p>Nenhum comentário ainda.</p>";
                 return;
             }
             
-            // NOVO (V2.1): Lógica de Filtro de Privacidade
-            // Eu sou admin? OU Eu sou o dono do treino?
             const isCurrentUserAdmin = AppPrincipal.state.userData.role === 'admin';
-            const isCurrentUserManager = isCurrentUserAdmin || AppPrincipal.state.currentUser.uid === AppPrincipal.state.modal.currentOwnerId;
+            const isCurrentUserOwner = AppPrincipal.state.currentUser.uid === AppPrincipal.state.modal.currentOwnerId;
 
             snapshot.forEach(childSnapshot => {
                 const data = childSnapshot.val();
-                
-                // O comentário é de um admin? (Usa o cache)
                 const isCommentFromAdmin = AppPrincipal.state.adminUIDs.hasOwnProperty(data.uid);
 
-                // REGRA: Se eu NÃO sou o dono/admin E o comentário é de um admin -> PULAR
-                if (!isCurrentUserManager && isCommentFromAdmin) {
-                    return; // Esconde o comentário do coach
+                // REGRA DE PRIVACIDADE:
+                if (!isCurrentUserOwner && !isCurrentUserAdmin && isCommentFromAdmin) {
+                    return; // Esconde comentários de admins (exceto para o dono ou outro admin)
                 }
 
                 const item = document.createElement('div');
                 item.className = 'comment-item';
-                // Formata a data (simples)
                 const date = new Date(data.timestamp).toLocaleString('pt-BR', { timeStyle: 'short', dateStyle: 'short' });
                 item.innerHTML = `
                     <p><strong>${data.name}:</strong> ${data.text}</p>
@@ -296,69 +362,93 @@ const AppPrincipal = {
     closeFeedbackModal: () => {
         AppPrincipal.state.modal.isOpen = false;
         AppPrincipal.elements.feedbackModal.classList.add('hidden');
-        
-        // Limpa os listeners do modal (essencial)
         if (AppPrincipal.state.listeners['modalComments']) {
             AppPrincipal.state.listeners['modalComments'].off();
-            delete AppPrincipal.state.listeners['modalComments'];
+            delete AppPrincipal.state.listeners[String(`modalComments`)];
         }
     },
     
-    // Salva o "Status" e "Feedback" (só o atleta pode)
-    handleFeedbackSubmit: (e) => {
+    // ATUALIZADO (V2.6): Salva "Status", "Feedback", "Foto" e "StravaData"
+    handleFeedbackSubmit: async (e) => {
         e.preventDefault();
-        const { workoutStatusSelect, workoutFeedbackText } = AppPrincipal.elements;
+        const { workoutStatusSelect, workoutFeedbackText, photoUploadInput, saveFeedbackBtn } = AppPrincipal.elements;
         const { currentWorkoutId, currentOwnerId } = AppPrincipal.state.modal;
         
-        // Segurança: Só o dono do treino pode enviar feedback
         if (currentOwnerId !== AppPrincipal.state.currentUser.uid) {
             alert("Você só pode salvar o feedback dos seus próprios treinos.");
             return;
         }
 
-        const feedbackData = {
-            status: workoutStatusSelect.value,
-            feedback: workoutFeedbackText.value,
-            realizadoAt: new Date().toISOString()
-        };
+        saveFeedbackBtn.disabled = true;
+        saveFeedbackBtn.textContent = "Salvando...";
 
-        const workoutRef = AppPrincipal.state.db.ref(`data/${currentOwnerId}/workouts/${currentWorkoutId}`);
-        
-        // 1. Atualiza o nó PRIVADO
-        workoutRef.update(feedbackData)
-            .then(() => {
-                // 2. NOVO (V2.1): Atualiza o nó PÚBLICO (/publicWorkouts/)
-                if (feedbackData.status !== 'planejado') {
-                    // Se o treino foi realizado, publica/atualiza no feed
-                    const publicRef = AppPrincipal.state.db.ref(`publicWorkouts/${currentWorkoutId}`);
-                    
-                    // Precisamos dos dados completos do treino (título, data, etc.)
-                    workoutRef.once('value', snapshot => {
-                        const workoutData = snapshot.val(); // Dados privados atualizados
-                        const publicData = {
-                            ownerId: currentOwnerId,
-                            ownerName: AppPrincipal.state.userData.name, // Nome do atleta
-                            date: workoutData.date,
-                            title: workoutData.title,
-                            description: workoutData.description,
-                            status: workoutData.status,
-                            feedback: workoutData.feedback, // Feedback do atleta
-                            realizadoAt: workoutData.realizadoAt
-                        };
-                        publicRef.set(publicData); // Publica no feed
-                    });
-                } else {
-                    // Se foi marcado de volta como "planejado", remove do feed
-                    AppPrincipal.state.db.ref(`publicWorkouts/${currentWorkoutId}`).remove();
-                }
+        try {
+            let imageUrl = null;
+            const file = photoUploadInput.files[0];
+            
+            // 1. Faz upload da imagem (se existir)
+            if (file) {
+                saveFeedbackBtn.textContent = "Enviando foto...";
+                // Nota: A IA Vision já foi disparada no 'onChange' da foto.
+                // Aqui apenas fazemos o upload para o Cloudinary.
+                imageUrl = await AppPrincipal.uploadFileToCloudinary(file);
+            }
 
-                console.log("Feedback salvo e feed atualizado!");
-                AppPrincipal.closeFeedbackModal();
-            })
-            .catch(err => alert("Erro ao salvar feedback: " + err.message));
+            // 2. Prepara dados
+            const feedbackData = {
+                status: workoutStatusSelect.value,
+                feedback: workoutFeedbackText.value,
+                realizadoAt: new Date().toISOString()
+            };
+            if (imageUrl) {
+                feedbackData.imageUrl = imageUrl;
+            }
+            // Adiciona dados do Strava se existirem (do state)
+            if (AppPrincipal.state.stravaData) {
+                feedbackData.stravaData = AppPrincipal.state.stravaData;
+            }
+
+            const workoutRef = AppPrincipal.state.db.ref(`data/${currentOwnerId}/workouts/${currentWorkoutId}`);
+            
+            // 3. Atualiza o nó PRIVADO
+            saveFeedbackBtn.textContent = "Atualizando treino...";
+            await workoutRef.update(feedbackData);
+            
+            // 4. Atualiza o nó PÚBLICO
+            if (feedbackData.status !== 'planejado') {
+                const snapshot = await workoutRef.once('value');
+                const workoutData = snapshot.val();
+                
+                const publicData = {
+                    ownerId: currentOwnerId,
+                    ownerName: AppPrincipal.state.userData.name,
+                    date: workoutData.date,
+                    title: workoutData.title,
+                    description: workoutData.description,
+                    status: workoutData.status,
+                    feedback: workoutData.feedback,
+                    realizadoAt: workoutData.realizadoAt,
+                    imageUrl: workoutData.imageUrl || null,
+                    stravaData: workoutData.stravaData || null // V2.6
+                };
+                await AppPrincipal.state.db.ref(`publicWorkouts/${currentWorkoutId}`).set(publicData);
+            } else {
+                // Se voltou para "planejado", remove do feed público
+                await AppPrincipal.state.db.ref(`publicWorkouts/${currentWorkoutId}`).remove();
+            }
+
+            console.log("Feedback salvo e feed atualizado!");
+            AppPrincipal.closeFeedbackModal();
+
+        } catch (err) {
+            console.error("Erro ao salvar feedback:", err);
+            alert("Erro ao salvar: " + err.message);
+            saveFeedbackBtn.disabled = false;
+            saveFeedbackBtn.textContent = "Salvar Feedback";
+        }
     },
     
-    // Salva um novo comentário
+    // ----- Modal Comentários (V2) -----
     handleCommentSubmit: (e) => {
         e.preventDefault();
         const { commentInput } = AppPrincipal.elements;
@@ -379,15 +469,343 @@ const AppPrincipal = {
                 commentInput.value = ""; // Limpa o input
             })
             .catch(err => alert("Erro ao enviar comentário: " + err.message));
+    },
+
+    // ----- Modal Log Atividade (V2.3) -----
+    openLogActivityModal: () => {
+        AppPrincipal.elements.logActivityForm.reset();
+        AppPrincipal.elements.logActivityModal.classList.remove('hidden');
+        // Define a data atual como padrão
+        document.getElementById('log-activity-date').value = new Date().toISOString().split('T')[0];
+    },
+
+    closeLogActivityModal: () => {
+        AppPrincipal.elements.logActivityModal.classList.add('hidden');
+    },
+
+    handleLogActivitySubmit: async (e) => {
+        e.preventDefault();
+        const btn = AppPrincipal.elements.logActivityForm.querySelector('button');
+        btn.disabled = true;
+
+        const athleteId = AppPrincipal.state.currentUser.uid;
+        
+        try {
+            const workoutData = {
+                date: document.getElementById('log-activity-date').value,
+                title: document.getElementById('log-activity-title').value,
+                description: `(${document.getElementById('log-activity-type').value})`, // Adiciona tipo na descrição
+                feedback: document.getElementById('log-activity-feedback').value,
+                createdBy: athleteId, // Atleta que criou
+                createdAt: new Date().toISOString(),
+                status: "realizado", // Já nasce realizado
+                realizadoAt: new Date().toISOString(),
+                imageUrl: null,
+                stravaData: null
+            };
+            
+            if (!workoutData.date || !workoutData.title || !workoutData.feedback) {
+                 throw new Error("Data, Título e Feedback são obrigatórios.");
+            }
+
+            // 1. Salva no nó PRIVADO
+            const newWorkoutRef = await AppPrincipal.state.db.ref(`data/${athleteId}/workouts`).push(workoutData);
+            const newWorkoutId = newWorkoutRef.key;
+
+            // 2. Salva no nó PÚBLICO (para o feed)
+            const publicData = {
+                ownerId: athleteId,
+                ownerName: AppPrincipal.state.userData.name,
+                date: workoutData.date,
+                title: workoutData.title,
+                description: workoutData.description,
+                status: workoutData.status,
+                feedback: workoutData.feedback,
+                realizadoAt: workoutData.realizadoAt,
+                imageUrl: null,
+                stravaData: null
+            };
+            await AppPrincipal.state.db.ref(`publicWorkouts/${newWorkoutId}`).set(publicData);
+
+            console.log("Atividade manual registrada e publicada no feed.");
+            AppPrincipal.closeLogActivityModal();
+
+        } catch (err) {
+            alert("Erro ao salvar atividade: " + err.message);
+        } finally {
+            btn.disabled = false;
+        }
+    },
+
+    // ----- Modal Quem Curtiu (V2.6 - Corrigido) -----
+    openWhoLikedModal: (workoutId) => {
+        const { whoLikedModal, whoLikedList } = AppPrincipal.elements;
+        whoLikedList.innerHTML = "<li>Carregando...</li>";
+        whoLikedModal.classList.remove('hidden');
+
+        const likesRef = AppPrincipal.state.db.ref(`workoutLikes/${workoutId}`);
+        likesRef.once('value', async (snapshot) => {
+            if (!snapshot.exists()) {
+                whoLikedList.innerHTML = "<li>Ninguém curtiu ainda.</li>";
+                return;
+            }
+
+            whoLikedList.innerHTML = ""; // Limpa o "Carregando"
+            const profilesCache = AppPrincipal.state.publicProfiles;
+            
+            // Usamos Promises para aguardar todas as buscas
+            const promises = [];
+            snapshot.forEach(childSnapshot => {
+                const uid = childSnapshot.key;
+                
+                // DIRETRIZ 5 (BUG): Tenta pegar do cache. Se falhar, busca no DB.
+                if (profilesCache[uid]) {
+                    promises.push(Promise.resolve(profilesCache[uid].name));
+                } else {
+                    // Fallback: Busca o nome no DB (mais lento, mas corrige "Usuário Desconhecido")
+                    const profileRef = AppPrincipal.state.db.ref(`publicProfiles/${uid}/name`);
+                    promises.push(profileRef.once('value').then(snap => snap.val() || "Usuário (ID: ..."+uid.slice(-4)+")"));
+                }
+            });
+
+            const names = await Promise.all(promises);
+            names.forEach(userName => {
+                const li = document.createElement('li');
+                li.textContent = userName;
+                whoLikedList.appendChild(li);
+            });
+        });
+    },
+
+    closeWhoLikedModal: () => {
+        AppPrincipal.elements.whoLikedModal.classList.add('hidden');
+    },
+
+    // ----- Modal Análise IA (V2.6) -----
+    openIaAnalysisModal: (analysisData = null) => {
+        const { iaAnalysisModal, iaAnalysisOutput, saveIaAnalysisBtn } = AppPrincipal.elements;
+        
+        if (analysisData) {
+            // Modo "Visualização" (clicou em um histórico)
+            outputEl.textContent = analysisData.analysisResult;
+            saveIaAnalysisBtn.classList.add('hidden'); // Esconde o botão salvar
+        } else {
+            // Modo "Nova Análise" (será preenchido pelo AdminPanel)
+            outputEl.textContent = "Coletando dados do atleta...";
+            saveIaAnalysisBtn.classList.add('hidden'); // Esconde até a análise terminar
+        }
+        
+        iaAnalysisModal.classList.remove('hidden');
+    },
+
+    closeIaAnalysisModal: () => {
+        AppPrincipal.elements.iaAnalysisModal.classList.add('hidden');
+        AppPrincipal.state.currentAnalysisData = null; // Limpa a análise atual
+    },
+    
+    // NOVO (V2.6): Salva a análise da IA no Firebase (Diretriz 2)
+    handleSaveIaAnalysis: async () => {
+        const { saveIaAnalysisBtn } = AppPrincipal.elements;
+        const analysisData = AppPrincipal.state.currentAnalysisData;
+        const athleteId = AdminPanel.state.selectedAthleteId; // Pega o atleta selecionado no AdminPanel
+
+        if (!analysisData || !athleteId) {
+            alert("ERRO: Dados da análise ou ID do atleta não encontrados.");
+            return;
+        }
+
+        saveIaAnalysisBtn.disabled = true;
+        saveIaAnalysisBtn.textContent = "Salvando...";
+
+        try {
+            const historyRef = AppPrincipal.state.db.ref(`iaAnalysisHistory/${athleteId}`);
+            await historyRef.push(analysisData);
+            
+            alert("Análise salva com sucesso!");
+            AppPrincipal.closeIaAnalysisModal();
+
+        } catch (err) {
+            console.error("Erro ao salvar análise:", err);
+            alert("Erro ao salvar: " + err.message);
+        } finally {
+            saveIaAnalysisBtn.disabled = false;
+            saveIaAnalysisBtn.textContent = "Salvar Análise";
+        }
+    },
+
+    // ===================================================================
+    // MÓDULO 4: Funções de IA (V2.6 - IA Vision)
+    // ===================================================================
+
+    // NOVO (V2.6): Lida com o upload da foto e chama a IA Vision
+    handlePhotoUpload: async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const { photoUploadFeedback, stravaDataDisplay, saveFeedbackBtn } = AppPrincipal.elements;
+        
+        // Limpa o estado anterior
+        AppPrincipal.state.stravaData = null;
+        stravaDataDisplay.classList.add('hidden');
+        photoUploadFeedback.textContent = "Analisando imagem com Gemini Vision...";
+        saveFeedbackBtn.disabled = true; // Desabilita salvar ENQUANTO analisa
+
+        try {
+            const base64Data = await AppPrincipal.fileToBase64(file);
+            const mimeType = file.type;
+
+            const prompt = `
+                Analise esta imagem de um app de corrida (como Strava, Nike, etc.).
+                Extraia SOMENTE os seguintes dados: Distância (km), Tempo (hh:mm:ss ou mm:ss) e Ritmo/Pace (mm:ss /km).
+                
+                Responda APENAS com um objeto JSON. Se um dado não for encontrado, retorne 'null'.
+                
+                Formato de Resposta (JSON):
+                {
+                  "distancia": "X.XX km",
+                  "tempo": "XX:XX:XX",
+                  "ritmo": "X:XX /km"
+                }
+            `;
+            
+            const jsonResult = await AppPrincipal.callGeminiVisionAPI(prompt, base64Data, mimeType);
+            
+            // Tenta parsear a resposta
+            const data = JSON.parse(jsonResult);
+            AppPrincipal.state.stravaData = data; // Salva os dados extraídos no state
+            AppPrincipal.displayStravaData(data); // Mostra no modal
+            photoUploadFeedback.textContent = "Foto analisada com sucesso!";
+
+        } catch (err) {
+            console.error("Erro na IA Vision:", err);
+            photoUploadFeedback.textContent = "IA não conseguiu ler dados desta imagem.";
+            AppPrincipal.state.stravaData = null; // Garante que esteja nulo se falhar
+            stravaDataDisplay.classList.add('hidden');
+        } finally {
+            saveFeedbackBtn.disabled = false; // Reabilita o botão "Salvar"
+        }
+    },
+
+    // NOVO (V2.6): Converte arquivo para Base64
+    fileToBase64: (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]); // Pega só o data
+            reader.onerror = error => reject(error);
+        });
+    },
+
+    // NOVO (V2.6): Exibe os dados extraídos no modal
+    displayStravaData: (data) => {
+        const { stravaDataDisplay } = AppPrincipal.elements;
+        document.getElementById('strava-data-distancia').textContent = `Distância: ${data.distancia || "N/A"}`;
+        document.getElementById('strava-data-tempo').textContent = `Tempo:     ${data.tempo || "N/A"}`;
+        document.getElementById('strava-data-ritmo').textContent = `Ritmo:     ${data.ritmo || "N/A"}`;
+        stravaDataDisplay.classList.remove('hidden');
+    },
+
+    // Adaptado do Kumon-IA (agora `callGeminiTextAPI`)
+    callGeminiTextAPI: async (prompt) => {
+        // V2.5: Lê a chave do 'window' e verifica o placeholder CORRETO
+        if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY.includes("COLE_SUA_CHAVE_GEMINI_AQUI")) {
+            throw new Error("API Key do Gemini não configurada em js/config.js");
+        }
+        
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${window.GEMINI_API_KEY}`;
+        
+        const requestBody = {
+            "contents": [{ "parts": [{ "text": prompt }] }]
+        };
+
+        const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+        
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`Erro API Gemini (Texto): ${err.error.message}`);
+        }
+        
+        const data = await response.json();
+        if (!data.candidates || data.candidates.length === 0) {
+            throw new Error("A IA (Texto) não retornou uma resposta.");
+        }
+        
+        return data.candidates[0].content.parts[0].text;
+    },
+
+    // NOVO (V2.6): API Gemini Vision (para Strava)
+    callGeminiVisionAPI: async (prompt, base64Data, mimeType) => {
+        if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY.includes("COLE_SUA_CHAVE_GEMINI_AQUI")) {
+            throw new Error("API Key do Gemini não configurada em js/config.js");
+        }
+
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${window.GEMINI_API_KEY}`;
+        
+        const requestBody = {
+            "contents": [
+                {
+                    "parts": [
+                        { "text": prompt },
+                        {
+                            "inlineData": {
+                                "mimeType": mimeType,
+                                "data": base64Data
+                            }
+                        }
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "responseMimeType": "application/json" // Pede a resposta em JSON
+            }
+        };
+
+        const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`Erro API Gemini (Visão): ${err.error.message}`);
+        }
+
+        const data = await response.json();
+        if (!data.candidates || data.candidates.length === 0) {
+            throw new Error("A IA (Visão) não retornou uma resposta.");
+        }
+
+        // Retorna a string JSON (que será parseada)
+        return data.candidates[0].content.parts[0].text;
+    },
+    
+    // Adaptado do Kumon-IA (agora `uploadFileToCloudinary`)
+    uploadFileToCloudinary: async (file) => {
+        // V2.5: Lê a config do 'window'
+        if (!window.CLOUDINARY_CONFIG || !window.CLOUDINARY_CONFIG.cloudName || !window.CLOUDINARY_CONFIG.uploadPreset || window.CLOUDINARY_CONFIG.cloudName.includes("SEU_CLOUD_NAME")) {
+            throw new Error("Cloudinary não está configurado em js/config.js");
+        }
+        
+        const f = new FormData(); 
+        f.append('file', file); 
+        f.append('upload_preset', window.CLOUDINARY_CONFIG.uploadPreset); 
+        f.append('folder', `lerunners/${AppPrincipal.state.currentUser.uid}`);
+        
+        const r = await fetch(`https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CONFIG.cloudName}/upload`, { method: 'POST', body: f });
+        if (!r.ok) throw new Error("Falha no upload para Cloudinary.");
+        
+        const data = await r.json();
+        return data.secure_url; // Retorna a URL segura
     }
 };
 
 // ===================================================================
-// 2. AuthLogic (Lógica da index.html)
+// 2. AuthLogic (Lógica da index.html - MOVIDO PARA CÁ NA V2.4)
 // ===================================================================
 const AuthLogic = {
-    // ... (Sem alterações da V2. O código V2.0 estava correto) ...
+    auth: null,
+    db: null,
+    elements: {},
+
     init: (auth, db) => {
+        console.log("AuthLogic V2.4: Inicializado.");
         AuthLogic.auth = auth;
         AuthLogic.db = db;
         AuthLogic.elements = {
@@ -520,622 +938,7 @@ const AuthLogic = {
     }
 };
 
-// ===================================================================
-// 3. AdminPanel (Lógica do Painel Coach V2.1)
-// ===================================================================
-const AdminPanel = {
-    init: (user, db) => {
-        console.log("AdminPanel V2.1: Inicializado.");
-        AdminPanel.state = { db, currentUser: user, selectedAthleteId: null, athletes: {} };
-
-        AdminPanel.elements = {
-            pendingList: document.getElementById('pending-list'),
-            athleteList: document.getElementById('athlete-list'),
-            athleteSearch: document.getElementById('athlete-search'),
-            athleteDetailName: document.getElementById('athlete-detail-name'),
-            athleteDetailContent: document.getElementById('athlete-detail-content'),
-            deleteAthleteBtn: document.getElementById('delete-athlete-btn'), // NOVO
-            addWorkoutForm: document.getElementById('add-workout-form'),
-            workoutsList: document.getElementById('workouts-list')
-        };
-
-        // Bind de eventos
-        AdminPanel.elements.addWorkoutForm.addEventListener('submit', AdminPanel.handleAddWorkout);
-        AdminPanel.elements.athleteSearch.addEventListener('input', AdminPanel.renderAthleteList);
-        AdminPanel.elements.deleteAthleteBtn.addEventListener('click', AdminPanel.deleteAthlete); // NOVO
-        
-        // Carregar dados
-        AdminPanel.loadPendingApprovals();
-        AdminPanel.loadAthletes();
-    },
-
-    loadPendingApprovals: () => {
-        const pendingRef = AdminPanel.state.db.ref('pendingApprovals');
-        AppPrincipal.state.listeners['adminPending'] = pendingRef;
-        
-        pendingRef.on('value', snapshot => {
-            const { pendingList } = AdminPanel.elements;
-            pendingList.innerHTML = "";
-            if (!snapshot.exists()) {
-                pendingList.innerHTML = "<p>Nenhuma solicitação pendente.</p>";
-                return;
-            }
-            snapshot.forEach(childSnapshot => {
-                const uid = childSnapshot.key;
-                const data = childSnapshot.val();
-                const item = document.createElement('div');
-                item.className = 'pending-item';
-                item.innerHTML = `
-                    <div class="pending-item-info">
-                        <strong>${data.name}</strong><br>
-                        <span>${data.email}</span>
-                    </div>
-                    <div class="pending-item-actions">
-                        <button class="btn btn-success btn-small" data-action="approve" data-uid="${uid}">Aprovar</button>
-                        <button class="btn btn-danger btn-small" data-action="reject" data-uid="${uid}">Rejeitar</button>
-                    </div>
-                `;
-                pendingList.appendChild(item);
-            });
-
-            pendingList.querySelectorAll('[data-action="approve"]').forEach(btn => 
-                btn.addEventListener('click', e => AdminPanel.approveAthlete(e.target.dataset.uid))
-            );
-            pendingList.querySelectorAll('[data-action="reject"]').forEach(btn => 
-                btn.addEventListener('click', e => AdminPanel.rejectAthlete(e.target.dataset.uid))
-            );
-        });
-    },
-
-    loadAthletes: () => {
-        const athletesRef = AdminPanel.state.db.ref('users');
-        AppPrincipal.state.listeners['adminAthletes'] = athletesRef;
-        
-        athletesRef.orderByChild('name').on('value', snapshot => {
-            AdminPanel.state.athletes = snapshot.val() || {};
-            AdminPanel.renderAthleteList();
-        });
-    },
-
-    renderAthleteList: () => {
-        const { athleteList, athleteSearch } = AdminPanel.elements;
-        const searchTerm = athleteSearch.value.toLowerCase();
-        athleteList.innerHTML = "";
-        
-        // Reset a seleção se o atleta selecionado não existir mais
-        if (AdminPanel.state.selectedAthleteId && !AdminPanel.state.athletes[AdminPanel.state.selectedAthleteId]) {
-            AdminPanel.selectAthlete(null, null); // Desseleciona
-        }
-
-        Object.entries(AdminPanel.state.athletes).forEach(([uid, userData]) => {
-            if (uid === AdminPanel.state.currentUser.uid) return;
-            if (searchTerm && !userData.name.toLowerCase().includes(searchTerm)) {
-                return;
-            }
-
-            const el = document.createElement('div');
-            el.className = 'athlete-list-item';
-            el.dataset.uid = uid;
-            el.innerHTML = `<span>${userData.name}</span>`;
-            el.addEventListener('click', () => AdminPanel.selectAthlete(uid, userData.name));
-            
-            if (uid === AdminPanel.state.selectedAthleteId) {
-                el.classList.add('selected');
-            }
-            athleteList.appendChild(el);
-        });
-    },
-
-    approveAthlete: (uid) => {
-        console.log("Aprovando:", uid);
-        const pendingRef = AdminPanel.state.db.ref('pendingApprovals/' + uid);
-        
-        pendingRef.once('value', snapshot => {
-            if (!snapshot.exists()) return console.error("Usuário pendente não encontrado.");
-            
-            const pendingData = snapshot.val();
-            
-            const newUserProfile = {
-                name: pendingData.name,
-                email: pendingData.email,
-                role: "atleta", 
-                createdAt: new Date().toISOString()
-            };
-            
-            const newPublicProfile = {
-                name: pendingData.name,
-            };
-            
-            const updates = {};
-            updates[`/users/${uid}`] = newUserProfile;
-            updates[`/publicProfiles/${uid}`] = newPublicProfile;
-            updates[`/data/${uid}`] = { workouts: {} };     
-            updates[`/pendingApprovals/${uid}`] = null; 
-
-            AdminPanel.state.db.ref().update(updates)
-                .then(() => console.log("Atleta aprovado e movido com sucesso."))
-                .catch(err => {
-                    console.error("ERRO CRÍTICO AO APROVAR:", err);
-                    alert("Falha ao aprovar o atleta. Verifique as Regras de Segurança. Detalhe: " + err.message);
-                });
-        });
-    },
-
-    rejectAthlete: (uid) => {
-        if (!confirm("Tem certeza que deseja REJEITAR este atleta?")) return;
-        AdminPanel.state.db.ref('pendingApprovals/' + uid).remove()
-            .then(() => console.log("Solicitação rejeitada."))
-            .catch(err => alert("Falha ao rejeitar: " + err.message));
-    },
-
-    // ATUALIZADO (V2.1): Excluir Atleta
-    deleteAthlete: () => {
-        const { selectedAthleteId } = AdminPanel.state;
-        if (!selectedAthleteId) return;
-        
-        const athleteName = AdminPanel.state.athletes[selectedAthleteId].name;
-        if (!confirm(`ATENÇÃO: Isso irá apagar PERMANENTEMENTE o atleta "${athleteName}" e todos os seus dados (treinos, comentários, etc.).\n\nIsso NÃO pode ser desfeito.\n\nTem certeza?`)) {
-            return;
-        }
-
-        // Exclusão completa (multi-path update)
-        const updates = {};
-        updates[`/users/${selectedAthleteId}`] = null;
-        updates[`/data/${selectedAthleteId}`] = null;
-        updates[`/publicProfiles/${selectedAthleteId}`] = null;
-        
-        // NOVO (V2.1): Limpa os publicWorkouts dele (Client-side cleanup)
-        // Isso é necessário pois as regras não limpam automaticamente
-        const feedRef = AdminPanel.state.db.ref('publicWorkouts');
-        feedRef.orderByChild('ownerId').equalTo(selectedAthleteId).once('value', snapshot => {
-            snapshot.forEach(childSnapshot => {
-                updates[`/publicWorkouts/${childSnapshot.key}`] = null;
-            });
-            
-            // Executa a exclusão em massa DEPOIS de encontrar os workouts
-            AdminPanel.state.db.ref().update(updates)
-                .then(() => {
-                    console.log("Atleta e seus dados públicos foram excluídos.");
-                    AdminPanel.selectAthlete(null, null); // Desseleciona
-                })
-                .catch(err => alert("Erro ao excluir atleta: " + err.message));
-        });
-    },
-
-    selectAthlete: (uid, name) => {
-        if (AdminPanel.state.selectedAthleteId === uid) return; // Já selecionado
-        
-        // Limpa o listener de treinos do atleta anterior
-        if (AppPrincipal.state.listeners['adminWorkouts']) {
-            AppPrincipal.state.listeners['adminWorkouts'].off();
-        }
-
-        if (uid === null) {
-            // Desselecionando
-            AdminPanel.state.selectedAthleteId = null;
-            AdminPanel.elements.athleteDetailName.textContent = "Selecione um Atleta";
-            AdminPanel.elements.athleteDetailContent.classList.add('hidden');
-        } else {
-            // Selecionando
-            AdminPanel.state.selectedAthleteId = uid;
-            AdminPanel.elements.athleteDetailName.textContent = `Planejamento de: ${name}`;
-            AdminPanel.elements.athleteDetailContent.classList.remove('hidden');
-            AdminPanel.loadWorkouts(uid);
-        }
-        
-        // Atualiza a classe 'selected' na lista
-        document.querySelectorAll('.athlete-list-item').forEach(el => {
-            el.classList.toggle('selected', el.dataset.uid === uid);
-        });
-    },
-
-    loadWorkouts: (athleteId) => {
-        const { workoutsList } = AdminPanel.elements;
-        workoutsList.innerHTML = "<p>Carregando treinos...</p>";
-        
-        const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
-        AppPrincipal.state.listeners['adminWorkouts'] = workoutsRef; // Registra novo listener
-
-        workoutsRef.orderByChild('date').on('value', snapshot => {
-            workoutsList.innerHTML = ""; 
-            if (!snapshot.exists()) {
-                workoutsList.innerHTML = "<p>Nenhum treino agendado.</p>";
-                return;
-            }
-            snapshot.forEach(childSnapshot => {
-                const card = AdminPanel.createWorkoutCard(
-                    childSnapshot.key,
-                    childSnapshot.val(), 
-                    athleteId
-                );
-                workoutsList.prepend(card);
-            });
-        });
-    },
-
-    handleAddWorkout: (e) => {
-        e.preventDefault();
-        const { selectedAthleteId } = AdminPanel.state;
-        const { addWorkoutForm } = AdminPanel.elements;
-        
-        if (!selectedAthleteId) return alert("Selecione um atleta.");
-
-        const workoutData = {
-            date: addWorkoutForm.querySelector('#workout-date').value,
-            title: addWorkoutForm.querySelector('#workout-title').value,
-            description: addWorkoutForm.querySelector('#workout-description').value,
-            createdBy: AdminPanel.state.currentUser.uid,
-            createdAt: new Date().toISOString(),
-            status: "planejado",
-            feedback: ""
-        };
-
-        if (!workoutData.date || !workoutData.title) return alert("Data e Título são obrigatórios.");
-
-        AdminPanel.state.db.ref(`data/${selectedAthleteId}/workouts`).push(workoutData)
-            .then(() => addWorkoutForm.reset())
-            .catch(err => alert("Falha ao salvar o treino: " + err.message));
-    },
-    
-    // Card de Treino (Versão Admin V2.1)
-    createWorkoutCard: (id, data, athleteId) => {
-        const el = document.createElement('div');
-        el.className = 'workout-card';
-        el.innerHTML = `
-            <div class="workout-card-header">
-                <div>
-                    <span class="date">${data.date}</span>
-                    <span class="title">${data.title}</span>
-                </div>
-                <span class="status-tag ${data.status || 'planejado'}">${data.status || 'planejado'}</span>
-            </div>
-            <div class="workout-card-body">
-                <p>${data.description || "Sem descrição."}</p>
-                ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
-            </div>
-            <div class="workout-card-footer">
-                <div class="workout-actions">
-                    <button class="action-btn btn-like"><i class='bx bx-heart'></i> <span class="like-count">0</span></button>
-                    <button class="action-btn btn-comment"><i class='bx bx-comment'></i> <span class="comment-count">0</span></button>
-                </div>
-                <button class="btn btn-danger btn-small" data-action="delete"><i class="bx bx-trash"></i></button>
-            </div>
-        `;
-        
-        // Abre o Modal de Comentários (Coach)
-        el.querySelector('.btn-comment').addEventListener('click', () => {
-            AppPrincipal.openFeedbackModal(id, athleteId, data.title);
-        });
-        
-        // ATUALIZADO (V2.1): Deletar o treino (Coach)
-        el.querySelector('[data-action="delete"]').addEventListener('click', () => {
-            if (confirm("Tem certeza que deseja apagar este treino?")) {
-                // Apaga o privado
-                AdminPanel.state.db.ref(`data/${athleteId}/workouts/${id}`).remove()
-                    .catch(err => alert("Falha ao deletar: " + err.message));
-                // Apaga o público (do feed)
-                AdminPanel.state.db.ref(`publicWorkouts/${id}`).remove();
-            }
-        });
-        
-        // Carrega Likes e Comentários
-        AdminPanel.loadWorkoutStats(el, id);
-        
-        return el;
-    },
-    
-    // Carrega status (likes/comentários) de um card
-    loadWorkoutStats: (cardElement, workoutId) => {
-        const likeBtn = cardElement.querySelector('.btn-like');
-        const likeCount = cardElement.querySelector('.like-count');
-        const commentCount = cardElement.querySelector('.comment-count');
-        
-        const likesRef = AdminPanel.state.db.ref(`workoutLikes/${workoutId}`);
-        const commentsRef = AdminPanel.state.db.ref(`workoutComments/${workoutId}`);
-        
-        // Listener de Likes
-        likesRef.on('value', snapshot => {
-            const count = snapshot.numChildren();
-            likeCount.textContent = count;
-            // Verifica se o Coach (usuário atual) curtiu
-            if (snapshot.hasChild(AdminPanel.state.currentUser.uid)) {
-                likeBtn.classList.add('liked');
-            } else {
-                likeBtn.classList.remove('liked');
-            }
-        });
-        
-        // Listener de Comentários
-        commentsRef.on('value', snapshot => {
-            commentCount.textContent = snapshot.numChildren();
-        });
-
-        // Ação de Curtir (Coach)
-        likeBtn.addEventListener('click', () => {
-            const myLikeRef = likesRef.child(AdminPanel.state.currentUser.uid);
-            myLikeRef.once('value', snapshot => {
-                if (snapshot.exists()) {
-                    myLikeRef.remove(); // Descurtir
-                } else {
-                    myLikeRef.set(true); // Curtir
-                }
-            });
-        });
-        
-        // Registra listeners para limpeza
-        AppPrincipal.state.listeners[`likes_${workoutId}`] = likesRef;
-        AppPrincipal.state.listeners[`comments_${workoutId}`] = commentsRef;
-    }
-};
-
-// ===================================================================
-// 4. AtletaPanel (Lógica do Painel Atleta V2.1)
-// ===================================================================
-const AtletaPanel = {
-    init: (user, db) => {
-        console.log("AtletaPanel V2.1: Inicializado.");
-        AtletaPanel.state = { db, currentUser: user };
-        AtletaPanel.elements = { workoutsList: document.getElementById('atleta-workouts-list') };
-        AtletaPanel.loadWorkouts(user.uid);
-    },
-
-    loadWorkouts: (athleteId) => {
-        const { workoutsList } = AtletaPanel.elements;
-        workoutsList.innerHTML = "<p>Carregando seus treinos...</p>";
-        
-        const workoutsRef = AtletaPanel.state.db.ref(`data/${athleteId}/workouts`);
-        AppPrincipal.state.listeners['atletaWorkouts'] = workoutsRef; // Registra listener
-
-        workoutsRef.orderByChild('date').on('value', snapshot => {
-            workoutsList.innerHTML = ""; 
-            if (!snapshot.exists()) {
-                workoutsList.innerHTML = "<p>Nenhum treino encontrado. Fale com seu coach!</p>";
-                return;
-            }
-            snapshot.forEach(childSnapshot => {
-                const card = AtletaPanel.createWorkoutCard(
-                    childSnapshot.key, 
-                    childSnapshot.val(), 
-                    athleteId
-                );
-                workoutsList.prepend(card);
-            });
-        });
-    },
-
-    // Card de Treino (Versão Atleta V2.1)
-    createWorkoutCard: (id, data, athleteId) => {
-        const el = document.createElement('div');
-        el.className = 'workout-card';
-        el.innerHTML = `
-            <div class="workout-card-header">
-                <div>
-                    <span class="date">${data.date}</span>
-                    <span class="title">${data.title}</span>
-                </div>
-                <span class="status-tag ${data.status || 'planejado'}">${data.status || 'planejado'}</span>
-            </div>
-            <div class="workout-card-body">
-                <p>${data.description || "Sem descrição."}</p>
-                ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
-            </div>
-            <div class="workout-card-footer">
-                <div class="workout-actions">
-                    <button class="action-btn btn-like"><i class='bx bx-heart'></i> <span class="like-count">0</span></button>
-                    <button class="action-btn btn-comment"><i class='bx bx-comment'></i> <span class="comment-count">0</span></button>
-                </div>
-                <button class="btn btn-primary btn-small" data-action="feedback">
-                    <i class='bx bx-edit'></i> Feedback
-                </button>
-            </div>
-        `;
-
-        // Ação de abrir o modal (Atleta)
-        const feedbackBtn = el.querySelector('[data-action="feedback"]');
-        feedbackBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Impede o clique duplo
-            AppPrincipal.openFeedbackModal(id, athleteId, data.title);
-        });
-        // Clicar no card todo (exceto botões) também abre o modal
-        el.addEventListener('click', (e) => {
-             if (!e.target.closest('button')) {
-                 AppPrincipal.openFeedbackModal(id, athleteId, data.title);
-             }
-        });
-        
-        // Carrega Likes e Comentários
-        AtletaPanel.loadWorkoutStats(el, id);
-        
-        return el;
-    },
-    
-    // Carrega status (likes/comentários) de um card (Quase idêntico ao AdminPanel)
-    loadWorkoutStats: (cardElement, workoutId) => {
-        const likeBtn = cardElement.querySelector('.btn-like');
-        const likeCount = cardElement.querySelector('.like-count');
-        const commentCount = cardElement.querySelector('.comment-count');
-        
-        const likesRef = AtletaPanel.state.db.ref(`workoutLikes/${workoutId}`);
-        const commentsRef = AtletaPanel.state.db.ref(`workoutComments/${workoutId}`);
-        
-        likesRef.on('value', snapshot => {
-            likeCount.textContent = snapshot.numChildren();
-            if (snapshot.hasChild(AtletaPanel.state.currentUser.uid)) {
-                likeBtn.classList.add('liked');
-            } else {
-                likeBtn.classList.remove('liked');
-            }
-        });
-        
-        commentsRef.on('value', snapshot => {
-            commentCount.textContent = snapshot.numChildren();
-        });
-
-        // Ação de Curtir (Atleta)
-        likeBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Impede o modal de abrir
-            const myLikeRef = likesRef.child(AtletaPanel.state.currentUser.uid);
-            myLikeRef.once('value', snapshot => {
-                if (snapshot.exists()) {
-                    myLikeRef.remove(); // Descurtir
-                } else {
-                    myLikeRef.set(true); // Curtir
-                }
-            });
-        });
-        
-        // Ação de Comentar (Atleta)
-        cardElement.querySelector('.btn-comment').addEventListener('click', (e) => {
-             e.stopPropagation(); // Impede o modal de abrir (se o clique for no card)
-             // (o modal vai abrir de qualquer forma)
-        });
-        
-        AppPrincipal.state.listeners[`likes_${workoutId}`] = likesRef;
-        AppPrincipal.state.listeners[`comments_${workoutId}`] = commentsRef;
-    }
-};
-
-// ===================================================================
-// 5. FeedPanel (Lógica do Feed Social V2.1 - CORRIGIDO)
-// ===================================================================
-const FeedPanel = {
-    init: (user, db) => {
-        console.log("FeedPanel V2.1: Inicializado.");
-        FeedPanel.state = { db, currentUser: user };
-        FeedPanel.elements = { feedList: document.getElementById('feed-list') };
-        
-        // 1. Carrega o feed
-        FeedPanel.loadFeed();
-    },
-
-    loadFeed: () => {
-        const { feedList } = FeedPanel.elements;
-        feedList.innerHTML = "<p>Carregando feed da equipe...</p>";
-        
-        // ATUALIZADO (V2.1): Lê do nó PÚBLICO /publicWorkouts/
-        const feedRef = FeedPanel.state.db.ref('publicWorkouts');
-        AppPrincipal.state.listeners['feedData'] = feedRef;
-
-        // Ordena por 'realizadoAt' e pega os 20 mais recentes
-        feedRef.orderByChild('realizadoAt').limitToLast(20).on('value', snapshot => {
-            feedList.innerHTML = "";
-            if (!snapshot.exists()) {
-                feedList.innerHTML = "<p>Nenhum treino realizado encontrado na equipe.</p>";
-                return;
-            }
-            
-            let workouts = [];
-            snapshot.forEach(childSnapshot => {
-                // Adiciona apenas treinos que tenham status e não sejam 'planejado'
-                const data = childSnapshot.val();
-                if (data.status && data.status !== 'planejado') {
-                    workouts.push({ id: childSnapshot.key, ...data });
-                }
-            });
-            
-            // Inverte para mostrar os mais novos primeiro
-            workouts.reverse().forEach(workout => {
-                const card = FeedPanel.createFeedCard(
-                    workout.id,
-                    workout, // dados completos
-                    workout.ownerId
-                );
-                feedList.appendChild(card); // append (pois já invertemos)
-            });
-
-            if (workouts.length === 0) {
-                 feedList.innerHTML = "<p>Nenhum treino realizado encontrado na equipe.</p>";
-            }
-        });
-    },
-    
-    // Card do Feed (V2.1)
-    createFeedCard: (id, data, ownerId) => {
-        const el = document.createElement('div');
-        el.className = 'workout-card';
-        
-        // ATUALIZADO (V2.1): Pega o nome do atleta dos dados do workout
-        const athleteName = data.ownerName || "Atleta";
-        
-        el.innerHTML = `
-            <div class="workout-card-header">
-                <!-- Nome do atleta -->
-                <span class="athlete-name">${athleteName}</span>
-                <div>
-                    <span class="date">${data.date}</span>
-                    <span class="title">${data.title}</span>
-                </div>
-                <span class="status-tag ${data.status || 'planejado'}">${data.status}</span>
-            </div>
-            <div class="workout-card-body">
-                <!-- Descrição foi removida do feed para ser mais limpo -->
-                <!-- <p>${data.description || "Sem descrição."}</p> -->
-                ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : '<p class="feedback-text" style="opacity: 0.7;">Nenhum feedback deixado.</p>'}
-            </div>
-            <div class="workout-card-footer">
-                <div class="workout-actions">
-                    <button class="action-btn btn-like"><i class='bx bx-heart'></i> <span class="like-count">0</span></button>
-                    <button class="action-btn btn-comment"><i class='bx bx-comment'></i> <span class="comment-count">0</span></button>
-                </div>
-            </div>
-        `;
-        
-        // Abre o Modal de Comentários
-        el.querySelector('.btn-comment').addEventListener('click', () => {
-            AppPrincipal.openFeedbackModal(id, ownerId, data.title);
-        });
-        // Clicar no card do feed também abre o modal
-        el.addEventListener('click', (e) => {
-             if (!e.target.closest('button')) {
-                 AppPrincipal.openFeedbackModal(id, ownerId, data.title);
-             }
-        });
-
-        // Carrega Likes e Comentários (V2)
-        FeedPanel.loadWorkoutStats(el, id);
-        
-        return el;
-    },
-    
-    // Carrega status (quase idêntico ao Admin/Atleta, mas usa o state do Feed)
-    loadWorkoutStats: (cardElement, workoutId) => {
-        const likeBtn = cardElement.querySelector('.btn-like');
-        const likeCount = cardElement.querySelector('.like-count');
-        const commentCount = cardElement.querySelector('.comment-count');
-        
-        const likesRef = FeedPanel.state.db.ref(`workoutLikes/${workoutId}`);
-        const commentsRef = FeedPanel.state.db.ref(`workoutComments/${workoutId}`);
-        
-        likesRef.on('value', snapshot => {
-            likeCount.textContent = snapshot.numChildren();
-            if (snapshot.hasChild(FeedPanel.state.currentUser.uid)) {
-                likeBtn.classList.add('liked');
-            } else {
-                likeBtn.classList.remove('liked');
-            }
-        });
-        
-        commentsRef.on('value', snapshot => {
-            commentCount.textContent = snapshot.numChildren();
-        });
-
-        // Ação de Curtir
-        likeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const myLikeRef = likesRef.child(FeedPanel.state.currentUser.uid);
-            myLikeRef.once('value', snapshot => {
-                if (snapshot.exists()) {
-                    myLikeRef.remove(); // Descurtir
-                } else {
-                    myLikeRef.set(true); // Curtir
-                }
-            });
-        });
-        
-        AppPrincipal.state.listeners[`feed_likes_${workoutId}`] = likesRef;
-        AppPrincipal.state.listeners[`feed_comments_${workoutId}`] = commentsRef;
-    }
-};
 
 // =l= Inicia o Cérebro Principal =l=
+// O DOMContentLoaded vai disparar a função init() do AppPrincipal
 document.addEventListener('DOMContentLoaded', AppPrincipal.init);
