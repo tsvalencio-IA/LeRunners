@@ -1,22 +1,29 @@
 /* =================================================================== */
-/* NOVO (V3.4): Service Worker Básico para PWA
+/* NOVO (V3.6): Service Worker Básico para PWA
+/* CORREÇÃO: Caminhos relativos (./) para o GitHub Pages
 /* =================================================================== */
 
-const CACHE_NAME = 'lerunners-cache-v3.4';
+const CACHE_NAME = 'lerunners-cache-v3.6'; // Versão do cache atualizada
 
 // Arquivos que compõem o "App Shell"
 const FILES_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/app.html',
-    '/css/styles.css',
-    '/js/config.js',
-    '/js/app.js',
-    '/js/panels.js',
-    '/manifest.json',
-    '/img/logo-192.png',
-    '/img/logo-512.png',
-    'https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css', // CSS externo
+    // ===================================================================
+    // CORREÇÃO (V3.6): Todos os caminhos locais agora usam './'
+    // ===================================================================
+    './',
+    './index.html',
+    './app.html',
+    './css/styles.css',
+    './js/config.js',
+    './js/app.js',
+    './js/panels.js',
+    './manifest.json',
+    './img/logo-192.png',
+    './img/logo-512.png',
+    // ===================================================================
+    
+    // Links externos (permanecem iguais)
+    'https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css', 
     'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js',
     'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js',
     'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js',
@@ -30,11 +37,15 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('[Service Worker] Cacheando o App Shell');
+                // Se um arquivo falhar (404), o addAll() falha.
                 return cache.addAll(FILES_TO_CACHE);
             })
             .then(() => {
                 console.log('[Service Worker] Instalação completa.');
                 return self.skipWaiting(); // Força o SW a ativar
+            })
+            .catch(err => {
+                console.error('[Service Worker] Falha ao cachear o App Shell:', err);
             })
     );
 });
