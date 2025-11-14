@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeRunners - Plataforma</title>
+    <!-- ATENÇÃO: Carregando V2.6 do CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="manifest" href="manifest.json">
+    <!-- CORREÇÃO (V2.6): Removido link para manifest.json (estava dando 404) -->
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
 </head>
@@ -24,7 +25,6 @@
         <header class="app-header">
             <h1>LeRunners</h1>
             <nav>
-                <!-- Botão de Navegação do Feed -->
                 <button id="nav-planilha-btn" class="btn btn-nav active">
                     <i class='bx bx-calendar'></i> <span>Planilha</span>
                 </button>
@@ -44,13 +44,18 @@
         </main>
     </div>
 
+    <!-- NOVO (V2.6): Rodapé (Diretriz 1) -->
+    <footer class="app-footer">
+        Desenvolvido com 🤖 por thIAguinho Soluções
+    </footer>
+
     <!-- 
       ===================================================================
       TEMPLATES HTML (Modelos que o JS vai usar para construir a tela) 
       ===================================================================
     -->
 
-    <!-- ========== Template do COACH (Admin) ========== -->
+    <!-- ========== Template do COACH (Admin) V2.6 ========== -->
     <template id="admin-panel-template">
         <div class="admin-dashboard">
             <h2><i class="bx bx-shield-quarter"></i> Painel do Coach</h2>
@@ -77,58 +82,78 @@
                     
                     <div id="athlete-detail-content" class="hidden">
                         
-                        <!-- Botão Excluir Aluno -->
-                        <button id="delete-athlete-btn" class="btn btn-danger btn-small" style="width: auto; float: right;">
-                            <i class='bx bx-user-x'></i> Excluir Aluno
-                        </button>
-                        
-                        <!-- NOVO (V2.3): Botão Análise IA -->
-                        <button id="analyze-athlete-btn-ia" class="btn btn-secondary btn-small" style="width: auto; float: right; margin-right: 10px;">
-                            <i class='bx bxs-brain'></i> Analisar com IA
-                        </button>
-
-                        <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
-                        
-                        <form id="add-workout-form" class="form-minimal">
-                            <div class="form-group">
-                                <label for="workout-date">Data</label>
-                                <input type="date" id="workout-date" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="workout-title">Título do Treino</label>
-                                <input type="text" id="workout-title" placeholder="Ex: Longo 10k Z2" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="workout-description">Descrição (Detalhes)</label>
-                                <textarea id="workout-description" rows="3" placeholder="Detalhes: 10min aquec. + 8km Z2..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-secondary">
-                                <i class="bx bx-plus"></i> Salvar Treino
+                        <!-- Ações do Coach (V2.3) -->
+                        <div class="admin-action-buttons">
+                            <!-- Botão Excluir movido para o final da prescrição -->
+                            <button id="delete-athlete-btn" class="btn btn-danger btn-small">
+                                <i class='bx bx-user-x'></i> Excluir Aluno
                             </button>
-                        </form>
-                        
-                        <hr>
-                        <h4><i class='bx bx-history'></i> Treinos Agendados</h4>
-                        <div id="workouts-list">
-                            <!-- Lista de treinos do atleta selecionado -->
                         </div>
+                        
+                        <!-- NOVO (V2.6): Abas do Admin (Diretriz 2) -->
+                        <div class="admin-tabs">
+                            <button class="tab-btn active" data-tab="prescrever">Prescrever</button>
+                            <button class="tab-btn" data-tab="kpis">KPIs & IA</button>
+                        </div>
+
+                        <!-- Aba 1: Prescrever -->
+                        <div id="admin-tab-prescrever" class="admin-tab-content active">
+                            <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
+                            <form id="add-workout-form" class="form-minimal">
+                                <div class="form-group">
+                                    <label for="workout-date">Data</label>
+                                    <input type="date" id="workout-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="workout-title">Título do Treino</label>
+                                    <input type="text" id="workout-title" placeholder="Ex: Longo 10k Z2" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="workout-description">Descrição (Detalhes)</label>
+                                    <textarea id="workout-description" rows="3" placeholder="Detalhes: 10min aquec. + 8km Z2..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="bx bx-plus"></i> Salvar Treino
+                                </button>
+                            </form>
+                            
+                            <hr>
+                            <h4><i class='bx bx-history'></i> Treinos Agendados</h4>
+                            <div id="workouts-list">
+                                <!-- Lista de treinos do atleta selecionado -->
+                            </div>
+                        </div>
+
+                        <!-- Aba 2: KPIs & IA -->
+                        <div id="admin-tab-kpis" class="admin-tab-content">
+                            <h4><i class='bx bxs-brain'></i> Análise de Performance (IA)</h4>
+                             <button id="analyze-athlete-btn-ia" class="btn btn-secondary" style="width: 100%; margin-bottom: 1rem;">
+                                <i class='bx bxs-brain'></i> Gerar Nova Análise (Gemini)
+                            </button>
+                            
+                            <h4><i class='bx bx-save'></i> Histórico de Análises Salvas</h4>
+                            <div id="ia-history-list" class="ia-history-list">
+                                <!-- Análises salvas da IA (Diretriz 2) -->
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </template>
 
-    <!-- ========== Template do ATLETA ========== -->
+    <!-- ========== Template do ATLETA V2.6 ========== -->
     <template id="atleta-panel-template">
         <div class="atleta-dashboard">
-            <h2><i class="bx bx-run"></i> Minha Planilha</h2>
+            <div class="atleta-header">
+                <h2><i class="bx bx-run"></i> Minha Planilha</h2>
+                <button id="log-manual-activity-btn" class="btn btn-primary">
+                    <i class='bx bx-plus-medical'></i> Registrar Atividade
+                </button>
+            </div>
             <p class="subtitle">Olá, <span id="atleta-welcome-name"></span>! Estes são seus próximos treinos.</p>
             
-            <!-- NOVO (V2.3): Botão de Log Manual -->
-            <button id="log-activity-btn" class="btn btn-success" style="width: 100%; max-width: 800px; margin: 0 auto 1rem auto;">
-                <i class='bx bx-plus-medical'></i> Registrar Atividade Manual
-            </button>
-
             <div id="atleta-workouts-container" class="panel">
                 <h4>Meus Treinos</h4>
                 <div id="atleta-workouts-list">
@@ -138,13 +163,13 @@
         </div>
     </template>
 
-    <!-- ========== Template do FEED SOCIAL (Inspirado no corri_rp) ========== -->
+    <!-- ========== Template do FEED SOCIAL (V2.1) ========== -->
     <template id="feed-panel-template">
         <div class="feed-dashboard">
             <h2><i class='bx bx-news'></i> Feed da Equipe</h2>
             <p class="subtitle">Veja o que a equipe está fazendo e deixe seu feedback.</p>
             <div id="feed-list" class="feed-list">
-                <!-- Cards de treinos realizados (do Módulo 2) e comentários (Módulo 3) aparecerão aqui -->
+                <!-- Cards de treinos realizados (do /publicWorkouts/) -->
             </div>
         </div>
     </template>
@@ -156,7 +181,7 @@
       ===================================================================
     -->
 
-    <!-- Modal de Feedback/Comentários do Atleta (ATUALIZADO V2.3) -->
+    <!-- Modal de Feedback/Comentários (ATUALIZADO V2.6) -->
     <div id="feedback-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -181,17 +206,26 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="workout-feedback-text">Como você se sentiu? (Opcional)</label>
-                            <textarea id="workout-feedback-text" rows="3" placeholder="Ex: Senti o joelho no final, mas o pace foi bom..."></textarea>
+                            <label for="workout-feedback-text">Como você se sentiu? (Obrigatório)</label>
+                            <textarea id="workout-feedback-text" rows="3" placeholder="Ex: Senti o joelho no final, mas o pace foi bom..." required></textarea>
                         </div>
                         
-                        <!-- NOVO (V2.3): Upload de Foto -->
+                        <!-- NOVO (V2.6): Upload de Foto (IA Vision) -->
                         <div class="form-group">
-                            <label for="photo-upload-input">Anexar Foto (Opcional)</label>
+                            <label for="photo-upload-input">Anexar Foto (Opcional - Gemini pode ler dados do Strava)</label>
                             <input type="file" id="photo-upload-input" accept="image/*">
+                            <p id="photo-upload-feedback" class="upload-feedback"></p>
                         </div>
+                        
+                        <!-- NOVO (V2.6): Dados do Strava (Diretriz 4) -->
+                        <fieldset id="strava-data-display" class="strava-data-display hidden">
+                            <legend><i class='bx bxl-strava'></i> Dados Extraídos (Gemini Vision)</legend>
+                            <p id="strava-data-distancia"></p>
+                            <p id="strava-data-tempo"></p>
+                            <p id="strava-data-ritmo"></p>
+                        </fieldset>
 
-                        <button type="submit" class="btn btn-primary" id="save-feedback-btn">Salvar Feedback</button>
+                        <button type="submit" id="save-feedback-btn" class="btn btn-primary">Salvar Feedback</button>
                     </fieldset>
                 </form>
                 
@@ -214,11 +248,11 @@
         </div>
     </div>
 
-    <!-- NOVO (V2.3): Modal de Registro Manual de Atividade -->
+    <!-- Modal de Log Manual de Atividade (V2.3) -->
     <div id="log-activity-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Registrar Nova Atividade</h3>
+                <h3><i class='bx bx-plus-medical'></i> Registrar Nova Atividade</h3>
                 <button class="close-btn" id="close-log-activity-modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -232,54 +266,59 @@
                         <div class="form-group">
                             <label for="log-activity-type">Tipo de Atividade</label>
                             <select id="log-activity-type" required>
-                                <option value="Corrida">Corrida</option>
+                                <option value="Corrida" selected>Corrida (Não prescrita)</option>
                                 <option value="Academia">Academia</option>
                                 <option value="Bike">Bike</option>
+                                <option value="Natação">Natação</option>
                                 <option value="Outro">Outro</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="log-activity-title">Título</label>
-                            <input type="text" id="log-activity-title" placeholder="Ex: Academia - Pernas" required>
+                            <input type="text" id="log-activity-title" placeholder="Ex: 5k na chuva" required>
                         </div>
                         <div class="form-group">
                             <label for="log-activity-feedback">Como você se sentiu? (Feedback)</label>
-                            <textarea id="log-activity-feedback" rows="3" placeholder="Ex: Treino forte, boa percepção..."></textarea>
+                            <textarea id="log-activity-feedback" rows="3" placeholder="Ex: Foi ótimo, me senti forte..." required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-success">Salvar Atividade</button>
+                        
+                        <button type="submit" class="btn btn-primary">Salvar Atividade</button>
                     </fieldset>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- NOVO (V2.3): Modal "Quem Curtiu" -->
+    <!-- Modal "Quem Curtiu" (V2.3) -->
     <div id="who-liked-modal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
-                <h3>Curtidas</h3>
+                <h3><i class='bx bxs-heart'></i> Curtidas</h3>
                 <button class="close-btn" id="close-who-liked-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <ul id="who-liked-list">
-                    <!-- Nomes de quem curtiu -->
+                    <!-- Lista de nomes será injetada pelo JS -->
                 </ul>
             </div>
         </div>
     </div>
 
-    <!-- NOVO (V2.3): Modal "Análise IA" -->
+    <!-- Modal Análise IA (Admin) (ATUALIZADO V2.6) -->
     <div id="ia-analysis-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Análise da IA (Gemini)</h3>
+                <h3><i class='bx bxs-brain'></i> Análise de Performance (Gemini IA)</h3>
                 <button class="close-btn" id="close-ia-analysis-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="subtitle">Analisando dados do atleta. Aguarde...</p>
-                <div id="ia-analysis-output">
-                    <!-- Resultado da IA -->
-                </div>
+                <pre id="ia-analysis-output">Gerando relatório...</pre>
+            </div>
+            <!-- NOVO (V2.6): Footer com botão Salvar (Diretriz 2) -->
+            <div class="modal-footer">
+                <button id="save-ia-analysis-btn" class="btn btn-primary hidden">
+                    <i class="bx bx-save"></i> Salvar Análise
+                </button>
             </div>
         </div>
     </div>
@@ -289,10 +328,13 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Script Cloudinary (V2.3) -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
-    <!-- Scripts da Aplicação (APENAS 2 ARQUIVOS) -->
+    <!-- Scripts da Aplicação (ARQUITETURA V2.4) -->
     <script src="js/config.js"></script>
-    <script src="js/app.js"></script> <!-- Cérebro unificado -->
+    <script src="js/app.js"></script> <!-- Cérebro (AppPrincipal) e AuthLogic -->
+    <script src="js/panels.js"></script> <!-- Módulos (AdminPanel, AtletaPanel, FeedPanel) -->
 
 </body>
 </html>
