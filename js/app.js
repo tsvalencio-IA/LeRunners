@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V3.0 - PERFIL DO ATLETA E CORREÇÕES)
+/* ARQUIVO DE LÓGICA UNIFICADO (V3.2 - VER PERFIL PÚBLICO)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -20,14 +20,14 @@ const AppPrincipal = {
             isOpen: false,
             currentWorkoutId: null,
             currentOwnerId: null,
-            newPhotoUrl: null // NOVO (V3.0): Para o upload da foto de perfil
+            newPhotoUrl: null // (V3.0): Para o upload da foto de perfil
         },
-        stravaData: null, // NOVO (V2.6): Armazena dados extraídos da IA Vision
-        currentAnalysisData: null // NOVO (V2.6): Armazena a última análise da IA
+        stravaData: null, // (V2.6): Armazena dados extraídos da IA Vision
+        currentAnalysisData: null // (V2.6): Armazena a última análise da IA
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V3.0 (Cérebro, Perfil do Atleta)...");
+        console.log("Iniciando AppPrincipal V3.2 (Cérebro, Ver Perfil)...");
         
         // V2.5: Verifica a chave no 'window'
         if (typeof window.firebaseConfig === 'undefined' || window.firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
@@ -71,7 +71,7 @@ const AppPrincipal = {
             
             navPlanilhaBtn: document.getElementById('nav-planilha-btn'),
             navFeedBtn: document.getElementById('nav-feed-btn'),
-            navProfileBtn: document.getElementById('nav-profile-btn'), // NOVO (V3.0)
+            navProfileBtn: document.getElementById('nav-profile-btn'), // (V3.0)
             
             // Modal Feedback (V2.6)
             feedbackModal: document.getElementById('feedback-modal'),
@@ -106,7 +106,7 @@ const AppPrincipal = {
             iaAnalysisOutput: document.getElementById('ia-analysis-output'),
             saveIaAnalysisBtn: document.getElementById('save-ia-analysis-btn'), // V2.6
 
-            // NOVO (V3.0): Modal de Perfil (Feature 3)
+            // Modal de Perfil (V3.0)
             profileModal: document.getElementById('profile-modal'),
             closeProfileModal: document.getElementById('close-profile-modal'),
             profileForm: document.getElementById('profile-form'),
@@ -116,6 +116,13 @@ const AppPrincipal = {
             profileName: document.getElementById('profile-name'),
             profileBio: document.getElementById('profile-bio'),
             saveProfileBtn: document.getElementById('save-profile-btn'),
+
+            // NOVO (V3.2): Modal de Visualização de Perfil
+            viewProfileModal: document.getElementById('view-profile-modal'),
+            closeViewProfileModal: document.getElementById('close-view-profile-modal'),
+            viewProfilePic: document.getElementById('view-profile-pic'),
+            viewProfileName: document.getElementById('view-profile-name'),
+            viewProfileBio: document.getElementById('view-profile-bio'),
         };
         
         // Listeners de Navegação
@@ -152,7 +159,7 @@ const AppPrincipal = {
         });
         AppPrincipal.elements.saveIaAnalysisBtn.addEventListener('click', AppPrincipal.handleSaveIaAnalysis);
 
-        // NOVO (V3.0): Listeners Modal Perfil
+        // Listeners Modal Perfil (V3.0)
         AppPrincipal.elements.navProfileBtn.addEventListener('click', AppPrincipal.openProfileModal);
         AppPrincipal.elements.closeProfileModal.addEventListener('click', AppPrincipal.closeProfileModal);
         AppPrincipal.elements.profileModal.addEventListener('click', (e) => {
@@ -160,6 +167,12 @@ const AppPrincipal = {
         });
         AppPrincipal.elements.profileForm.addEventListener('submit', AppPrincipal.handleProfileSubmit);
         AppPrincipal.elements.profilePicUpload.addEventListener('change', AppPrincipal.handleProfilePhotoUpload);
+
+        // NOVO (V3.2): Listeners Modal Visualização de Perfil
+        AppPrincipal.elements.closeViewProfileModal.addEventListener('click', AppPrincipal.closeViewProfileModal);
+        AppPrincipal.elements.viewProfileModal.addEventListener('click', (e) => {
+            if (e.target === AppPrincipal.elements.viewProfileModal) AppPrincipal.closeViewProfileModal();
+        });
 
 
         // O Guardião do app.html
@@ -209,7 +222,7 @@ const AppPrincipal = {
                     let adminName;
                     if (userSnapshot.exists()) {
                         adminName = userSnapshot.val().name;
-                        // NOVO (V3.0): Salva todos os dados do admin
+                        // (V3.0): Salva todos os dados do admin
                         AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
                     } else {
                         // (V2.9) FIX: Criar perfil se não existir
@@ -226,7 +239,7 @@ const AppPrincipal = {
                     }
                     
                     AppPrincipal.elements.userDisplay.textContent = `${adminName} (Coach)`;
-                    // NOVO (V3.0): Controla a view (para esconder o botão "Meu Perfil")
+                    // (V3.0): Controla a view (para esconder o botão "Meu Perfil")
                     appContainer.classList.add('admin-view');
                     appContainer.classList.remove('atleta-view');
                     AppPrincipal.navigateTo('planilha');
@@ -239,7 +252,7 @@ const AppPrincipal = {
                 if (userSnapshot.exists()) {
                     AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
                     AppPrincipal.elements.userDisplay.textContent = `${AppPrincipal.state.userData.name}`;
-                    // NOVO (V3.0): Controla a view (para mostrar o botão "Meu Perfil")
+                    // (V3.0): Controla a view (para mostrar o botão "Meu Perfil")
                     appContainer.classList.add('atleta-view');
                     appContainer.classList.remove('admin-view');
                     AppPrincipal.navigateTo('planilha'); // Atleta começa na planilha
@@ -318,7 +331,7 @@ const AppPrincipal = {
     },
     
     // ===================================================================
-    // MÓDULO 3/4: Lógica dos Modais (V3.0)
+    // MÓDULO 3/4: Lógica dos Modais (V3.2)
     // ===================================================================
     
     // ----- Modal Feedback (V2.8) -----
@@ -428,7 +441,7 @@ const AppPrincipal = {
         }
     },
     
-    // ATUALIZADO (V3.0): Salva feedback e usa a pasta 'workouts'
+    // Salva feedback (V3.0)
     handleFeedbackSubmit: async (e) => {
         e.preventDefault();
         const { workoutStatusSelect, workoutFeedbackText, photoUploadInput, saveFeedbackBtn } = AppPrincipal.elements;
@@ -449,7 +462,7 @@ const AppPrincipal = {
             // 1. Faz upload da imagem (se existir)
             if (file) {
                 saveFeedbackBtn.textContent = "Enviando foto...";
-                // NOVO (V3.0): Especifica a pasta 'workouts'
+                // (V3.0): Especifica a pasta 'workouts'
                 imageUrl = await AppPrincipal.uploadFileToCloudinary(file, 'workouts');
             }
 
@@ -660,7 +673,7 @@ const AppPrincipal = {
         AppPrincipal.state.currentAnalysisData = null;
     },
     
-    // ATUALIZADO (V3.0): Correção do Bug 4 (Listener)
+    // Salva Análise IA (V3.0 - Correção Bug 4)
     handleSaveIaAnalysis: async () => {
         const { saveIaAnalysisBtn } = AppPrincipal.elements;
         const analysisData = AppPrincipal.state.currentAnalysisData;
@@ -682,9 +695,7 @@ const AppPrincipal = {
             alert("Análise salva com sucesso!");
             AppPrincipal.closeIaAnalysisModal();
             
-            // ===================================================================
-            // CORREÇÃO (V3.0 - Bug 4): Limpa o listener antigo ANTES de recarregar
-            // ===================================================================
+            // (V3.0 - Bug 4): Limpa o listener antigo ANTES de recarregar
             if (AppPrincipal.state.listeners['adminIaHistory']) {
                 AppPrincipal.state.listeners['adminIaHistory'].off();
                 delete AppPrincipal.state.listeners['adminIaHistory'];
@@ -705,9 +716,7 @@ const AppPrincipal = {
         }
     },
 
-    // ===================================================================
-    // NOVO (V3.0): Funções do Modal de Perfil (Feature 3)
-    // ===================================================================
+    // ----- Funções do Modal de Perfil (V3.0) -----
     openProfileModal: () => {
         const { profileModal, profileName, profileBio, profilePicPreview, profileUploadFeedback, saveProfileBtn } = AppPrincipal.elements;
         const { userData } = AppPrincipal.state;
@@ -811,12 +820,38 @@ const AppPrincipal = {
         }
     },
 
+    // ===================================================================
+    // NOVO (V3.2): Funções do Modal de Visualização de Perfil
+    // ===================================================================
+    openViewProfileModal: (userId) => {
+        const { viewProfileModal, viewProfilePic, viewProfileName, viewProfileBio } = AppPrincipal.elements;
+        const userCache = AppPrincipal.state.userCache;
+
+        if (!userCache || !userCache[userId]) {
+            console.error("Dados do usuário não encontrados no cache:", userId);
+            return;
+        }
+
+        const userData = userCache[userId];
+        
+        // Preenche o modal
+        viewProfilePic.src = userData.photoUrl || 'https://placehold.co/150x150/4169E1/FFFFFF?text=Atleta';
+        viewProfileName.textContent = userData.name || "Atleta";
+        viewProfileBio.textContent = userData.bio || "Este atleta ainda não escreveu uma biografia.";
+
+        viewProfileModal.classList.remove('hidden');
+    },
+
+    closeViewProfileModal: () => {
+        AppPrincipal.elements.viewProfileModal.classList.add('hidden');
+    },
+
 
     // ===================================================================
     // MÓDULO 4: Funções de IA (V3.0 - Cloudinary atualizado)
     // ===================================================================
 
-    // NOVO (V2.6): Lida com o upload da foto e chama a IA Vision
+    // Lida com upload de foto do treino (V2.6)
     handlePhotoUpload: async (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -865,7 +900,7 @@ const AppPrincipal = {
         }
     },
 
-    // NOVO (V2.6): Converte arquivo para Base64
+    // Converte arquivo para Base64 (V2.6)
     fileToBase64: (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -875,7 +910,7 @@ const AppPrincipal = {
         });
     },
 
-    // NOVO (V2.6): Exibe os dados extraídos no modal
+    // Exibe os dados extraídos no modal (V2.6)
     displayStravaData: (data) => {
         const { stravaDataDisplay } = AppPrincipal.elements;
         document.getElementById('strava-data-distancia').textContent = `Distância: ${data.distancia || "N/A"}`;
@@ -955,7 +990,7 @@ const AppPrincipal = {
         return data.candidates[0].content.parts[0].text;
     },
     
-    // ATUALIZADO (V3.0): Aceita 'folderName'
+    // Cloudinary (V3.0 - Aceita 'folderName')
     uploadFileToCloudinary: async (file, folderName = 'workouts') => {
         // V2.5: Lê a config do 'window'
         if (!window.CLOUDINARY_CONFIG || !window.CLOUDINARY_CONFIG.cloudName || !window.CLOUDINARY_CONFIG.uploadPreset || window.CLOUDINARY_CONFIG.cloudName.includes("SEU_CLOUD_NAME")) {
