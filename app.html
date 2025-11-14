@@ -9,6 +9,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="img/logo-192.png">
     <link rel="apple-touch-icon" href="img/logo-192.png">
+
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
 </head>
@@ -34,6 +35,7 @@
                 <button id="nav-profile-btn" class="btn btn-nav">
                     <i class='bx bx-user-circle'></i> <span>Meu Perfil</span>
                 </button>
+
                 <span id="userDisplay" class="user-display"></span>
                 <button id="logoutButton" class="btn btn-danger">
                     <i class="bx bx-log-out"></i> Sair
@@ -278,7 +280,7 @@
             </div>
             <div class="modal-footer">
                 <button id="save-ia-analysis-btn" class="btn btn-primary hidden">
-                    <i class="bx bx-save"></i> Salvar Análise
+                    <i class="bx bx-save'></i> Salvar Análise
                 </button>
             </div>
         </div>
@@ -316,6 +318,22 @@
                         <button type="submit" id="save-profile-btn" class="btn btn-primary">Salvar Perfil</button>
                     </fieldset>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-profile-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class='bx bx-user'></i> Perfil do Atleta</h3>
+                <button class="close-btn" id="close-view-profile-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-pic-container">
+                    <img src="https://placehold.co/150x150/4169E1/FFFFFF?text=Atleta" alt="Foto do Atleta" id="view-profile-pic" class="profile-pic-preview">
+                </div>
+                <h2 id="view-profile-name" class="view-profile-name">Carregando...</h2>
+                <p id="view-profile-bio" class="view-profile-bio">Carregando...</p>
             </div>
         </div>
     </div>
