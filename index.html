@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeRunners - Plataforma de Treinos</title>
+    <!-- ATENÇÃO: Carregando V2.6 do CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    <!-- CORREÇÃO: O erro de digitação 'rel_manifest"' (do zip anterior) foi corrigido para 'rel="manifest"' -->
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
@@ -13,7 +13,9 @@
 <body class="login-page">
 
     <div class="login-container">
-        <img src="https://via.placeholder.com/150/00008B/FFFFFF?text=LR" alt="Logo LeRunners" class="logo">
+        <!-- DIRETRIZ 1 (LOGO): Trocado placeholder por um logo real (URL de placeholder) -->
+        <!-- Troque 'https://placehold.co/150x150/00008B/FFFFFF?text=LR' pela URL da sua imagem de logo -->
+        <img src="https://placehold.co/150x150/00008B/FFFFFF?text=LR" alt="Logo LeRunners" class="logo">
         
         <!-- Formulário de Login -->
         <form id="login-form">
@@ -79,13 +81,20 @@
         <p class="toggle-link hidden">Já tem conta? <a href="#" id="toggleToLogin">Entre</a></p>
     </div>
 
+    <!-- NOVO (V2.6): Rodapé (Diretriz 1) -->
+    <footer class="app-footer">
+        Desenvolvido com 🤖 por thIAguinho Soluções
+    </footer>
+
     <!-- Scripts Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    <!-- Scripts da Aplicação (APENAS 2 ARQUIVOS) -->
+    <!-- Scripts da Aplicação (ARQUITETURA V2.4) -->
     <script src="js/config.js"></script>
-    <script src="js/app.js"></script> <!-- Cérebro unificado -->
+    <!-- app.js agora contém AuthLogic e AppPrincipal -->
+    <script src="js/app.js"></script> 
+    
 </body>
 </html>
