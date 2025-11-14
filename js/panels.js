@@ -1,17 +1,17 @@
 /* =================================================================== */
-/* ARQUIVO DE MÓDULOS (V3.3 - CORREÇÃO DE REFERÊNCIA DO ATLETAPANEL)
+/* ARQUIVO DE MÓDULOS (V3.5 - PRESCRIÇÃO ESTRUTURADA)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
 // ===================================================================
-// 3. AdminPanel (Lógica do Painel Coach V3.0)
+// 3. AdminPanel (Lógica do Painel Coach V3.5)
 // ===================================================================
 const AdminPanel = {
     state: {},
     elements: {},
 
     init: (user, db) => {
-        console.log("AdminPanel V3.0: Inicializado.");
+        console.log("AdminPanel V3.5: Inicializado.");
         AdminPanel.state = { db, currentUser: user, selectedAthleteId: null, athletes: {} };
 
         AdminPanel.elements = {
@@ -28,11 +28,11 @@ const AdminPanel = {
             adminTabPrescrever: document.getElementById('admin-tab-prescrever'),
             adminTabKpis: document.getElementById('admin-tab-kpis'),
             
-            // Conteúdo Aba 1
+            // Conteúdo Aba 1 (Prescrição)
             addWorkoutForm: document.getElementById('add-workout-form'),
             workoutsList: document.getElementById('workouts-list'),
 
-            // Conteúdo Aba 2
+            // Conteúdo Aba 2 (IA)
             analyzeAthleteBtnIa: document.getElementById('analyze-athlete-btn-ia'),
             iaHistoryList: document.getElementById('ia-history-list')
         };
@@ -295,6 +295,9 @@ const AdminPanel = {
         });
     },
 
+    // ===================================================================
+    // ATUALIZADO (V3.5): Salva o formulário estruturado
+    // ===================================================================
     handleAddWorkout: (e) => {
         e.preventDefault();
         const { selectedAthleteId } = AdminPanel.state;
@@ -302,22 +305,67 @@ const AdminPanel = {
         
         if (!selectedAthleteId) return alert("Selecione um atleta.");
 
+        // 1. Coleta dados básicos
+        const date = addWorkoutForm.querySelector('#workout-date').value;
+        const title = addWorkoutForm.querySelector('#workout-title').value;
+        
+        if (!date || !title) return alert("Data e Título são obrigatórios.");
+
+        // 2. Coleta dados estruturados
+        const modalidade = addWorkoutForm.querySelector('#workout-modalidade').value;
+        const tipoTreino = addWorkoutForm.querySelector('#workout-tipo-treino').value;
+        const intensidade = addWorkoutForm.querySelector('#workout-intensidade').value;
+        const percurso = addWorkoutForm.querySelector('#workout-percurso').value;
+        
+        // 3. Coleta métricas (opcionais)
+        const distancia = addWorkoutForm.querySelector('#workout-distancia').value.trim();
+        const tempo = addWorkoutForm.querySelector('#workout-tempo').value.trim();
+        const pace = addWorkoutForm.querySelector('#workout-pace').value.trim();
+        const velocidade = addWorkoutForm.querySelector('#workout-velocidade').value.trim();
+        
+        // 4. Coleta observações (opcional)
+        const observacoes = addWorkoutForm.querySelector('#workout-observacoes').value.trim();
+
+        // 5. Constrói a string de 'description'
+        let description = `[${modalidade}] - [${tipoTreino}]\n`;
+        description += `Intensidade: ${intensidade}\n`;
+        description += `Percurso: ${percurso}\n`;
+        description += `--- \n`;
+        
+        if (distancia) description += `Distância: ${distancia}\n`;
+        if (tempo) description += `Tempo: ${tempo}\n`;
+        if (pace) description += `Pace: ${pace}\n`;
+        if (velocidade) description += `Velocidade: ${velocidade}\n`;
+        
+        if (observacoes) {
+             description += `--- \nObservações:\n${observacoes}`;
+        }
+
+        // 6. Prepara o objeto para o Firebase
         const workoutData = {
-            date: addWorkoutForm.querySelector('#workout-date').value,
-            title: addWorkoutForm.querySelector('#workout-title').value,
-            description: addWorkoutForm.querySelector('#workout-description').value,
+            date: date,
+            title: title,
+            description: description, // A string formatada vai aqui
             createdBy: AdminPanel.state.currentUser.uid,
             createdAt: new Date().toISOString(),
             status: "planejado",
             feedback: "",
             imageUrl: null,
-            stravaData: null // V2.6
+            stravaData: null
         };
 
-        if (!workoutData.date || !workoutData.title) return alert("Data e Título são obrigatórios.");
-
+        // 7. Salva no DB
         AdminPanel.state.db.ref(`data/${selectedAthleteId}/workouts`).push(workoutData)
-            .then(() => addWorkoutForm.reset())
+            .then(() => {
+                // Limpa apenas os campos de métricas e observações
+                addWorkoutForm.querySelector('#workout-distancia').value = "";
+                addWorkoutForm.querySelector('#workout-tempo').value = "";
+                addWorkoutForm.querySelector('#workout-pace').value = "";
+                addWorkoutForm.querySelector('#workout-velocidade').value = "";
+                addWorkoutForm.querySelector('#workout-observacoes').value = "";
+                addWorkoutForm.querySelector('#workout-title').value = "";
+                // Mantém data, modalidade, tipo, intensidade e percurso para facilitar o próximo cadastro
+            })
             .catch(err => alert("Falha ao salvar o treino: " + err.message));
     },
     
@@ -544,7 +592,7 @@ const AdminPanel = {
 };
 
 // ===================================================================
-// 4. AtletaPanel (Lógica do Painel Atleta V3.3 - CORRIGIDO)
+// 4. AtletaPanel (Lógica do Painel Atleta V3.3)
 // ===================================================================
 const AtletaPanel = {
     state: {},
@@ -586,7 +634,7 @@ const AtletaPanel = {
         });
     },
 
-    // Card de Treino (Atleta V3.3 - CORRIGIDO)
+    // Card de Treino (Atleta V3.3)
     createWorkoutCard: (id, data, athleteId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -599,9 +647,7 @@ const AtletaPanel = {
             <div class="workout-card-body">
                 <p>${data.description || "Sem descrição."}</p>
                 ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
-                
                 ${data.stravaData ? AtletaPanel.createStravaDataDisplay(data.stravaData) : ''}
-                
                 ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Foto do treino" class="workout-image">` : ''}
             </div>
             <div class="workout-card-footer">
@@ -634,9 +680,7 @@ const AtletaPanel = {
         return el;
     },
     
-    // ===================================================================
-    // NOVO (V3.3): Helper de Strava copiado do AdminPanel para cá.
-    // ===================================================================
+    // (V3.3): Helper de Strava
     createStravaDataDisplay: (stravaData) => {
         return `
             <fieldset class="strava-data-display">
@@ -648,7 +692,7 @@ const AtletaPanel = {
         `;
     },
     
-    // Carrega status (likes/comentários) de um card (V3.3 - CORRIGIDO)
+    // Carrega status (likes/comentários) de um card (V3.3)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
@@ -656,9 +700,6 @@ const AtletaPanel = {
         
         const isOwner = (AtletaPanel.state.currentUser.uid === ownerId);
         
-        // ===================================================================
-        // CORREÇÃO (V3.3): Usa AtletaPanel.state.db em vez de AdminPanel
-        // ===================================================================
         const likesRef = AtletaPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = AtletaPanel.state.db.ref(`workoutComments/${workoutId}`);
         
@@ -722,14 +763,14 @@ const AtletaPanel = {
 };
 
 // ===================================================================
-// 5. FeedPanel (Lógica do Feed Social V3.2)
+// 5. FeedPanel (Lógica do Feed Social V3.3)
 // ===================================================================
 const FeedPanel = {
     state: {},
     elements: {},
 
     init: (user, db) => {
-        console.log("FeedPanel V3.2: Inicializado.");
+        console.log("FeedPanel V3.3: Inicializado.");
         FeedPanel.state = { db, currentUser: user };
         FeedPanel.elements = { feedList: document.getElementById('feed-list') };
         
@@ -793,9 +834,7 @@ const FeedPanel = {
             <div class="workout-card-body">
                 ${data.description ? `<p>${data.description}</p>` : ''}
                 ${data.feedback ? `<p class="feedback-text">${data.feedback}</p>` : ''}
-                
                 ${data.stravaData ? AtletaPanel.createStravaDataDisplay(data.stravaData) : ''}
-                
                 ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Foto do treino" class="workout-image">` : ''}
             </div>
             <div class="workout-card-footer">
@@ -832,7 +871,7 @@ const FeedPanel = {
         return el;
     },
     
-    // Carrega status (likes/comentários) de um card (V3.0 - Bug 2)
+    // Carrega status (likes/comentários) de um card (V3.3)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
@@ -840,9 +879,6 @@ const FeedPanel = {
 
         const isOwner = (FeedPanel.state.currentUser.uid === ownerId);
 
-        // ===================================================================
-        // CORREÇÃO (V3.3): Usa FeedPanel.state.db em vez de AdminPanel
-        // ===================================================================
         const likesRef = FeedPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = FeedPanel.state.db.ref(`workoutComments/${workoutId}`);
         
