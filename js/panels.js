@@ -1,17 +1,17 @@
 /* =================================================================== */
-/* ARQUIVO DE MÓDULOS (V2.7 - PAINEIS E CORREÇÃO DE LIKES - CORRIGIDO)
+/* ARQUIVO DE MÓDULOS (V3.0 - PERFIL DO ATLETA E CORREÇÕES DE BUGS)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
 // ===================================================================
-// 3. AdminPanel (Lógica do Painel Coach V2.7)
+// 3. AdminPanel (Lógica do Painel Coach V3.0)
 // ===================================================================
 const AdminPanel = {
     state: {},
     elements: {},
 
     init: (user, db) => {
-        console.log("AdminPanel V2.7: Inicializado.");
+        console.log("AdminPanel V3.0: Inicializado.");
         AdminPanel.state = { db, currentUser: user, selectedAthleteId: null, athletes: {} };
 
         AdminPanel.elements = {
@@ -22,7 +22,7 @@ const AdminPanel = {
             athleteDetailContent: document.getElementById('athlete-detail-content'),
             deleteAthleteBtn: document.getElementById('delete-athlete-btn'),
             
-            // Abas V2.6 (Diretriz 2)
+            // Abas V2.6
             tabPrescreverBtn: document.querySelector('[data-tab="prescrever"]'),
             tabKpisBtn: document.querySelector('[data-tab="kpis"]'),
             adminTabPrescrever: document.getElementById('admin-tab-prescrever'),
@@ -46,7 +46,6 @@ const AdminPanel = {
         AdminPanel.elements.tabPrescreverBtn.addEventListener('click', () => AdminPanel.switchTab('prescrever'));
         AdminPanel.elements.tabKpisBtn.addEventListener('click', () => {
             AdminPanel.switchTab('kpis');
-            // NOVO (V2.6): Carrega o histórico de IA quando a aba é clicada
             if(AdminPanel.state.selectedAthleteId) {
                 AdminPanel.loadIaHistory(AdminPanel.state.selectedAthleteId);
             }
@@ -58,7 +57,7 @@ const AdminPanel = {
         AdminPanel.loadAthletes();
     },
 
-    // NOVO (V2.6): Controle das Abas
+    // Controle das Abas (V2.6)
     switchTab: (tabName) => {
         const { tabPrescreverBtn, tabKpisBtn, adminTabPrescrever, adminTabKpis } = AdminPanel.elements;
         
@@ -152,14 +151,20 @@ const AdminPanel = {
             
             const pendingData = snapshot.val();
             
-            const newUserProfile = { name: pendingData.name, email: pendingData.email, role: "atleta", createdAt: new Date().toISOString() };
-            const newPublicProfile = { name: pendingData.name };
+            const newUserProfile = { 
+                name: pendingData.name, 
+                email: pendingData.email, 
+                role: "atleta", 
+                createdAt: new Date().toISOString(),
+                bio: "", // NOVO (V3.0)
+                photoUrl: "" // NOVO (V3.0)
+            };
             
             const updates = {};
             updates[`/users/${uid}`] = newUserProfile;
-            updates[`/publicProfiles/${uid}`] = newPublicProfile;
+            // updates[`/publicProfiles/${uid}`] = newPublicProfile; // Removido V2.9+
             updates[`/data/${uid}`] = { workouts: {} };     
-            updates[`/iaAnalysisHistory/${uid}`] = {}; // NOVO (V2.6): Cria o nó de histórico
+            updates[`/iaAnalysisHistory/${uid}`] = {}; // V2.6
             updates[`/pendingApprovals/${uid}`] = null; 
 
             AdminPanel.state.db.ref().update(updates)
@@ -178,6 +183,7 @@ const AdminPanel = {
             .catch(err => alert("Falha ao rejeitar: " + err.message));
     },
 
+    // ATUALIZADO (V3.0): Correção do Bug 1 (Excluir Aluno)
     deleteAthlete: () => {
         const { selectedAthleteId } = AdminPanel.state;
         if (!selectedAthleteId) return;
@@ -190,8 +196,8 @@ const AdminPanel = {
         const updates = {};
         updates[`/users/${selectedAthleteId}`] = null;
         updates[`/data/${selectedAthleteId}`] = null;
-        updates[`/publicProfiles/${selectedAthleteId}`] = null;
-        updates[`/iaAnalysisHistory/${selectedAthleteId}`] = null; // NOVO (V2.6)
+        // updates[`/publicProfiles/${selectedAthleteId}`] = null; // CORREÇÃO (V3.0): Removido nó obsoleto
+        updates[`/iaAnalysisHistory/${selectedAthleteId}`] = null; // V2.6
         
         const feedRef = AdminPanel.state.db.ref('publicWorkouts');
         feedRef.orderByChild('ownerId').equalTo(selectedAthleteId).once('value', snapshot => {
@@ -211,14 +217,14 @@ const AdminPanel = {
         });
     },
 
+    // ATUALIZADO (V3.0): Correção do Bug 2 (Troca de Atleta)
     selectAthlete: (uid, name) => {
-        // Limpa listeners antigos
-        if (AppPrincipal.state.listeners['adminWorkouts']) {
-            AppPrincipal.state.listeners['adminWorkouts'].off();
-        }
-        if (AppPrincipal.state.listeners['adminIaHistory']) {
-            AppPrincipal.state.listeners['adminIaHistory'].off();
-        }
+        // ===================================================================
+        // CORREÇÃO (V3.0 - Bug 2): Limpa TODOS os listeners do painel anterior
+        // Isso inclui 'adminWorkouts', 'adminIaHistory' E os listeners de 
+        // likes/comments de CADA card (ex: 'likes_workout123').
+        // ===================================================================
+        AppPrincipal.cleanupListeners(true);
 
         if (uid === null) {
             // Desselecionando
@@ -232,7 +238,7 @@ const AdminPanel = {
             AdminPanel.elements.athleteDetailContent.classList.remove('hidden');
             AdminPanel.switchTab('prescrever'); // Sempre reseta para a aba 'prescrever'
             AdminPanel.loadWorkouts(uid);
-            AdminPanel.loadIaHistory(uid); // V2.6: Carrega o histórico (mesmo que a aba não esteja visível)
+            AdminPanel.loadIaHistory(uid); // V2.6
         }
         
         document.querySelectorAll('.athlete-list-item').forEach(el => {
@@ -245,6 +251,7 @@ const AdminPanel = {
         workoutsList.innerHTML = "<p>Carregando treinos...</p>";
         
         const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
+        // Recria o listener principal de treinos (que foi limpo pelo selectAthlete)
         AppPrincipal.state.listeners['adminWorkouts'] = workoutsRef.orderByChild('date').on('value', snapshot => {
             workoutsList.innerHTML = ""; 
             if (!snapshot.exists()) {
@@ -262,14 +269,15 @@ const AdminPanel = {
         });
     },
     
-    // NOVO (V2.6): Carrega o histórico de Análises Salvas da IA (Diretriz 2)
+    // Carrega histórico IA (V2.6)
     loadIaHistory: (athleteId) => {
         const { iaHistoryList } = AdminPanel.elements;
-        if (!iaHistoryList) return; // Se a aba não foi nem renderizada
+        if (!iaHistoryList) return; 
         
         iaHistoryList.innerHTML = "<p>Carregando histórico de IA...</p>";
         
         const historyRef = AdminPanel.state.db.ref(`iaAnalysisHistory/${athleteId}`);
+        // Recria o listener principal do histórico (que foi limpo pelo selectAthlete)
         AppPrincipal.state.listeners['adminIaHistory'] = historyRef.orderByChild('analysisDate').limitToLast(10).on('value', snapshot => {
             iaHistoryList.innerHTML = ""; 
             if (!snapshot.exists()) {
@@ -319,7 +327,7 @@ const AdminPanel = {
             .catch(err => alert("Falha ao salvar o treino: " + err.message));
     },
     
-    // Card de Treino (Versão Admin V2.6)
+    // Card de Treino (Admin V2.6)
     createWorkoutCard: (id, data, athleteId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -369,7 +377,7 @@ const AdminPanel = {
         return el;
     },
     
-    // NOVO (V2.6): Card para o Histórico de IA (Diretriz 2)
+    // Card Histórico IA (V2.6)
     createIaHistoryCard: (id, data) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -383,7 +391,7 @@ const AdminPanel = {
             <div class="workout-card-header">
                 <div>
                     <span class="date">Análise de ${date}</span>
-                    <span class="title">Gerada por ${AppPrincipal.state.publicProfiles[data.coachUid]?.name || 'Coach'}</span>
+                    <span class="title">Gerada por ${AppPrincipal.state.userCache[data.coachUid]?.name || 'Coach'}</span>
                 </div>
             </div>
             <div class="workout-card-body">
@@ -399,7 +407,7 @@ const AdminPanel = {
         return el;
     },
 
-    // NOVO (V2.6): Helper para mostrar dados do Strava
+    // Helper p/ Strava (V2.6)
     createStravaDataDisplay: (stravaData) => {
         return `
             <fieldset class="strava-data-display">
@@ -411,18 +419,24 @@ const AdminPanel = {
         `;
     },
     
-    // Carrega status (likes/comentários) de um card (V2.6 - CORREÇÃO LIKES)
+    // Carrega status (likes/comentários) de um card (V2.6)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
         const commentCount = cardElement.querySelector('.comment-count');
         
-        // DIRETRIZ 5 (Likes UX): Verifica se o usuário logado é o dono
         const isOwner = (AdminPanel.state.currentUser.uid === ownerId);
         
         const likesRef = AdminPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = AdminPanel.state.db.ref(`workoutComments/${workoutId}`);
         
+        // ===================================================================
+        // ATENÇÃO (V3.0 - Bug 2): Armazena este listener no AppPrincipal
+        // para que ele possa ser limpo pelo cleanupListeners()
+        // ===================================================================
+        const likesListenerKey = `likes_${workoutId}`;
+        const commentsListenerKey = `comments_${workoutId}`;
+
         const likesListener = likesRef.on('value', snapshot => {
             const count = snapshot.numChildren();
             likeCount.textContent = count;
@@ -433,7 +447,6 @@ const AdminPanel = {
                 likeBtn.classList.remove('liked');
             }
             
-            // DIRETRIZ 5 (Likes UX): Dono não pode curtir o próprio post
             if (isOwner) {
                 likeBtn.disabled = true;
             }
@@ -454,7 +467,7 @@ const AdminPanel = {
             commentCount.textContent = snapshot.numChildren();
         });
 
-        // Ação de Curtir (Coach) - Só adiciona se NÃO for o dono
+        // Ação de Curtir (Coach)
         if (!isOwner) {
             likeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -469,18 +482,17 @@ const AdminPanel = {
             });
         }
         
-        AppPrincipal.state.listeners[String(`likes_${workoutId}`)] = likesListener;
-        AppPrincipal.state.listeners[String(`comments_${workoutId}`)] = commentsListener;
+        AppPrincipal.state.listeners[likesListenerKey] = likesListener;
+        AppPrincipal.state.listeners[commentsListenerKey] = commentsListener;
     },
 
-    // ATUALIZADO (V2.7 - CORRIGIDO): Lógica de Análise IA (Diretriz 2 e 4)
+    // Análise IA (V2.7)
     handleAnalyzeAthleteIA: async () => {
         const { selectedAthleteId } = AdminPanel.state;
         if (!selectedAthleteId) return alert("Selecione um atleta.");
         
         AppPrincipal.openIaAnalysisModal(); // Abre o modal (sem dados)
         
-        // CORREÇÃO V2.7: Acessa as variáveis corretas do AppPrincipal
         const iaAnalysisOutput = AppPrincipal.elements.iaAnalysisOutput;
         const saveBtn = AppPrincipal.elements.saveIaAnalysisBtn;
         
@@ -556,7 +568,7 @@ const AtletaPanel = {
             logManualActivityBtn: document.getElementById('log-manual-activity-btn')
         };
 
-        // NOVO (V2.3): Botão Log Manual
+        // V2.3: Botão Log Manual
         AtletaPanel.elements.logManualActivityBtn.addEventListener('click', AppPrincipal.openLogActivityModal);
 
         AtletaPanel.loadWorkouts(user.uid);
@@ -584,7 +596,7 @@ const AtletaPanel = {
         });
     },
 
-    // Card de Treino (Versão Atleta V2.6)
+    // Card de Treino (Atleta V2.6)
     createWorkoutCard: (id, data, athleteId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -630,18 +642,23 @@ const AtletaPanel = {
         return el;
     },
     
-    // Carrega status (likes/comentários) de um card (V2.6 - CORREÇÃO LIKES)
+    // Carrega status (likes/comentários) de um card (V2.6)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
         const commentCount = cardElement.querySelector('.comment-count');
         
-        // DIRETRIZ 5 (Likes UX): Verifica se o usuário logado é o dono
         const isOwner = (AtletaPanel.state.currentUser.uid === ownerId);
         
-        const likesRef = AtletaPanel.state.db.ref(`workoutLikes/${workoutId}`);
-        const commentsRef = AtletaPanel.state.db.ref(`workoutComments/${workoutId}`);
+        const likesRef = AdminPanel.state.db.ref(`workoutLikes/${workoutId}`);
+        const commentsRef = AdminPanel.state.db.ref(`workoutComments/${workoutId}`);
         
+        // ===================================================================
+        // ATENÇÃO (V3.0 - Bug 2): Armazena este listener no AppPrincipal
+        // ===================================================================
+        const likesListenerKey = `likes_${workoutId}`;
+        const commentsListenerKey = `comments_${workoutId}`;
+
         const likesListener = likesRef.on('value', snapshot => {
             const count = snapshot.numChildren();
             likeCount.textContent = count;
@@ -652,7 +669,6 @@ const AtletaPanel = {
                 likeBtn.classList.remove('liked');
             }
 
-            // DIRETRIZ 5 (Likes UX): Dono não pode curtir o próprio post
             if (isOwner) {
                 likeBtn.disabled = true;
             }
@@ -673,7 +689,7 @@ const AtletaPanel = {
             commentCount.textContent = snapshot.numChildren();
         });
 
-        // Ação de Curtir (Atleta) - Só adiciona se NÃO for o dono
+        // Ação de Curtir (Atleta)
         if (!isOwner) {
             likeBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Impede o modal de abrir
@@ -694,20 +710,20 @@ const AtletaPanel = {
              // O clique no card (que é o listener principal) vai abrir o modal
         });
         
-        AppPrincipal.state.listeners[String(`likes_${workoutId}`)] = likesListener;
-        AppPrincipal.state.listeners[String(`comments_${workoutId}`)] = commentsListener;
+        AppPrincipal.state.listeners[likesListenerKey] = likesListener;
+        AppPrincipal.state.listeners[commentsListenerKey] = commentsListener;
     }
 };
 
 // ===================================================================
-// 5. FeedPanel (Lógica do Feed Social V2.6)
+// 5. FeedPanel (Lógica do Feed Social V3.0)
 // ===================================================================
 const FeedPanel = {
     state: {},
     elements: {},
 
     init: (user, db) => {
-        console.log("FeedPanel V2.6: Inicializado.");
+        console.log("FeedPanel V3.0: Inicializado.");
         FeedPanel.state = { db, currentUser: user };
         FeedPanel.elements = { feedList: document.getElementById('feed-list') };
         
@@ -745,15 +761,22 @@ const FeedPanel = {
         });
     },
     
-    // Card do Feed (V2.6)
+    // ATUALIZADO (V3.0): Card do Feed com Avatar (Feature 3)
     createFeedCard: (id, data, ownerId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
         
-        const athleteName = AppPrincipal.state.publicProfiles[ownerId]?.name || data.ownerName || "Atleta";
+        // V3.0: Pega o atleta do cache de /users
+        const athleteData = AppPrincipal.state.userCache[ownerId];
+        
+        const athleteName = athleteData?.name || data.ownerName || "Atleta";
+        // V3.0: Define o avatar
+        const athleteAvatar = athleteData?.photoUrl || 'https://placehold.co/150x150/4169E1/FFFFFF?text=LR';
         
         el.innerHTML = `
             <div class="workout-card-header">
+                <img src="${athleteAvatar}" alt="Avatar de ${athleteName}" class="athlete-avatar">
+                
                 <span class="athlete-name">${athleteName}</span>
                 <div>
                     <span class="date">${data.date}</span>
@@ -782,23 +805,28 @@ const FeedPanel = {
              }
         });
 
-        // Carrega Likes e Comentários (V2.6)
+        // Carrega Likes e Comentários
         FeedPanel.loadWorkoutStats(el, id, ownerId);
         
         return el;
     },
     
-    // Carrega status (likes/comentários) de um card (V2.6 - CORREÇÃO LIKES)
+    // Carrega status (likes/comentários) de um card (V2.6)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
         const commentCount = cardElement.querySelector('.comment-count');
 
-        // DIRETRIZ 5 (Likes UX): Verifica se o usuário logado é o dono
         const isOwner = (FeedPanel.state.currentUser.uid === ownerId);
 
         const likesRef = FeedPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = FeedPanel.state.db.ref(`workoutComments/${workoutId}`);
+        
+        // ===================================================================
+        // ATENÇÃO (V3.0 - Bug 2): Armazena este listener no AppPrincipal
+        // ===================================================================
+        const likesListenerKey = `feed_likes_${workoutId}`;
+        const commentsListenerKey = `feed_comments_${workoutId}`;
         
         const likesListener = likesRef.on('value', snapshot => {
             const count = snapshot.numChildren();
@@ -810,7 +838,6 @@ const FeedPanel = {
                 likeBtn.classList.remove('liked');
             }
 
-            // DIRETRIZ 5 (Likes UX): Dono não pode curtir o próprio post
             if (isOwner) {
                 likeBtn.disabled = true;
             }
@@ -831,7 +858,7 @@ const FeedPanel = {
             commentCount.textContent = snapshot.numChildren();
         });
 
-        // Ação de Curtir - Só adiciona se NÃO for o dono
+        // Ação de Curtir
         if (!isOwner) {
             likeBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Impede o modal de abrir
@@ -846,7 +873,7 @@ const FeedPanel = {
             });
         }
         
-        AppPrincipal.state.listeners[String(`feed_likes_${workoutId}`)] = likesListener;
-        AppPrincipal.state.listeners[String(`feed_comments_${workoutId}`)] = commentsListener;
+        AppPrincipal.state.listeners[likesListenerKey] = likesListener;
+        AppPrincipal.state.listeners[commentsListenerKey] = commentsListener;
     }
 };
