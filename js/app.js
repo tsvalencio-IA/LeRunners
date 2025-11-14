@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.9 - CORREÇÃO CACHE DE NOMES)
+/* ARQUIVO DE LÓGICA UNIFICADO (V3.0 - PERFIL DO ATLETA E CORREÇÕES)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -9,24 +9,25 @@
 const AppPrincipal = {
     state: {
         currentUser: null, // O objeto 'user' do Auth
-        userData: null,    // O perfil de '/users/' (name, role)
+        userData: null,    // O perfil de '/users/' (name, role, photoUrl, bio)
         db: null,
         auth: null,
         listeners: {},     // Para limpar listeners do Firebase
         currentView: 'planilha', // 'planilha' ou 'feed'
         adminUIDs: {},     // Cache dos UIDs de admins
-        userCache: {}, // CORREÇÃO (V2.9): Cache de NOMES vindo de /users
+        userCache: {},     // Cache de NOMES vindo de /users (V2.9)
         modal: {
             isOpen: false,
             currentWorkoutId: null,
-            currentOwnerId: null
+            currentOwnerId: null,
+            newPhotoUrl: null // NOVO (V3.0): Para o upload da foto de perfil
         },
         stravaData: null, // NOVO (V2.6): Armazena dados extraídos da IA Vision
         currentAnalysisData: null // NOVO (V2.6): Armazena a última análise da IA
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2.9 (Cérebro, Correção de Cache)...");
+        console.log("Iniciando AppPrincipal V3.0 (Cérebro, Perfil do Atleta)...");
         
         // V2.5: Verifica a chave no 'window'
         if (typeof window.firebaseConfig === 'undefined' || window.firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
@@ -70,6 +71,7 @@ const AppPrincipal = {
             
             navPlanilhaBtn: document.getElementById('nav-planilha-btn'),
             navFeedBtn: document.getElementById('nav-feed-btn'),
+            navProfileBtn: document.getElementById('nav-profile-btn'), // NOVO (V3.0)
             
             // Modal Feedback (V2.6)
             feedbackModal: document.getElementById('feedback-modal'),
@@ -103,6 +105,17 @@ const AppPrincipal = {
             closeIaAnalysisModal: document.getElementById('close-ia-analysis-modal'),
             iaAnalysisOutput: document.getElementById('ia-analysis-output'),
             saveIaAnalysisBtn: document.getElementById('save-ia-analysis-btn'), // V2.6
+
+            // NOVO (V3.0): Modal de Perfil (Feature 3)
+            profileModal: document.getElementById('profile-modal'),
+            closeProfileModal: document.getElementById('close-profile-modal'),
+            profileForm: document.getElementById('profile-form'),
+            profilePicPreview: document.getElementById('profile-pic-preview'),
+            profilePicUpload: document.getElementById('profile-pic-upload'),
+            profileUploadFeedback: document.getElementById('profile-upload-feedback'),
+            profileName: document.getElementById('profile-name'),
+            profileBio: document.getElementById('profile-bio'),
+            saveProfileBtn: document.getElementById('save-profile-btn'),
         };
         
         // Listeners de Navegação
@@ -139,12 +152,21 @@ const AppPrincipal = {
         });
         AppPrincipal.elements.saveIaAnalysisBtn.addEventListener('click', AppPrincipal.handleSaveIaAnalysis);
 
+        // NOVO (V3.0): Listeners Modal Perfil
+        AppPrincipal.elements.navProfileBtn.addEventListener('click', AppPrincipal.openProfileModal);
+        AppPrincipal.elements.closeProfileModal.addEventListener('click', AppPrincipal.closeProfileModal);
+        AppPrincipal.elements.profileModal.addEventListener('click', (e) => {
+            if (e.target === AppPrincipal.elements.profileModal) AppPrincipal.closeProfileModal();
+        });
+        AppPrincipal.elements.profileForm.addEventListener('submit', AppPrincipal.handleProfileSubmit);
+        AppPrincipal.elements.profilePicUpload.addEventListener('change', AppPrincipal.handleProfilePhotoUpload);
+
 
         // O Guardião do app.html
         AppPrincipal.state.auth.onAuthStateChanged(AppPrincipal.handlePlatformAuthStateChange);
     },
 
-    // CORREÇÃO V2.9: Carrega cache de /users (fonte da verdade)
+    // Carrega cache de /users (V2.9)
     loadCaches: () => {
         const adminsRef = AppPrincipal.state.db.ref('admins');
         AppPrincipal.state.listeners['cacheAdmins'] = adminsRef;
@@ -153,7 +175,7 @@ const AppPrincipal = {
             console.log("Cache de Admins carregado:", Object.keys(AppPrincipal.state.adminUIDs));
         });
 
-        // CORREÇÃO: Lê de /users, não /publicProfiles
+        // Lê de /users, (V2.9)
         const usersRef = AppPrincipal.state.db.ref('users');
         AppPrincipal.state.listeners['cacheUsers'] = usersRef;
         usersRef.on('value', snapshot => {
@@ -171,6 +193,7 @@ const AppPrincipal = {
             return;
         }
 
+        const { appContainer } = AppPrincipal.elements;
         AppPrincipal.state.currentUser = user;
         const uid = user.uid;
         
@@ -181,30 +204,31 @@ const AppPrincipal = {
         AppPrincipal.state.db.ref('admins/' + uid).once('value', adminSnapshot => {
             if (adminSnapshot.exists() && adminSnapshot.val() === true) {
                 
-                // CORREÇÃO V2.9: Garante que o Admin tenha um perfil em /users
+                // Garante que o Admin tenha um perfil em /users (V2.9)
                 AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
                     let adminName;
                     if (userSnapshot.exists()) {
-                        // Admin já tem perfil em /users (Cenário ideal)
                         adminName = userSnapshot.val().name;
+                        // NOVO (V3.0): Salva todos os dados do admin
+                        AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
                     } else {
-                        // *** NOVO (V2.9) FIX ***
-                        // Admin foi promovido manualmente e não tem perfil. Criar um.
+                        // (V2.9) FIX: Criar perfil se não existir
                         console.warn(`Admin ${user.email} não encontrado em /users. Criando perfil...`);
-                        adminName = user.email; // Nome temporário é o email
+                        adminName = user.email; // Nome temporário
                         const adminProfile = {
                             name: adminName,
                             email: user.email,
                             role: "admin",
                             createdAt: new Date().toISOString()
                         };
-                        // Escreve o perfil (não precisa esperar)
                         AppPrincipal.state.db.ref('users/' + uid).set(adminProfile);
-                        // O cache 'cacheUsers' vai atualizar automaticamente
+                        AppPrincipal.state.userData = adminProfile; // Salva localmente
                     }
                     
-                    AppPrincipal.state.userData = { name: adminName, role: 'admin', uid: uid };
                     AppPrincipal.elements.userDisplay.textContent = `${adminName} (Coach)`;
+                    // NOVO (V3.0): Controla a view (para esconder o botão "Meu Perfil")
+                    appContainer.classList.add('admin-view');
+                    appContainer.classList.remove('atleta-view');
                     AppPrincipal.navigateTo('planilha');
                 });
                 return;
@@ -215,6 +239,9 @@ const AppPrincipal = {
                 if (userSnapshot.exists()) {
                     AppPrincipal.state.userData = { ...userSnapshot.val(), uid: uid };
                     AppPrincipal.elements.userDisplay.textContent = `${AppPrincipal.state.userData.name}`;
+                    // NOVO (V3.0): Controla a view (para mostrar o botão "Meu Perfil")
+                    appContainer.classList.add('atleta-view');
+                    appContainer.classList.remove('admin-view');
                     AppPrincipal.navigateTo('planilha'); // Atleta começa na planilha
                 } else {
                     console.warn("Status: PENDENTE/REJEITADO. Voltando ao login.");
@@ -273,7 +300,7 @@ const AppPrincipal = {
         AppPrincipal.state.auth.signOut().catch(err => console.error("Erro ao sair:", err));
     },
 
-    // CORREÇÃO V2.8: Lógica de limpeza de listeners
+    // Limpeza de listeners (V2.9)
     cleanupListeners: (panelOnly = false) => {
         Object.keys(AppPrincipal.state.listeners).forEach(key => {
             const listenerRef = AppPrincipal.state.listeners[key];
@@ -291,7 +318,7 @@ const AppPrincipal = {
     },
     
     // ===================================================================
-    // MÓDULO 3/4: Lógica dos Modais (V2.9 - CORREÇÃO LISTENER E CACHE)
+    // MÓDULO 3/4: Lógica dos Modais (V3.0)
     // ===================================================================
     
     // ----- Modal Feedback (V2.8) -----
@@ -348,8 +375,7 @@ const AppPrincipal = {
         // 2. Carrega os Comentários (do nó /workoutComments/)
         const commentsRef = AppPrincipal.state.db.ref(`workoutComments/${workoutId}`);
         
-        // CORREÇÃO V2.8: Armazena a REF, não o callback
-        AppPrincipal.state.listeners['modalComments'] = commentsRef; 
+        AppPrincipal.state.listeners['modalComments'] = commentsRef; // V2.8
         
         commentsRef.orderByChild('timestamp').on('value', snapshot => {
             commentsList.innerHTML = "";
@@ -374,7 +400,7 @@ const AppPrincipal = {
                 item.className = 'comment-item';
                 const date = new Date(data.timestamp).toLocaleString('pt-BR', { timeStyle: 'short', dateStyle: 'short' });
                 
-                // CORREÇÃO V2.9: Usa o userCache para o nome
+                // V2.9: Usa o userCache para o nome
                 const commenterName = AppPrincipal.state.userCache[data.uid]?.name || "Usuário";
                 
                 item.innerHTML = `
@@ -389,12 +415,11 @@ const AppPrincipal = {
         feedbackModal.classList.remove('hidden');
     },
     
-    // CORREÇÃO V2.8: Limpa o listener corretamente
+    // Limpa o listener do modal (V2.8)
     closeFeedbackModal: () => {
         AppPrincipal.state.modal.isOpen = false;
         AppPrincipal.elements.feedbackModal.classList.add('hidden');
         
-        // Pega a REF armazenada e chama .off() nela
         const listenerRef = AppPrincipal.state.listeners['modalComments'];
         if (listenerRef && typeof listenerRef.off === 'function') {
             listenerRef.off();
@@ -403,7 +428,7 @@ const AppPrincipal = {
         }
     },
     
-    // ATUALIZADO (V2.6): Salva "Status", "Feedback", "Foto" e "StravaData"
+    // ATUALIZADO (V3.0): Salva feedback e usa a pasta 'workouts'
     handleFeedbackSubmit: async (e) => {
         e.preventDefault();
         const { workoutStatusSelect, workoutFeedbackText, photoUploadInput, saveFeedbackBtn } = AppPrincipal.elements;
@@ -424,9 +449,8 @@ const AppPrincipal = {
             // 1. Faz upload da imagem (se existir)
             if (file) {
                 saveFeedbackBtn.textContent = "Enviando foto...";
-                // Nota: A IA Vision já foi disparada no 'onChange' da foto.
-                // Aqui apenas fazemos o upload para o Cloudinary.
-                imageUrl = await AppPrincipal.uploadFileToCloudinary(file);
+                // NOVO (V3.0): Especifica a pasta 'workouts'
+                imageUrl = await AppPrincipal.uploadFileToCloudinary(file, 'workouts');
             }
 
             // 2. Prepara dados
@@ -438,7 +462,6 @@ const AppPrincipal = {
             if (imageUrl) {
                 feedbackData.imageUrl = imageUrl;
             }
-            // Adiciona dados do Strava se existirem (do state)
             if (AppPrincipal.state.stravaData) {
                 feedbackData.stravaData = AppPrincipal.state.stravaData;
             }
@@ -456,7 +479,7 @@ const AppPrincipal = {
                 
                 const publicData = {
                     ownerId: currentOwnerId,
-                    // CORREÇÃO V2.9: Pega o nome do userCache
+                    // V2.9: Pega o nome do userCache
                     ownerName: AppPrincipal.state.userCache[currentOwnerId]?.name || AppPrincipal.state.userData.name,
                     date: workoutData.date,
                     title: workoutData.title,
@@ -484,7 +507,7 @@ const AppPrincipal = {
         }
     },
     
-    // ----- Modal Comentários (V2) -----
+    // ----- Modal Comentários (V2.9) -----
     handleCommentSubmit: (e) => {
         e.preventDefault();
         const { commentInput } = AppPrincipal.elements;
@@ -495,7 +518,7 @@ const AppPrincipal = {
 
         const commentData = {
             uid: AppPrincipal.state.currentUser.uid,
-            // CORREÇÃO V2.9: Pega o nome do userCache (ou do state.userData)
+            // V2.9: Pega o nome do userCache
             name: AppPrincipal.state.userCache[AppPrincipal.state.currentUser.uid]?.name || AppPrincipal.state.userData.name,
             text: text,
             timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -508,11 +531,10 @@ const AppPrincipal = {
             .catch(err => alert("Erro ao enviar comentário: " + err.message));
     },
 
-    // ----- Modal Log Atividade (V2.3) -----
+    // ----- Modal Log Atividade (V2.9) -----
     openLogActivityModal: () => {
         AppPrincipal.elements.logActivityForm.reset();
         AppPrincipal.elements.logActivityModal.classList.remove('hidden');
-        // Define a data atual como padrão
         document.getElementById('log-activity-date').value = new Date().toISOString().split('T')[0];
     },
 
@@ -531,11 +553,11 @@ const AppPrincipal = {
             const workoutData = {
                 date: document.getElementById('log-activity-date').value,
                 title: document.getElementById('log-activity-title').value,
-                description: `(${document.getElementById('log-activity-type').value})`, // Adiciona tipo na descrição
+                description: `(${document.getElementById('log-activity-type').value})`,
                 feedback: document.getElementById('log-activity-feedback').value,
-                createdBy: athleteId, // Atleta que criou
+                createdBy: athleteId,
                 createdAt: new Date().toISOString(),
-                status: "realizado", // Já nasce realizado
+                status: "realizado",
                 realizadoAt: new Date().toISOString(),
                 imageUrl: null,
                 stravaData: null
@@ -545,14 +567,12 @@ const AppPrincipal = {
                  throw new Error("Data, Título e Feedback são obrigatórios.");
             }
 
-            // 1. Salva no nó PRIVADO
             const newWorkoutRef = await AppPrincipal.state.db.ref(`data/${athleteId}/workouts`).push(workoutData);
             const newWorkoutId = newWorkoutRef.key;
 
-            // 2. Salva no nó PÚBLICO (para o feed)
             const publicData = {
                 ownerId: athleteId,
-                // CORREÇÃO V2.9: Pega o nome do userCache
+                // V2.9: Pega o nome do userCache
                 ownerName: AppPrincipal.state.userCache[athleteId]?.name || AppPrincipal.state.userData.name,
                 date: workoutData.date,
                 title: workoutData.title,
@@ -575,7 +595,7 @@ const AppPrincipal = {
         }
     },
 
-    // ----- Modal Quem Curtiu (V2.9 - CORRIGIDO) -----
+    // ----- Modal Quem Curtiu (V2.9) -----
     openWhoLikedModal: (workoutId) => {
         const { whoLikedModal, whoLikedList } = AppPrincipal.elements;
         whoLikedList.innerHTML = "<li>Carregando...</li>";
@@ -589,18 +609,15 @@ const AppPrincipal = {
             }
 
             whoLikedList.innerHTML = ""; // Limpa o "Carregando"
-            // CORREÇÃO V2.9: Usa o userCache
-            const userCache = AppPrincipal.state.userCache;
+            const userCache = AppPrincipal.state.userCache; // V2.9
             
             const promises = [];
             snapshot.forEach(childSnapshot => {
                 const uid = childSnapshot.key;
                 
-                // CORREÇÃO V2.9: Lê o nome do userCache
                 if (userCache[uid] && userCache[uid].name) {
                     promises.push(Promise.resolve(userCache[uid].name));
                 } else {
-                    // Fallback: Busca o nome em /users (caso o cache ainda não tenha atualizado)
                     const userRef = AppPrincipal.state.db.ref(`users/${uid}/name`);
                     promises.push(userRef.once('value').then(snap => snap.val() || "Usuário (ID: ..."+uid.slice(-4)+")"));
                 }
@@ -619,21 +636,20 @@ const AppPrincipal = {
         AppPrincipal.elements.whoLikedModal.classList.add('hidden');
     },
 
-    // ----- Modal Análise IA (V2.7 - CORRIGIDO) -----
+    // ----- Modal Análise IA (V2.7) -----
     openIaAnalysisModal: (analysisData = null) => {
-        // CORREÇÃO V2.7: Acessa as variáveis corretas
         const { iaAnalysisModal, iaAnalysisOutput, saveIaAnalysisBtn } = AppPrincipal.elements;
         
         if (analysisData) {
-            // Modo "Visualização" (clicou em um histórico)
-            iaAnalysisOutput.textContent = analysisData.analysisResult; // Mostra resultado salvo
-            AppPrincipal.state.currentAnalysisData = analysisData; // Armazena para debug (mas não salva de novo)
-            saveIaAnalysisBtn.classList.add('hidden'); // Esconde o botão salvar
+            // Modo "Visualização"
+            iaAnalysisOutput.textContent = analysisData.analysisResult;
+            AppPrincipal.state.currentAnalysisData = analysisData;
+            saveIaAnalysisBtn.classList.add('hidden');
         } else {
-            // Modo "Nova Análise" (será preenchido pelo AdminPanel)
+            // Modo "Nova Análise"
             iaAnalysisOutput.textContent = "Coletando dados do atleta...";
-            saveIaAnalysisBtn.classList.add('hidden'); // Esconde até a análise terminar
-            AppPrincipal.state.currentAnalysisData = null; // Limpa cache
+            saveIaAnalysisBtn.classList.add('hidden');
+            AppPrincipal.state.currentAnalysisData = null;
         }
         
         iaAnalysisModal.classList.remove('hidden');
@@ -641,15 +657,14 @@ const AppPrincipal = {
 
     closeIaAnalysisModal: () => {
         AppPrincipal.elements.iaAnalysisModal.classList.add('hidden');
-        AppPrincipal.state.currentAnalysisData = null; // Limpa a análise atual
+        AppPrincipal.state.currentAnalysisData = null;
     },
     
-    // NOVO (V2.6): Salva a análise da IA no Firebase (Diretriz 2)
+    // ATUALIZADO (V3.0): Correção do Bug 4 (Listener)
     handleSaveIaAnalysis: async () => {
         const { saveIaAnalysisBtn } = AppPrincipal.elements;
         const analysisData = AppPrincipal.state.currentAnalysisData;
         
-        // Pega o atleta selecionado no AdminPanel (que deve estar no state do AdminPanel)
         const athleteId = AdminPanel.state.selectedAthleteId; 
 
         if (!analysisData || !athleteId) {
@@ -667,9 +682,18 @@ const AppPrincipal = {
             alert("Análise salva com sucesso!");
             AppPrincipal.closeIaAnalysisModal();
             
+            // ===================================================================
+            // CORREÇÃO (V3.0 - Bug 4): Limpa o listener antigo ANTES de recarregar
+            // ===================================================================
+            if (AppPrincipal.state.listeners['adminIaHistory']) {
+                AppPrincipal.state.listeners['adminIaHistory'].off();
+                delete AppPrincipal.state.listeners['adminIaHistory'];
+                console.log("Listener de Histórico de IA limpo para recarga.");
+            }
+            
             // Recarrega o histórico de IA (se a aba estiver visível)
             if (AdminPanel.elements.iaHistoryList) {
-                AdminPanel.loadIaHistory(athleteId);
+                AdminPanel.loadIaHistory(athleteId); // Agora é seguro chamar
             }
 
         } catch (err) {
@@ -682,7 +706,114 @@ const AppPrincipal = {
     },
 
     // ===================================================================
-    // MÓDULO 4: Funções de IA (V2.6 - IA Vision)
+    // NOVO (V3.0): Funções do Modal de Perfil (Feature 3)
+    // ===================================================================
+    openProfileModal: () => {
+        const { profileModal, profileName, profileBio, profilePicPreview, profileUploadFeedback, saveProfileBtn } = AppPrincipal.elements;
+        const { userData } = AppPrincipal.state;
+        
+        if (!userData) return;
+
+        // Reseta o estado
+        AppPrincipal.state.modal.newPhotoUrl = null;
+        profileUploadFeedback.textContent = "";
+        saveProfileBtn.disabled = false;
+        saveProfileBtn.textContent = "Salvar Perfil";
+
+        // Preenche com dados atuais
+        profileName.value = userData.name || '';
+        profileBio.value = userData.bio || '';
+        profilePicPreview.src = userData.photoUrl || 'https://placehold.co/150x150/4169E1/FFFFFF?text=Atleta';
+
+        profileModal.classList.remove('hidden');
+    },
+
+    closeProfileModal: () => {
+        AppPrincipal.elements.profileModal.classList.add('hidden');
+        AppPrincipal.state.modal.newPhotoUrl = null; // Limpa URL pendente
+    },
+    
+    handleProfilePhotoUpload: async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const { profileUploadFeedback, saveProfileBtn, profilePicPreview } = AppPrincipal.elements;
+
+        profileUploadFeedback.textContent = "Enviando foto...";
+        profileUploadFeedback.style.color = "var(--strava-orange)";
+        saveProfileBtn.disabled = true;
+
+        try {
+            // Usa a pasta 'profile'
+            const imageUrl = await AppPrincipal.uploadFileToCloudinary(file, 'profile');
+            
+            AppPrincipal.state.modal.newPhotoUrl = imageUrl; // Salva URL para o submit
+            profilePicPreview.src = imageUrl; // Atualiza preview
+            profileUploadFeedback.textContent = "Foto alterada. Clique em 'Salvar Perfil' para confirmar.";
+            profileUploadFeedback.style.color = "var(--success-color)";
+
+        } catch (err) {
+            console.error("Erro no upload da foto de perfil:", err);
+            profileUploadFeedback.textContent = "Falha no upload da foto.";
+            profileUploadFeedback.style.color = "var(--danger-color)";
+        } finally {
+            saveProfileBtn.disabled = false;
+            event.target.value = null; // Limpa o input
+        }
+    },
+
+    handleProfileSubmit: async (e) => {
+        e.preventDefault();
+        const { saveProfileBtn, profileName, profileBio } = AppPrincipal.elements;
+        const { currentUser } = AppPrincipal.state;
+        
+        saveProfileBtn.disabled = true;
+        saveProfileBtn.textContent = "Salvando...";
+
+        try {
+            const newName = profileName.value.trim();
+            const newBio = profileBio.value.trim();
+            const newPhotoUrl = AppPrincipal.state.modal.newPhotoUrl;
+
+            if (!newName) {
+                throw new Error("O nome não pode ficar em branco.");
+            }
+
+            const updates = {};
+            updates[`/users/${currentUser.uid}/name`] = newName;
+            updates[`/users/${currentUser.uid}/bio`] = newBio;
+            
+            if (newPhotoUrl) {
+                updates[`/users/${currentUser.uid}/photoUrl`] = newPhotoUrl;
+            }
+            
+            // Salva no Firebase
+            await AppPrincipal.state.db.ref().update(updates);
+
+            // Atualiza o estado local
+            AppPrincipal.state.userData.name = newName;
+            AppPrincipal.state.userData.bio = newBio;
+            if (newPhotoUrl) {
+                AppPrincipal.state.userData.photoUrl = newPhotoUrl;
+            }
+            
+            // Atualiza o header
+            AppPrincipal.elements.userDisplay.textContent = newName;
+
+            console.log("Perfil salvo com sucesso.");
+            AppPrincipal.closeProfileModal();
+
+        } catch (err) {
+            console.error("Erro ao salvar perfil:", err);
+            alert("Erro ao salvar perfil: " + err.message);
+            saveProfileBtn.disabled = false;
+            saveProfileBtn.textContent = "Salvar Perfil";
+        }
+    },
+
+
+    // ===================================================================
+    // MÓDULO 4: Funções de IA (V3.0 - Cloudinary atualizado)
     // ===================================================================
 
     // NOVO (V2.6): Lida com o upload da foto e chama a IA Vision
@@ -753,9 +884,9 @@ const AppPrincipal = {
         stravaDataDisplay.classList.remove('hidden');
     },
 
-    // Adaptado do Kumon-IA (agora `callGeminiTextAPI`)
+    // API Gemini Texto (V2.6)
     callGeminiTextAPI: async (prompt) => {
-        // V2.5: Lê a chave do 'window' e verifica o placeholder CORRETO
+        // V2.5: Lê a chave do 'window'
         if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY.includes("COLE_SUA_CHAVE_GEMINI_AQUI")) {
             throw new Error("API Key do Gemini não configurada em js/config.js");
         }
@@ -781,7 +912,7 @@ const AppPrincipal = {
         return data.candidates[0].content.parts[0].text;
     },
 
-    // NOVO (V2.6): API Gemini Vision (para Strava)
+    // API Gemini Vision (V2.6)
     callGeminiVisionAPI: async (prompt, base64Data, mimeType) => {
         if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY.includes("COLE_SUA_CHAVE_GEMINI_AQUI")) {
             throw new Error("API Key do Gemini não configurada em js/config.js");
@@ -824,8 +955,8 @@ const AppPrincipal = {
         return data.candidates[0].content.parts[0].text;
     },
     
-    // Adaptado do Kumon-IA (agora `uploadFileToCloudinary`)
-    uploadFileToCloudinary: async (file) => {
+    // ATUALIZADO (V3.0): Aceita 'folderName'
+    uploadFileToCloudinary: async (file, folderName = 'workouts') => {
         // V2.5: Lê a config do 'window'
         if (!window.CLOUDINARY_CONFIG || !window.CLOUDINARY_CONFIG.cloudName || !window.CLOUDINARY_CONFIG.uploadPreset || window.CLOUDINARY_CONFIG.cloudName.includes("SEU_CLOUD_NAME")) {
             throw new Error("Cloudinary não está configurado em js/config.js");
@@ -834,7 +965,8 @@ const AppPrincipal = {
         const f = new FormData(); 
         f.append('file', file); 
         f.append('upload_preset', window.CLOUDINARY_CONFIG.uploadPreset); 
-        f.append('folder', `lerunners/${AppPrincipal.state.currentUser.uid}`);
+        // Salva na subpasta correta (workouts/ ou profile/)
+        f.append('folder', `lerunners/${AppPrincipal.state.currentUser.uid}/${folderName}`);
         
         const r = await fetch(`https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CONFIG.cloudName}/upload`, { method: 'POST', body: f });
         if (!r.ok) throw new Error("Falha no upload para Cloudinary.");
@@ -845,7 +977,7 @@ const AppPrincipal = {
 };
 
 // ===================================================================
-// 2. AuthLogic (Lógica da index.html - MOVIDO PARA CÁ NA V2.4)
+// 2. AuthLogic (Lógica da index.html - V2.4)
 // ===================================================================
 const AuthLogic = {
     auth: null,
