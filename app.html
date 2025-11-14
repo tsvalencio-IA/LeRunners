@@ -4,24 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeRunners - Plataforma</title>
-    <!-- ATENÇÃO: Carregando V2.6 do CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    <!-- CORREÇÃO (V2.6): Removido link para manifest.json (estava dando 404) -->
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/logo-192.png">
+    <link rel="apple-touch-icon" href="img/logo-192.png">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <meta name="theme-color" content="#00008B">
 </head>
 <body class="app-page">
 
-    <!-- Loader Inicial (O Guardião está checando o login) -->
     <div id="loader" class="loader-container">
         <div class="loader"></div>
         <p>Autenticando...</p>
     </div>
 
-    <!-- Container Principal do Aplicativo (Inicia escondido) -->
     <div id="app-container" class="hidden">
         
-        <!-- Header Fixo -->
         <header class="app-header">
             <h1>LeRunners</h1>
             <nav>
@@ -31,6 +30,10 @@
                 <button id="nav-feed-btn" class="btn btn-nav">
                     <i class='bx bx-news'></i> <span>Feed</span>
                 </button>
+
+                <button id="nav-profile-btn" class="btn btn-nav">
+                    <i class='bx bx-user-circle'></i> <span>Meu Perfil</span>
+                </button>
                 <span id="userDisplay" class="user-display"></span>
                 <button id="logoutButton" class="btn btn-danger">
                     <i class="bx bx-log-out"></i> Sair
@@ -38,65 +41,47 @@
             </nav>
         </header>
 
-        <!-- Conteúdo Dinâmico (Carregado pelo app.js) -->
         <main id="app-main-content" class="app-main">
-            <!-- O Painel do Admin, Atleta ou Feed será injetado aqui -->
-        </main>
+            </main>
     </div>
 
-    <!-- NOVO (V2.6): Rodapé (Diretriz 1) -->
     <footer class="app-footer">
         Desenvolvido com 🤖 por thIAguinho Soluções
     </footer>
 
-    <!-- 
-      ===================================================================
-      TEMPLATES HTML (Modelos que o JS vai usar para construir a tela) 
-      ===================================================================
-    -->
-
-    <!-- ========== Template do COACH (Admin) V2.6 ========== -->
     <template id="admin-panel-template">
         <div class="admin-dashboard">
             <h2><i class="bx bx-shield-quarter"></i> Painel do Coach</h2>
             
-            <!-- Painel de Aprovações Pendentes (do corri_rp) -->
             <div class="panel approval-panel">
                 <h3><i class='bx bx-user-check'></i> Aprovações Pendentes</h3>
                 <div id="pending-list">
-                    <!-- Lista de atletas aguardando aprovação -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Layout Principal do Coach -->
             <div class="admin-layout">
                 <div class="athlete-list-container panel">
                     <h3><i class='bx bx-group'></i> Meus Atletas</h3>
                     <input type="text" id="athlete-search" class="search-input" placeholder="Pesquisar atleta...">
                     <div id="athlete-list" class="athlete-list">
-                        <!-- Lista de atletas aprovados -->
-                    </div>
+                        </div>
                 </div>
                 <div class="athlete-details-container panel">
                     <h3 id="athlete-detail-name">Selecione um Atleta</h3>
                     
                     <div id="athlete-detail-content" class="hidden">
                         
-                        <!-- Ações do Coach (V2.3) -->
                         <div class="admin-action-buttons">
-                            <!-- Botão Excluir movido para o final da prescrição -->
                             <button id="delete-athlete-btn" class="btn btn-danger btn-small">
                                 <i class='bx bx-user-x'></i> Excluir Aluno
                             </button>
                         </div>
                         
-                        <!-- NOVO (V2.6): Abas do Admin (Diretriz 2) -->
                         <div class="admin-tabs">
                             <button class="tab-btn active" data-tab="prescrever">Prescrever</button>
                             <button class="tab-btn" data-tab="kpis">KPIs & IA</button>
                         </div>
 
-                        <!-- Aba 1: Prescrever -->
                         <div id="admin-tab-prescrever" class="admin-tab-content active">
                             <h4><i class='bx bx-calendar-edit'></i> Prescrever Treino</h4>
                             <form id="add-workout-form" class="form-minimal">
@@ -120,11 +105,9 @@
                             <hr>
                             <h4><i class='bx bx-history'></i> Treinos Agendados</h4>
                             <div id="workouts-list">
-                                <!-- Lista de treinos do atleta selecionado -->
-                            </div>
+                                </div>
                         </div>
 
-                        <!-- Aba 2: KPIs & IA -->
                         <div id="admin-tab-kpis" class="admin-tab-content">
                             <h4><i class='bx bxs-brain'></i> Análise de Performance (IA)</h4>
                              <button id="analyze-athlete-btn-ia" class="btn btn-secondary" style="width: 100%; margin-bottom: 1rem;">
@@ -133,8 +116,7 @@
                             
                             <h4><i class='bx bx-save'></i> Histórico de Análises Salvas</h4>
                             <div id="ia-history-list" class="ia-history-list">
-                                <!-- Análises salvas da IA (Diretriz 2) -->
-                            </div>
+                                </div>
                         </div>
 
                     </div>
@@ -143,7 +125,6 @@
         </div>
     </template>
 
-    <!-- ========== Template do ATLETA V2.6 ========== -->
     <template id="atleta-panel-template">
         <div class="atleta-dashboard">
             <div class="atleta-header">
@@ -157,31 +138,21 @@
             <div id="atleta-workouts-container" class="panel">
                 <h4>Meus Treinos</h4>
                 <div id="atleta-workouts-list">
-                    <!-- Treinos prescritos pelo Coach -->
-                </div>
+                    </div>
             </div>
         </div>
     </template>
 
-    <!-- ========== Template do FEED SOCIAL (V2.1) ========== -->
     <template id="feed-panel-template">
         <div class="feed-dashboard">
             <h2><i class='bx bx-news'></i> Feed da Equipe</h2>
             <p class="subtitle">Veja o que a equipe está fazendo e deixe seu feedback.</p>
             <div id="feed-list" class="feed-list">
-                <!-- Cards de treinos realizados (do /publicWorkouts/) -->
-            </div>
+                </div>
         </div>
     </template>
 
 
-    <!-- 
-      ===================================================================
-      MODAIS GLOBAIS (Pop-ups)
-      ===================================================================
-    -->
-
-    <!-- Modal de Feedback/Comentários (ATUALIZADO V2.6) -->
     <div id="feedback-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -193,7 +164,6 @@
                     <input type="hidden" id="feedback-workout-id">
                     <input type="hidden" id="feedback-workout-owner-id">
                     
-                    <!-- Seção "Marcar como Feito" -->
                     <fieldset>
                         <legend>Status do Treino</legend>
                         <div class="form-group">
@@ -210,14 +180,12 @@
                             <textarea id="workout-feedback-text" rows="3" placeholder="Ex: Senti o joelho no final, mas o pace foi bom..." required></textarea>
                         </div>
                         
-                        <!-- NOVO (V2.6): Upload de Foto (IA Vision) -->
                         <div class="form-group">
                             <label for="photo-upload-input">Anexar Foto (Opcional - Gemini pode ler dados do Strava)</label>
                             <input type="file" id="photo-upload-input" accept="image/*">
                             <p id="photo-upload-feedback" class="upload-feedback"></p>
                         </div>
                         
-                        <!-- NOVO (V2.6): Dados do Strava (Diretriz 4) -->
                         <fieldset id="strava-data-display" class="strava-data-display hidden">
                             <legend><i class='bx bxl-strava'></i> Dados Extraídos (Gemini Vision)</legend>
                             <p id="strava-data-distancia"></p>
@@ -231,12 +199,10 @@
                 
                 <hr>
 
-                <!-- Seção de Comentários (Coach e Atleta) -->
                 <fieldset>
                     <legend>Comentários (Coach/Atleta)</legend>
                     <div id="comments-list" class="comments-list">
-                        <!-- Comentários serão carregados aqui -->
-                    </div>
+                        </div>
                     <form id="comment-form" class="comment-form">
                         <input type="text" id="comment-input" placeholder="Escreva um comentário..." required>
                         <button type="submit" class="btn btn-secondary btn-small">
@@ -248,7 +214,6 @@
         </div>
     </div>
 
-    <!-- Modal de Log Manual de Atividade (V2.3) -->
     <div id="log-activity-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -289,7 +254,6 @@
         </div>
     </div>
 
-    <!-- Modal "Quem Curtiu" (V2.3) -->
     <div id="who-liked-modal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
@@ -298,13 +262,11 @@
             </div>
             <div class="modal-body">
                 <ul id="who-liked-list">
-                    <!-- Lista de nomes será injetada pelo JS -->
-                </ul>
+                    </ul>
             </div>
         </div>
     </div>
 
-    <!-- Modal Análise IA (Admin) (ATUALIZADO V2.6) -->
     <div id="ia-analysis-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -314,7 +276,6 @@
             <div class="modal-body">
                 <pre id="ia-analysis-output">Gerando relatório...</pre>
             </div>
-            <!-- NOVO (V2.6): Footer com botão Salvar (Diretriz 2) -->
             <div class="modal-footer">
                 <button id="save-ia-analysis-btn" class="btn btn-primary hidden">
                     <i class="bx bx-save"></i> Salvar Análise
@@ -323,18 +284,46 @@
         </div>
     </div>
 
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class='bx bx-user-circle'></i> Meu Perfil</h3>
+                <button class="close-btn" id="close-profile-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-form">
+                    <fieldset>
+                        <legend>Minhas Informações</legend>
+                        
+                        <div class="profile-pic-container">
+                            <img src="https://placehold.co/150x150/4169E1/FFFFFF?text=Atleta" alt="Foto do Perfil" id="profile-pic-preview" class="profile-pic-preview">
+                        </div>
 
-    <!-- Scripts Firebase -->
+                        <div class="form-group">
+                            <label for="profile-pic-upload">Alterar Foto (Opcional)</label>
+                            <input type="file" id="profile-pic-upload" accept="image/*">
+                            <p id="profile-upload-feedback" class="upload-feedback"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-name">Nome Completo</label>
+                            <input type="text" id="profile-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-bio">Biografia (Opcional)</label>
+                            <textarea id="profile-bio" rows="3" placeholder="Fale um pouco sobre você, seus objetivos..."></textarea>
+                        </div>
+                        
+                        <button type="submit" id="save-profile-btn" class="btn btn-primary">Salvar Perfil</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <!-- Script Cloudinary (V2.3) -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
-    <!-- Scripts da Aplicação (ARQUITETURA V2.4) -->
     <script src="js/config.js"></script>
-    <script src="js/app.js"></script> <!-- Cérebro (AppPrincipal) e AuthLogic -->
-    <script src="js/panels.js"></script> <!-- Módulos (AdminPanel, AtletaPanel, FeedPanel) -->
-
-</body>
+    <script src="js/app.js"></script> <script src="js/panels.js"></script> </body>
 </html>
