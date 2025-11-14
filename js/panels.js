@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE MÓDULOS (V2.6 - PAINEIS E CORREÇÃO DE LIKES)
+/* ARQUIVO DE MÓDULOS (V2.7 - PAINEIS E CORREÇÃO DE LIKES - CORRIGIDO)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -11,7 +11,7 @@ const AdminPanel = {
     elements: {},
 
     init: (user, db) => {
-        console.log("AdminPanel V2.6: Inicializado.");
+        console.log("AdminPanel V2.7: Inicializado.");
         AdminPanel.state = { db, currentUser: user, selectedAthleteId: null, athletes: {} };
 
         AdminPanel.elements = {
@@ -44,7 +44,13 @@ const AdminPanel = {
         
         // Listeners Abas V2.6
         AdminPanel.elements.tabPrescreverBtn.addEventListener('click', () => AdminPanel.switchTab('prescrever'));
-        AdminPanel.elements.tabKpisBtn.addEventListener('click', () => AdminPanel.switchTab('kpis'));
+        AdminPanel.elements.tabKpisBtn.addEventListener('click', () => {
+            AdminPanel.switchTab('kpis');
+            // NOVO (V2.6): Carrega o histórico de IA quando a aba é clicada
+            if(AdminPanel.state.selectedAthleteId) {
+                AdminPanel.loadIaHistory(AdminPanel.state.selectedAthleteId);
+            }
+        });
         AdminPanel.elements.analyzeAthleteBtnIa.addEventListener('click', AdminPanel.handleAnalyzeAthleteIA);
         
         // Carregar dados
@@ -226,6 +232,7 @@ const AdminPanel = {
             AdminPanel.elements.athleteDetailContent.classList.remove('hidden');
             AdminPanel.switchTab('prescrever'); // Sempre reseta para a aba 'prescrever'
             AdminPanel.loadWorkouts(uid);
+            AdminPanel.loadIaHistory(uid); // V2.6: Carrega o histórico (mesmo que a aba não esteja visível)
         }
         
         document.querySelectorAll('.athlete-list-item').forEach(el => {
@@ -466,16 +473,18 @@ const AdminPanel = {
         AppPrincipal.state.listeners[String(`comments_${workoutId}`)] = commentsListener;
     },
 
-    // ATUALIZADO (V2.6): Lógica de Análise IA (Diretriz 2 e 4)
+    // ATUALIZADO (V2.7 - CORRIGIDO): Lógica de Análise IA (Diretriz 2 e 4)
     handleAnalyzeAthleteIA: async () => {
         const { selectedAthleteId } = AdminPanel.state;
         if (!selectedAthleteId) return alert("Selecione um atleta.");
         
         AppPrincipal.openIaAnalysisModal(); // Abre o modal (sem dados)
-        const outputEl = AppPrincipal.elements.iaAnalysisOutput;
+        
+        // CORREÇÃO V2.7: Acessa as variáveis corretas do AppPrincipal
+        const iaAnalysisOutput = AppPrincipal.elements.iaAnalysisOutput;
         const saveBtn = AppPrincipal.elements.saveIaAnalysisBtn;
         
-        outputEl.textContent = "Coletando dados do atleta...";
+        iaAnalysisOutput.textContent = "Coletando dados do atleta...";
         saveBtn.classList.add('hidden'); // Esconde o botão Salvar
 
         try {
@@ -509,13 +518,13 @@ const AdminPanel = {
                 5.  **Sugestão de Foco:** Qual deve ser o foco para a próxima semana? (Ex: Focar em recuperação, aumentar volume, etc.).
             `;
             
-            outputEl.textContent = "Enviando dados para análise (Gemini)...";
+            iaAnalysisOutput.textContent = "Enviando dados para análise (Gemini)...";
             
-            // 3. Chamar a API
+            // 3. Chamar a API (do AppPrincipal)
             const analysisResult = await AppPrincipal.callGeminiTextAPI(prompt);
             
             // 4. Exibir resultado e armazenar no state (para o botão Salvar)
-            outputEl.textContent = analysisResult;
+            iaAnalysisOutput.textContent = analysisResult;
             AppPrincipal.state.currentAnalysisData = {
                 analysisDate: new Date().toISOString(),
                 coachUid: AdminPanel.state.currentUser.uid,
@@ -526,7 +535,7 @@ const AdminPanel = {
 
         } catch (err) {
             console.error("Erro na Análise IA:", err);
-            outputEl.textContent = `ERRO: ${err.message}`;
+            iaAnalysisOutput.textContent = `ERRO: ${err.message}`;
             saveBtn.classList.add('hidden'); // Esconde o botão se der erro
         }
     }
