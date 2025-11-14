@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.6 - CÉREBRO, AUTH E IA VISION)
+/* ARQUIVO DE LÓGICA UNIFICADO (V2.7 - CÉREBRO, AUTH E IA VISION - CORRIGIDO)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -26,7 +26,7 @@ const AppPrincipal = {
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2.6 (Cérebro, IA Vision)...");
+        console.log("Iniciando AppPrincipal V2.7 (Cérebro, IA Vision - CORRIGIDO)...");
         
         // V2.5: Verifica a chave no 'window'
         if (typeof window.firebaseConfig === 'undefined' || window.firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
@@ -581,18 +581,21 @@ const AppPrincipal = {
         AppPrincipal.elements.whoLikedModal.classList.add('hidden');
     },
 
-    // ----- Modal Análise IA (V2.6) -----
+    // ----- Modal Análise IA (V2.7 - CORRIGIDO) -----
     openIaAnalysisModal: (analysisData = null) => {
+        // CORREÇÃO V2.7: Acessa as variáveis corretas
         const { iaAnalysisModal, iaAnalysisOutput, saveIaAnalysisBtn } = AppPrincipal.elements;
         
         if (analysisData) {
             // Modo "Visualização" (clicou em um histórico)
-            outputEl.textContent = analysisData.analysisResult;
+            iaAnalysisOutput.textContent = analysisData.analysisResult; // Mostra resultado salvo
+            AppPrincipal.state.currentAnalysisData = analysisData; // Armazena para debug (mas não salva de novo)
             saveIaAnalysisBtn.classList.add('hidden'); // Esconde o botão salvar
         } else {
             // Modo "Nova Análise" (será preenchido pelo AdminPanel)
-            outputEl.textContent = "Coletando dados do atleta...";
+            iaAnalysisOutput.textContent = "Coletando dados do atleta...";
             saveIaAnalysisBtn.classList.add('hidden'); // Esconde até a análise terminar
+            AppPrincipal.state.currentAnalysisData = null; // Limpa cache
         }
         
         iaAnalysisModal.classList.remove('hidden');
@@ -607,7 +610,9 @@ const AppPrincipal = {
     handleSaveIaAnalysis: async () => {
         const { saveIaAnalysisBtn } = AppPrincipal.elements;
         const analysisData = AppPrincipal.state.currentAnalysisData;
-        const athleteId = AdminPanel.state.selectedAthleteId; // Pega o atleta selecionado no AdminPanel
+        
+        // Pega o atleta selecionado no AdminPanel (que deve estar no state do AdminPanel)
+        const athleteId = AdminPanel.state.selectedAthleteId; 
 
         if (!analysisData || !athleteId) {
             alert("ERRO: Dados da análise ou ID do atleta não encontrados.");
@@ -623,6 +628,11 @@ const AppPrincipal = {
             
             alert("Análise salva com sucesso!");
             AppPrincipal.closeIaAnalysisModal();
+            
+            // Recarrega o histórico de IA (se a aba estiver visível)
+            if (AdminPanel.elements.iaHistoryList) {
+                AdminPanel.loadIaHistory(athleteId);
+            }
 
         } catch (err) {
             console.error("Erro ao salvar análise:", err);
