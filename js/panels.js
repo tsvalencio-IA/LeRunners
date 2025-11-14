@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE MÓDULOS (V3.0 - PERFIL DO ATLETA E CORREÇÕES DE BUGS)
+/* ARQUIVO DE MÓDULOS (V3.2 - VER PERFIL PÚBLICO)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -156,13 +156,12 @@ const AdminPanel = {
                 email: pendingData.email, 
                 role: "atleta", 
                 createdAt: new Date().toISOString(),
-                bio: "", // NOVO (V3.0)
-                photoUrl: "" // NOVO (V3.0)
+                bio: "", // (V3.0)
+                photoUrl: "" // (V3.0)
             };
             
             const updates = {};
             updates[`/users/${uid}`] = newUserProfile;
-            // updates[`/publicProfiles/${uid}`] = newPublicProfile; // Removido V2.9+
             updates[`/data/${uid}`] = { workouts: {} };     
             updates[`/iaAnalysisHistory/${uid}`] = {}; // V2.6
             updates[`/pendingApprovals/${uid}`] = null; 
@@ -183,7 +182,7 @@ const AdminPanel = {
             .catch(err => alert("Falha ao rejeitar: " + err.message));
     },
 
-    // ATUALIZADO (V3.0): Correção do Bug 1 (Excluir Aluno)
+    // (V3.0 - Correção Bug 1)
     deleteAthlete: () => {
         const { selectedAthleteId } = AdminPanel.state;
         if (!selectedAthleteId) return;
@@ -196,7 +195,6 @@ const AdminPanel = {
         const updates = {};
         updates[`/users/${selectedAthleteId}`] = null;
         updates[`/data/${selectedAthleteId}`] = null;
-        // updates[`/publicProfiles/${selectedAthleteId}`] = null; // CORREÇÃO (V3.0): Removido nó obsoleto
         updates[`/iaAnalysisHistory/${selectedAthleteId}`] = null; // V2.6
         
         const feedRef = AdminPanel.state.db.ref('publicWorkouts');
@@ -217,13 +215,9 @@ const AdminPanel = {
         });
     },
 
-    // ATUALIZADO (V3.0): Correção do Bug 2 (Troca de Atleta)
+    // (V3.0 - Correção Bug 2)
     selectAthlete: (uid, name) => {
-        // ===================================================================
-        // CORREÇÃO (V3.0 - Bug 2): Limpa TODOS os listeners do painel anterior
-        // Isso inclui 'adminWorkouts', 'adminIaHistory' E os listeners de 
-        // likes/comments de CADA card (ex: 'likes_workout123').
-        // ===================================================================
+        // Limpa TODOS os listeners do painel anterior (Bug 2)
         AppPrincipal.cleanupListeners(true);
 
         if (uid === null) {
@@ -251,7 +245,7 @@ const AdminPanel = {
         workoutsList.innerHTML = "<p>Carregando treinos...</p>";
         
         const workoutsRef = AdminPanel.state.db.ref(`data/${athleteId}/workouts`);
-        // Recria o listener principal de treinos (que foi limpo pelo selectAthlete)
+        // Recria o listener principal de treinos
         AppPrincipal.state.listeners['adminWorkouts'] = workoutsRef.orderByChild('date').on('value', snapshot => {
             workoutsList.innerHTML = ""; 
             if (!snapshot.exists()) {
@@ -277,7 +271,7 @@ const AdminPanel = {
         iaHistoryList.innerHTML = "<p>Carregando histórico de IA...</p>";
         
         const historyRef = AdminPanel.state.db.ref(`iaAnalysisHistory/${athleteId}`);
-        // Recria o listener principal do histórico (que foi limpo pelo selectAthlete)
+        // Recria o listener principal do histórico
         AppPrincipal.state.listeners['adminIaHistory'] = historyRef.orderByChild('analysisDate').limitToLast(10).on('value', snapshot => {
             iaHistoryList.innerHTML = ""; 
             if (!snapshot.exists()) {
@@ -419,7 +413,7 @@ const AdminPanel = {
         `;
     },
     
-    // Carrega status (likes/comentários) de um card (V2.6)
+    // Carrega status (likes/comentários) de um card (V3.0 - Bug 2)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
@@ -430,10 +424,6 @@ const AdminPanel = {
         const likesRef = AdminPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = AdminPanel.state.db.ref(`workoutComments/${workoutId}`);
         
-        // ===================================================================
-        // ATENÇÃO (V3.0 - Bug 2): Armazena este listener no AppPrincipal
-        // para que ele possa ser limpo pelo cleanupListeners()
-        // ===================================================================
         const likesListenerKey = `likes_${workoutId}`;
         const commentsListenerKey = `comments_${workoutId}`;
 
@@ -554,14 +544,14 @@ const AdminPanel = {
 };
 
 // ===================================================================
-// 4. AtletaPanel (Lógica do Painel Atleta V2.6)
+// 4. AtletaPanel (Lógica do Painel Atleta V3.0)
 // ===================================================================
 const AtletaPanel = {
     state: {},
     elements: {},
 
     init: (user, db) => {
-        console.log("AtletaPanel V2.6: Inicializado.");
+        console.log("AtletaPanel V3.0: Inicializado.");
         AtletaPanel.state = { db, currentUser: user };
         AtletaPanel.elements = { 
             workoutsList: document.getElementById('atleta-workouts-list'),
@@ -642,7 +632,7 @@ const AtletaPanel = {
         return el;
     },
     
-    // Carrega status (likes/comentários) de um card (V2.6)
+    // Carrega status (likes/comentários) de um card (V3.0 - Bug 2)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
@@ -653,9 +643,6 @@ const AtletaPanel = {
         const likesRef = AdminPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = AdminPanel.state.db.ref(`workoutComments/${workoutId}`);
         
-        // ===================================================================
-        // ATENÇÃO (V3.0 - Bug 2): Armazena este listener no AppPrincipal
-        // ===================================================================
         const likesListenerKey = `likes_${workoutId}`;
         const commentsListenerKey = `comments_${workoutId}`;
 
@@ -716,14 +703,14 @@ const AtletaPanel = {
 };
 
 // ===================================================================
-// 5. FeedPanel (Lógica do Feed Social V3.0)
+// 5. FeedPanel (Lógica do Feed Social V3.2)
 // ===================================================================
 const FeedPanel = {
     state: {},
     elements: {},
 
     init: (user, db) => {
-        console.log("FeedPanel V3.0: Inicializado.");
+        console.log("FeedPanel V3.2: Inicializado.");
         FeedPanel.state = { db, currentUser: user };
         FeedPanel.elements = { feedList: document.getElementById('feed-list') };
         
@@ -761,7 +748,7 @@ const FeedPanel = {
         });
     },
     
-    // ATUALIZADO (V3.0): Card do Feed com Avatar (Feature 3)
+    // ATUALIZADO (V3.2): Card do Feed com listeners no Avatar/Nome
     createFeedCard: (id, data, ownerId) => {
         const el = document.createElement('div');
         el.className = 'workout-card';
@@ -797,10 +784,26 @@ const FeedPanel = {
                 </div>
             </div>
         `;
+
+        // ===================================================================
+        // NOVO (V3.2): Adiciona listeners para abrir o modal de visualização de perfil
+        // ===================================================================
+        const avatarEl = el.querySelector('.athlete-avatar');
+        const nameEl = el.querySelector('.athlete-name');
+
+        const openProfile = (e) => {
+            e.stopPropagation(); // Impede o modal de feedback de abrir
+            AppPrincipal.openViewProfileModal(ownerId);
+        };
+
+        avatarEl.addEventListener('click', openProfile);
+        nameEl.addEventListener('click', openProfile);
+        // ===================================================================
         
-        // Abre o Modal de Comentários
+        // Abre o Modal de Feedback (clique no card)
         el.addEventListener('click', (e) => {
-             if (!e.target.closest('button')) { // Não abre se clicar no like
+             // Não abre se clicar no like (botões são tratados) ou nos elementos de perfil (tratados por stopPropagation)
+             if (!e.target.closest('button')) { 
                 AppPrincipal.openFeedbackModal(id, ownerId, data.title);
              }
         });
@@ -811,7 +814,7 @@ const FeedPanel = {
         return el;
     },
     
-    // Carrega status (likes/comentários) de um card (V2.6)
+    // Carrega status (likes/comentários) de um card (V3.0 - Bug 2)
     loadWorkoutStats: (cardElement, workoutId, ownerId) => {
         const likeBtn = cardElement.querySelector('.btn-like');
         const likeCount = cardElement.querySelector('.like-count');
@@ -822,9 +825,6 @@ const FeedPanel = {
         const likesRef = FeedPanel.state.db.ref(`workoutLikes/${workoutId}`);
         const commentsRef = FeedPanel.state.db.ref(`workoutComments/${workoutId}`);
         
-        // ===================================================================
-        // ATENÇÃO (V3.0 - Bug 2): Armazena este listener no AppPrincipal
-        // ===================================================================
         const likesListenerKey = `feed_likes_${workoutId}`;
         const commentsListenerKey = `feed_comments_${workoutId}`;
         
