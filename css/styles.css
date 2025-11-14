@@ -336,7 +336,7 @@ legend {
 
 
 /* =================================================================== */
-/* 5. PAINEL ADMIN (V2.6)
+/* 5. PAINEL ADMIN (V3.5)
 /* =================================================================== */
 .admin-dashboard h2,
 .atleta-dashboard h2,
@@ -458,6 +458,44 @@ legend {
 .admin-tab-content.active {
     display: block;
 }
+
+/* ===================================================================
+  NOVO (V3.5): Estilos do Formulário Estruturado
+  ===================================================================
+*/
+.form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.form-grid-4col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+}
+.form-minimal .form-group {
+    margin-bottom: 0; /* Remove margem dupla dentro do fieldset */
+}
+.form-minimal .form-grid-4col .form-group input,
+.form-minimal .form-grid-2col .form-group input {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+}
+.form-minimal .form-group select {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.4rem;
+}
+.workout-fieldset {
+    padding: 0.75rem 1rem 1rem 1rem;
+    background: #fdfdfd;
+}
+.workout-fieldset legend {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+/* =================================================================== */
+
+
 /* Lista de Histórico de IA */
 .ia-history-list .workout-card { /* Reutilizando o card */
     cursor: pointer;
@@ -688,7 +726,7 @@ legend {
     position: absolute;
     top: 1rem;
     left: 1rem;
-    /* NOVO (V3.2): Deixa o avatar clicável */
+    /* (V3.2): Deixa o avatar clicável */
     cursor: pointer;
     transition: transform 0.2s ease;
 }
@@ -704,7 +742,7 @@ legend {
     margin-left: 55px;
     display: block;
     padding-top: 0.25rem;
-    /* NOVO (V3.2): Deixa o nome clicável */
+    /* (V3.2): Deixa o nome clicável */
     cursor: pointer;
     text-decoration: none;
     display: inline-block; /* Para o hover funcionar bem */
@@ -874,10 +912,7 @@ legend {
     color: var(--success-color); /* Feedback de upload de perfil */
 }
 
-/* ===================================================================
-  NOVO (V3.2): Estilos do Modal de Visualização de Perfil
-  ===================================================================
-*/
+/* Estilos do Modal de Visualização de Perfil (V3.2) */
 #view-profile-modal .modal-content {
     max-width: 500px; /* Um pouco menor */
 }
@@ -909,6 +944,15 @@ legend {
     }
     .athlete-list-container {
         max-height: 300px; /* Limita altura em telas pequenas */
+    }
+    
+    /* V3.5: Formulário estruturado em 1 coluna */
+    .form-grid-2col,
+    .form-grid-4col {
+        grid-template-columns: 1fr;
+    }
+    .form-minimal .form-group {
+        margin-bottom: 0.5rem; /* Adiciona espaço no mobile */
     }
 }
 
@@ -973,6 +1017,11 @@ legend {
     .feed-list .athlete-avatar {
         width: 35px;
         height: 35px;
+    }
+    
+    /* V3.5: Garante que 4 colunas virem 2 no mobile */
+    .form-grid-4col {
+        grid-template-columns: 1fr 1fr;
     }
 
 }
