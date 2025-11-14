@@ -1,5 +1,5 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V2.8 - CÉREBRO, AUTH E CORREÇÃO LISTENERS)
+/* ARQUIVO DE LÓGICA UNIFICADO (V2.9 - CORREÇÃO CACHE DE NOMES)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* =================================================================== */
 
@@ -15,7 +15,7 @@ const AppPrincipal = {
         listeners: {},     // Para limpar listeners do Firebase
         currentView: 'planilha', // 'planilha' ou 'feed'
         adminUIDs: {},     // Cache dos UIDs de admins
-        publicProfiles: {}, // Cache dos perfis públicos
+        userCache: {}, // CORREÇÃO (V2.9): Cache de NOMES vindo de /users
         modal: {
             isOpen: false,
             currentWorkoutId: null,
@@ -26,7 +26,7 @@ const AppPrincipal = {
     },
 
     init: () => {
-        console.log("Iniciando AppPrincipal V2.8 (Cérebro, IA Vision - CORREÇÃO LISTENERS)...");
+        console.log("Iniciando AppPrincipal V2.9 (Cérebro, Correção de Cache)...");
         
         // V2.5: Verifica a chave no 'window'
         if (typeof window.firebaseConfig === 'undefined' || window.firebaseConfig.apiKey.includes("COLE_SUA_CHAVE")) {
@@ -117,7 +117,6 @@ const AppPrincipal = {
         AppPrincipal.elements.feedbackModal.addEventListener('click', (e) => {
             if (e.target === AppPrincipal.elements.feedbackModal) AppPrincipal.closeFeedbackModal();
         });
-        // NOVO (V2.6): Listener para IA Vision do Strava
         AppPrincipal.elements.photoUploadInput.addEventListener('change', AppPrincipal.handlePhotoUpload);
 
         // Listeners Modal Log Atividade (V2.3)
@@ -145,22 +144,21 @@ const AppPrincipal = {
         AppPrincipal.state.auth.onAuthStateChanged(AppPrincipal.handlePlatformAuthStateChange);
     },
 
-    // Carrega caches de Admins e Perfis Públicos
+    // CORREÇÃO V2.9: Carrega cache de /users (fonte da verdade)
     loadCaches: () => {
         const adminsRef = AppPrincipal.state.db.ref('admins');
-        // CORREÇÃO V2.8: Armazena a REF, não o callback
         AppPrincipal.state.listeners['cacheAdmins'] = adminsRef;
         adminsRef.on('value', snapshot => {
             AppPrincipal.state.adminUIDs = snapshot.val() || {};
             console.log("Cache de Admins carregado:", Object.keys(AppPrincipal.state.adminUIDs));
         });
 
-        const profilesRef = AppPrincipal.state.db.ref('publicProfiles');
-        // CORREÇÃO V2.8: Armazena a REF, não o callback
-        AppPrincipal.state.listeners['cacheProfiles'] = profilesRef;
-        profilesRef.on('value', snapshot => {
-            AppPrincipal.state.publicProfiles = snapshot.val() || {};
-            console.log("Cache de Perfis Públicos carregado.");
+        // CORREÇÃO: Lê de /users, não /publicProfiles
+        const usersRef = AppPrincipal.state.db.ref('users');
+        AppPrincipal.state.listeners['cacheUsers'] = usersRef;
+        usersRef.on('value', snapshot => {
+            AppPrincipal.state.userCache = snapshot.val() || {};
+            console.log("Cache de *Usuários* (V2.9) carregado.");
         });
     },
 
@@ -182,11 +180,32 @@ const AppPrincipal = {
         // 1. É Admin?
         AppPrincipal.state.db.ref('admins/' + uid).once('value', adminSnapshot => {
             if (adminSnapshot.exists() && adminSnapshot.val() === true) {
+                
+                // CORREÇÃO V2.9: Garante que o Admin tenha um perfil em /users
                 AppPrincipal.state.db.ref('users/' + uid).once('value', userSnapshot => {
-                    let adminName = userSnapshot.exists() ? userSnapshot.val().name : user.email;
+                    let adminName;
+                    if (userSnapshot.exists()) {
+                        // Admin já tem perfil em /users (Cenário ideal)
+                        adminName = userSnapshot.val().name;
+                    } else {
+                        // *** NOVO (V2.9) FIX ***
+                        // Admin foi promovido manualmente e não tem perfil. Criar um.
+                        console.warn(`Admin ${user.email} não encontrado em /users. Criando perfil...`);
+                        adminName = user.email; // Nome temporário é o email
+                        const adminProfile = {
+                            name: adminName,
+                            email: user.email,
+                            role: "admin",
+                            createdAt: new Date().toISOString()
+                        };
+                        // Escreve o perfil (não precisa esperar)
+                        AppPrincipal.state.db.ref('users/' + uid).set(adminProfile);
+                        // O cache 'cacheUsers' vai atualizar automaticamente
+                    }
+                    
                     AppPrincipal.state.userData = { name: adminName, role: 'admin', uid: uid };
                     AppPrincipal.elements.userDisplay.textContent = `${adminName} (Coach)`;
-                    AppPrincipal.navigateTo('planilha'); // Coach começa na planilha
+                    AppPrincipal.navigateTo('planilha');
                 });
                 return;
             }
@@ -216,7 +235,6 @@ const AppPrincipal = {
         navPlanilhaBtn.classList.toggle('active', page === 'planilha');
         navFeedBtn.classList.toggle('active', page === 'feed');
 
-        // VERIFICA SE OS PAINÉIS (de panels.js) ESTÃO CARREGADOS
         if (typeof AdminPanel === 'undefined' || typeof AtletaPanel === 'undefined' || typeof FeedPanel === 'undefined') {
             console.error("ERRO CRÍTICO: js/panels.js não foi carregado a tempo.");
             mainContent.innerHTML = "<h1>Erro ao carregar módulos. Recarregue a página.</h1>";
@@ -260,12 +278,10 @@ const AppPrincipal = {
         Object.keys(AppPrincipal.state.listeners).forEach(key => {
             const listenerRef = AppPrincipal.state.listeners[key];
             
-            // Se for 'panelOnly', só limpa listeners que NÃO são os caches
-            if (panelOnly && (key === 'cacheAdmins' || key === 'cacheProfiles')) {
+            if (panelOnly && (key === 'cacheAdmins' || key === 'cacheUsers')) { // V2.9: Protege 'cacheUsers'
                 return; 
             }
             
-            // Verifica se é uma referência válida do Firebase
             if (listenerRef && typeof listenerRef.off === 'function') {
                 listenerRef.off(); // Desliga o listener
             }
@@ -275,7 +291,7 @@ const AppPrincipal = {
     },
     
     // ===================================================================
-    // MÓDULO 3/4: Lógica dos Modais (V2.8 - CORREÇÃO LISTENER)
+    // MÓDULO 3/4: Lógica dos Modais (V2.9 - CORREÇÃO LISTENER E CACHE)
     // ===================================================================
     
     // ----- Modal Feedback (V2.8) -----
@@ -357,8 +373,12 @@ const AppPrincipal = {
                 const item = document.createElement('div');
                 item.className = 'comment-item';
                 const date = new Date(data.timestamp).toLocaleString('pt-BR', { timeStyle: 'short', dateStyle: 'short' });
+                
+                // CORREÇÃO V2.9: Usa o userCache para o nome
+                const commenterName = AppPrincipal.state.userCache[data.uid]?.name || "Usuário";
+                
                 item.innerHTML = `
-                    <p><strong>${data.name}:</strong> ${data.text}</p>
+                    <p><strong>${commenterName}:</strong> ${data.text}</p>
                     <span>${date}</span>
                 `;
                 commentsList.appendChild(item);
@@ -436,7 +456,8 @@ const AppPrincipal = {
                 
                 const publicData = {
                     ownerId: currentOwnerId,
-                    ownerName: AppPrincipal.state.userData.name,
+                    // CORREÇÃO V2.9: Pega o nome do userCache
+                    ownerName: AppPrincipal.state.userCache[currentOwnerId]?.name || AppPrincipal.state.userData.name,
                     date: workoutData.date,
                     title: workoutData.title,
                     description: workoutData.description,
@@ -474,7 +495,8 @@ const AppPrincipal = {
 
         const commentData = {
             uid: AppPrincipal.state.currentUser.uid,
-            name: AppPrincipal.state.userData.name,
+            // CORREÇÃO V2.9: Pega o nome do userCache (ou do state.userData)
+            name: AppPrincipal.state.userCache[AppPrincipal.state.currentUser.uid]?.name || AppPrincipal.state.userData.name,
             text: text,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
@@ -530,7 +552,8 @@ const AppPrincipal = {
             // 2. Salva no nó PÚBLICO (para o feed)
             const publicData = {
                 ownerId: athleteId,
-                ownerName: AppPrincipal.state.userData.name,
+                // CORREÇÃO V2.9: Pega o nome do userCache
+                ownerName: AppPrincipal.state.userCache[athleteId]?.name || AppPrincipal.state.userData.name,
                 date: workoutData.date,
                 title: workoutData.title,
                 description: workoutData.description,
@@ -552,7 +575,7 @@ const AppPrincipal = {
         }
     },
 
-    // ----- Modal Quem Curtiu (V2.6 - Corrigido) -----
+    // ----- Modal Quem Curtiu (V2.9 - CORRIGIDO) -----
     openWhoLikedModal: (workoutId) => {
         const { whoLikedModal, whoLikedList } = AppPrincipal.elements;
         whoLikedList.innerHTML = "<li>Carregando...</li>";
@@ -566,20 +589,20 @@ const AppPrincipal = {
             }
 
             whoLikedList.innerHTML = ""; // Limpa o "Carregando"
-            const profilesCache = AppPrincipal.state.publicProfiles;
+            // CORREÇÃO V2.9: Usa o userCache
+            const userCache = AppPrincipal.state.userCache;
             
-            // Usamos Promises para aguardar todas as buscas
             const promises = [];
             snapshot.forEach(childSnapshot => {
                 const uid = childSnapshot.key;
                 
-                // DIRETRIZ 5 (BUG): Tenta pegar do cache. Se falhar, busca no DB.
-                if (profilesCache[uid]) {
-                    promises.push(Promise.resolve(profilesCache[uid].name));
+                // CORREÇÃO V2.9: Lê o nome do userCache
+                if (userCache[uid] && userCache[uid].name) {
+                    promises.push(Promise.resolve(userCache[uid].name));
                 } else {
-                    // Fallback: Busca o nome no DB (mais lento, mas corrige "Usuário Desconhecido")
-                    const profileRef = AppPrincipal.state.db.ref(`publicProfiles/${uid}/name`);
-                    promises.push(profileRef.once('value').then(snap => snap.val() || "Usuário (ID: ..."+uid.slice(-4)+")"));
+                    // Fallback: Busca o nome em /users (caso o cache ainda não tenha atualizado)
+                    const userRef = AppPrincipal.state.db.ref(`users/${uid}/name`);
+                    promises.push(userRef.once('value').then(snap => snap.val() || "Usuário (ID: ..."+uid.slice(-4)+")"));
                 }
             });
 
