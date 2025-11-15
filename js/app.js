@@ -152,7 +152,7 @@ const AppPrincipal = {
             if (e.target === AppPrincipal.elements.whoLikedModal) AppPrincipal.closeWhoLikedModal();
         });
 
-        // Listeners Modal IA (V2.6)
+        // Listeners Modal Análise IA (V2.6)
         AppPrincipal.elements.closeIaAnalysisModal.addEventListener('click', AppPrincipal.closeIaAnalysisModal);
         AppPrincipal.elements.iaAnalysisModal.addEventListener('click', (e) => {
             if (e.target === AppPrincipal.elements.iaAnalysisModal) AppPrincipal.closeIaAnalysisModal();
@@ -1008,8 +1008,120 @@ const AppPrincipal = {
         
         const data = await r.json();
         return data.secure_url; // Retorna a URL segura
+    },
+    
+    // ===================================================================
+    // 6. StravaLogic (Nova Integração V5.0) - Adicionado a este módulo
+    // ===================================================================
+    handleStravaConnect: () => {
+        // 1. Monta a URL de Autorização
+        const clientID = window.STRAVA_PUBLIC_CONFIG.clientID;
+        const redirectURI = window.STRAVA_PUBLIC_CONFIG.redirectURI;
+        
+        const stravaAuthUrl = `https://www.strava.com/oauth/authorize?` +
+            `client_id=${clientID}&` +
+            `response_type=code&` +
+            `redirect_uri=${redirectURI}&` +
+            `approval_prompt=force&` +
+            `scope=read_all,activity:read_all,profile:read_all`; // Escopos necessários
+
+        // 2. Redireciona o usuário para o Strava
+        window.location.href = stravaAuthUrl;
+    },
+
+    // Função que será chamada quando o Strava retornar para app.html
+    exchangeStravaCode: async (stravaCode) => {
+        const VERCEL_API_URL = window.STRAVA_PUBLIC_CONFIG.vercelAPI;
+        const user = AppPrincipal.state.currentUser;
+
+        if (!user) {
+            alert("Erro: Usuário não autenticado para conectar ao Strava.");
+            return;
+        }
+
+        try {
+            const idToken = await user.getIdToken();
+
+            console.log("Enviando código Strava para o backend Vercel...");
+
+            const response = await fetch(VERCEL_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Enviando o token do Firebase de forma segura
+                    'Authorization': `Bearer ${idToken}` 
+                },
+                body: JSON.stringify({ 
+                    code: stravaCode
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Strava conectado com sucesso! Recarregando...");
+                window.location.href = 'app.html'; // Recarrega para limpar a URL
+            } else {
+                console.error("Erro na integração Strava:", result);
+                alert(`Falha ao conectar Strava: ${result.details || result.error}`);
+                // Recarrega sem o código na URL
+                window.location.href = 'app.html';
+            }
+
+        } catch (error) {
+            console.error("Erro de rede/chamada da função Vercel:", error);
+            alert("Erro de rede ao contatar o backend.");
+            window.location.href = 'app.html';
+        }
     }
 };
+
+// Injeta o Guardião de Callback do Strava no initPlatform
+AppPrincipal.initPlatformOriginal = AppPrincipal.initPlatform;
+AppPrincipal.initPlatform = () => {
+    // Chama a função original
+    AppPrincipal.initPlatformOriginal();
+
+    // Novo Guardião: Verifica se há código do Strava na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const stravaCode = urlParams.get('code');
+    const stravaError = urlParams.get('error');
+
+    if (stravaCode && !stravaError) {
+        // Se houver código, o app deve trocar o token
+        AppPrincipal.elements.loader.classList.remove('hidden');
+        AppPrincipal.elements.appContainer.classList.add('hidden');
+        AppPrincipal.exchangeStravaCode(stravaCode);
+    } else if (stravaError) {
+        alert(`Conexão Strava Falhou: ${stravaError}.`);
+        window.location.href = 'app.html'; // Limpa a URL
+    }
+};
+
+// Adiciona o botão de conexão Strava no Modal de Perfil (V3.0)
+AppPrincipal.openProfileModalOriginal = AppPrincipal.openProfileModal;
+AppPrincipal.openProfileModal = () => {
+    AppPrincipal.openProfileModalOriginal();
+    
+    const modalBody = AppPrincipal.elements.profileModal.querySelector('.modal-body');
+    if (!modalBody.querySelector('#strava-connect-section')) {
+        const stravaSection = document.createElement('div');
+        stravaSection.id = 'strava-connect-section';
+        stravaSection.innerHTML = `
+            <fieldset style="margin-top: 1rem;">
+                <legend><i class='bx bxl-strava'></i> Integração Strava</legend>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Conecte sua conta para permitir a leitura de dados pela IA.</p>
+                <button id="btn-connect-strava" class="btn btn-secondary" style="background-color: var(--strava-orange); color: white;">
+                    <i class='bx bxl-strava'></i> Conectar Strava
+                </button>
+            </fieldset>
+        `;
+        modalBody.appendChild(stravaSection);
+        
+        modalBody.querySelector('#btn-connect-strava').addEventListener('click', AppPrincipal.handleStravaConnect);
+    }
+};
+// ===================================================================
 
 // ===================================================================
 // 2. AuthLogic (Lógica da index.html - V2.4)
