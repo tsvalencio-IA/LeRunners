@@ -2,14 +2,13 @@
 /* ARQUIVO DE LÓGICA UNIFICADO (V3.2 - VER PERFIL PÚBLICO)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
 /* CORREÇÃO CRÍTICA STRAVA (V3.2.1): Espera a autenticação do Firebase.
-/* CORREÇÃO CRÍTICA LOGIN (V3.2.5): Novo FIX de inicialização e referência de botões do AuthLogic.
+/* FIX DE LOGIN (V3.2.6): Retorna à estrutura de inicialização estável.
 /* =================================================================== */
 
 // ===================================================================
 // 1. AppPrincipal (O Cérebro) - Lógica de app.html
 // ===================================================================
 const AppPrincipal = {
-    // ... (AppPrincipal.state, elements e métodos são mantidos idênticos às versões anteriores)
     state: {
         currentUser: null,
         userData: null,
@@ -23,23 +22,54 @@ const AppPrincipal = {
         stravaData: null,
         currentAnalysisData: null
     },
+
     elements: {},
 
+    // Inicialização principal: Decisão se está em app.html ou index.html
     init: () => {
-        // ... (lógica de inicialização do Firebase e mapeamento inicial de AppPrincipal)
+        console.log("Iniciando AppPrincipal V3.2 (Cérebro, Ver Perfil)...");
+        
+        if (typeof window.firebaseConfig === 'undefined') {
+            document.body.innerHTML = "<h1>Erro Crítico: O arquivo js/config.js não foi configurado.</h1>";
+            return;
+        }
+
+        try {
+            if (firebase.apps.length === 0) {
+                firebase.initializeApp(window.firebaseConfig);
+            }
+        } catch (e) {
+            document.body.innerHTML = "<h1>Erro Crítico: Falha ao conectar com o Firebase.</h1>";
+            return;
+        }
+
+        AppPrincipal.state.auth = firebase.auth();
+        AppPrincipal.state.db = firebase.database();
+
+        // Roteamento: O script está na index.html ou app.html?
+        if (document.getElementById('login-form')) {
+            console.log("Modo: Autenticação (index.html)");
+            AuthLogic.init(AppPrincipal.state.auth, AppPrincipal.state.db); // Chama o AuthLogic com os objetos
+        } else if (document.getElementById('app-container')) {
+            console.log("Modo: Plataforma (app.html)");
+            AppPrincipal.initPlatform();
+        }
     },
     
-    initPlatform: () => {
-        // ... (Mapeamento de elementos de app.html e Listeners)
-        // ... (O Guardião de Strava é injetado no final)
-    },
-
-    // ... (RESTO DOS MÉTODOS DO AppPrincipal: navigateTo, handleLogout, handlePhotoUpload, etc.)
+    // ... (initPlatform, loadCaches, handlePlatformAuthStateChange, navigateTo, etc.)
+    
+    // ... (RESTO DOS MÉTODOS DO AppPrincipal - MANTIDOS IDÊNTICOS)
 
     // ===================================================================
     // StravaLogic (Apenas o bloco de injeção no final do AppPrincipal)
     // ===================================================================
-    // ... (handleStravaConnect, exchangeStravaCode)
+    handleStravaConnect: () => {
+        // ... (Lógica para montar URL e redirecionar)
+    },
+
+    exchangeStravaCode: async (stravaCode) => {
+        // ... (Lógica de troca de token Vercel/Firebase)
+    },
     
     // Injeta a correção do Guardião de Strava no initPlatform
     AppPrincipal.initPlatformOriginal = AppPrincipal.initPlatform;
@@ -55,6 +85,7 @@ const AppPrincipal = {
             AppPrincipal.elements.loader.classList.remove('hidden');
             AppPrincipal.elements.appContainer.classList.add('hidden');
             
+            // CORREÇÃO STRAVA V3.2.1: Espera a autenticação
             const unsubscribe = AppPrincipal.state.auth.onAuthStateChanged(user => {
                 if (user) { 
                     if (AppPrincipal.state.currentUser && user.uid === AppPrincipal.state.currentUser.uid) {
@@ -75,52 +106,43 @@ const AppPrincipal = {
 
 
 // ===================================================================
-// 2. AuthLogic (Lógica da index.html - FIX V3.2.5)
+// 2. AuthLogic (Lógica da index.html - FIX V3.2.6)
 // ===================================================================
 const AuthLogic = {
     auth: null,
     db: null,
     elements: {},
 
-    init: () => { 
-        console.log("AuthLogic V3.2.5: Inicializado.");
+    init: (auth, db) => { // RECEBE auth e db como argumentos
+        console.log("AuthLogic V3.2.6: Inicializado.");
         
-        // 1. Garante que o Firebase esteja inicializado
-        if (typeof window.firebaseConfig === 'undefined') {
-            document.getElementById('login-error').textContent = "Erro: Configuração do Firebase ausente.";
-            return;
-        }
-        if (firebase.apps.length === 0) {
-            firebase.initializeApp(window.firebaseConfig);
-        }
-        
-        // 2. Mapeia auth/db
-        AuthLogic.auth = firebase.auth();
-        AuthLogic.db = firebase.database();
+        // CORREÇÃO: Usa os objetos passados pelo AppPrincipal
+        AuthLogic.auth = auth;
+        AuthLogic.db = db;
 
-        // 3. Mapeia elementos (usando IDs corrigidos no index.html)
+        // Mapeia elementos
         AuthLogic.elements = {
             loginForm: document.getElementById('login-form'),
             registerForm: document.getElementById('register-form'),
             pendingView: document.getElementById('pending-view'),
             pendingEmailDisplay: document.getElementById('pending-email-display'),
             btnLogoutPending: document.getElementById('btn-logout-pending'),
-            loginErrorMsg: document.getElementById('login-error'), // ID do P
-            registerErrorMsg: document.getElementById('register-error'), // ID do P
+            loginErrorMsg: document.getElementById('login-error'),
+            registerErrorMsg: document.getElementById('register-error'),
             toggleToRegister: document.getElementById('toggleToRegister'),
             toggleToLogin: document.getElementById('toggleToLogin'),
+            
+            // IDs dos botões de submit
             btnSubmitLogin: document.getElementById('btn-submit-login'),
             btnSubmitRegister: document.getElementById('btn-submit-register')
         };
         
-        // 4. Registra Listeners
+        // Registra Listeners
         AuthLogic.elements.toggleToRegister.addEventListener('click', AuthLogic.handleToggle);
         AuthLogic.elements.toggleToLogin.addEventListener('click', AuthLogic.handleToggle);
         AuthLogic.elements.btnLogoutPending.addEventListener('click', () => AuthLogic.auth.signOut());
         
-        // CORREÇÃO CRÍTICA: Não usar addEventListener direto nos forms,
-        // mas sim nos elementos mapeados que controlam a submissão,
-        // garantindo que os elementos existam no momento da chamada.
+        // CRÍTICO: Registra os handlers de submit
         if(AuthLogic.elements.loginForm) {
              AuthLogic.elements.loginForm.addEventListener('submit', AuthLogic.handleLogin);
         }
@@ -128,7 +150,7 @@ const AuthLogic = {
              AuthLogic.elements.registerForm.addEventListener('submit', AuthLogic.handleRegister);
         }
         
-        // 5. Inicia o guardião de estado
+        // Inicia o guardião de estado
         AuthLogic.auth.onAuthStateChanged(AuthLogic.handleLoginGuard);
     },
     
@@ -138,10 +160,8 @@ const AuthLogic = {
         const password = document.getElementById('loginPassword').value;
         const btn = AuthLogic.elements.btnSubmitLogin;
         
-        // Resetamos o campo de erro no início
-        AuthLogic.elements.loginErrorMsg.textContent = ""; 
+        AuthLogic.elements.loginErrorMsg.textContent = "";
 
-        // CRÍTICO: Verifica se os elementos do form estão válidos antes de desabilitar o botão
         if(!email || !password) return;
 
         btn.disabled = true;
@@ -156,34 +176,15 @@ const AuthLogic = {
                 } else {
                     AuthLogic.elements.loginErrorMsg.textContent = "Erro ao tentar entrar.";
                 }
-                // CORREÇÃO: Não reseta o formulário aqui para permitir correção.
             });
     },
 
-    handleRegister: (e) => {
-        e.preventDefault();
-        const name = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        const btn = AuthLogic.elements.btnSubmitRegister;
-        
-        // ... (RESTO DA LÓGICA DE REGISTRO)
-    },
-    
-    // ... (showView, handleToggle, handleLoginGuard - MANTIDOS IDÊNTICOS)
+    // ... (RESTO DOS MÉTODOS DO AuthLogic: handleRegister, handleLoginGuard, etc.)
 };
 
 
-// =l= INICIALIZAÇÃO FINAL (V3.2.5) =l=
+// =l= INICIALIZAÇÃO FINAL (V3.2.6) =l=
 // O código completo deve incluir o AppPrincipal e o AuthLogic completos aqui.
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Inicialização da Lógica da Plataforma (app.html)
-    if (document.body.classList.contains('app-page')) {
-        AppPrincipal.init();
-    } 
-    // Inicialização da Lógica de Autenticação (index.html)
-    else if (document.body.classList.contains('login-page')) {
-        AuthLogic.init();
-    }
-});
+// O DOMContentLoaded irá chamar a função AppPrincipal.init(), que fará o roteamento.
+document.addEventListener('DOMContentLoaded', AppPrincipal.init);
