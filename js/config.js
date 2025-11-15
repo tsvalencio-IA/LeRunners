@@ -26,10 +26,10 @@ const CLOUDINARY_CONFIG = {
 const STRAVA_PUBLIC_CONFIG = {
     // ID PÚBLICO
     clientID: '185534', 
-    // URL DE RETORNO (DEVE SER A URL DO SEU GITHUB PAGES, ex: https://seuusuario.github.io/LeRunners-main/app.html)
+    // URL DE RETORNO (APONTA PARA O SEU GITHUB PAGES - CORRETO!)
     redirectURI: 'https://tsvalencio-ia.github.io/LeRunners/app.html', 
-    // URL da API Vercel
-    vercelAPI: 'SUA_URL_VERCEL_AQUI/api/strava-exchange'
+    // URL da API Vercel (FINALIZADA!)
+    vercelAPI: 'https://le-runners-git-main-thiaguinho-s-projects.vercel.app/api/strava-exchange'
 };
 
 // ===================================================================
