@@ -27,7 +27,7 @@ const STRAVA_PUBLIC_CONFIG = {
     // ID PÚBLICO
     clientID: '185534', 
     // URL DE RETORNO (DEVE SER A URL DO SEU GITHUB PAGES, ex: https://seuusuario.github.io/LeRunners-main/app.html)
-    redirectURI: 'SUA_URL_GITHUB_PAGES_AQUI/app.html', 
+    redirectURI: 'https://tsvalencio-ia.github.io/LeRunners/app.html', 
     // URL da API Vercel
     vercelAPI: 'SUA_URL_VERCEL_AQUI/api/strava-exchange'
 };
