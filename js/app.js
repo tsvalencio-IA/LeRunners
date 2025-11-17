@@ -1,6 +1,6 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V3.2.11 - FINAL ÍNTEGRA 100% E FIX DE SYNTAX ERROR)
-/* CORREÇÃO CRÍTICA: Limpeza de sintaxe e estabilidade de inicialização.
+/* ARQUIVO DE LÓGICA UNIFICADO (V3.3.1 - ÍNTEGRA TOTAL 100% E FIX DE SYNTAX ERROR)
+/* CORREÇÃO CRÍTICA: Restaura o Login e Adiciona o Strava/IA de forma estável.
 /* =================================================================== */
 
 // ===================================================================
@@ -23,9 +23,9 @@ const AppPrincipal = {
 
     elements: {},
 
-    // Inicialização principal: Decisão se está em app.html ou index.html
+    // Inicialização principal: Decisão se está em app.html ou index.html (V2.2 Roteamento)
     init: () => {
-        console.log("Iniciando AppPrincipal V3.2.11...");
+        console.log("Iniciando AppPrincipal V3.3.1...");
         
         if (typeof window.firebaseConfig === 'undefined') {
             document.body.innerHTML = "<h1>Erro Crítico: O arquivo js/config.js não foi configurado.</h1>";
@@ -392,7 +392,6 @@ const AppPrincipal = {
     },
     
     closeFeedbackModal: () => {
-        AppPrincipal.state.modal.isOpen = false;
         AppPrincipal.elements.feedbackModal.classList.add('hidden');
         
         const listenerRef = AppPrincipal.state.listeners['modalComments'];
@@ -1113,7 +1112,6 @@ const AuthLogic = {
             loginForm: document.getElementById('login-form'),
             registerForm: document.getElementById('register-form'),
             pendingView: document.getElementById('pending-view'),
-            pendingEmailDisplay: document.getElementById('pending-email-display'),
             btnLogoutPending: document.getElementById('btn-logout-pending'),
             loginErrorMsg: document.getElementById('login-error'),
             registerErrorMsg: document.getElementById('register-error'),
