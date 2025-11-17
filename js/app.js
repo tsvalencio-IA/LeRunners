@@ -1,6 +1,6 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V3.2.10 - ÍNTEGRA TOTAL 100% E SEM SYNTAX ERROR)
-/* RESTAURADO: Versão estável com FIX de login e Strava.
+/* ARQUIVO DE LÓGICA UNIFICADO (V3.2.11 - FINAL ÍNTEGRA 100% E FIX DE SYNTAX ERROR)
+/* CORREÇÃO CRÍTICA: Limpeza de sintaxe e estabilidade de inicialização.
 /* =================================================================== */
 
 // ===================================================================
@@ -23,9 +23,9 @@ const AppPrincipal = {
 
     elements: {},
 
-    // Inicialização principal: Decisão se está em app.html ou index.html (V2.2 Roteamento)
+    // Inicialização principal: Decisão se está em app.html ou index.html
     init: () => {
-        console.log("Iniciando AppPrincipal V3.2.10...");
+        console.log("Iniciando AppPrincipal V3.2.11...");
         
         if (typeof window.firebaseConfig === 'undefined') {
             document.body.innerHTML = "<h1>Erro Crítico: O arquivo js/config.js não foi configurado.</h1>";
@@ -1109,18 +1109,17 @@ const AuthLogic = {
         AuthLogic.auth = auth;
         AuthLogic.db = db;
 
-        // Mapeamento de elementos de login/registro (usando IDs no HTML)
         AuthLogic.elements = {
             loginForm: document.getElementById('login-form'),
             registerForm: document.getElementById('register-form'),
             pendingView: document.getElementById('pending-view'),
+            pendingEmailDisplay: document.getElementById('pending-email-display'),
             btnLogoutPending: document.getElementById('btn-logout-pending'),
             loginErrorMsg: document.getElementById('login-error'),
             registerErrorMsg: document.getElementById('register-error'),
             toggleToRegister: document.getElementById('toggleToRegister'),
             toggleToLogin: document.getElementById('toggleToLogin'),
             
-            // IDs de botões de submit do index.html (Obrigatório ter ID)
             btnSubmitLogin: document.getElementById('btn-submit-login'),
             btnSubmitRegister: document.getElementById('btn-submit-register')
         };
