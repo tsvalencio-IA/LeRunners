@@ -86,9 +86,24 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script src="js/config.js"></script>
-    <script src="js/app.js"></script> <script>
-        // O AppPrincipal.init (no js/app.js) fará o roteamento de inicialização no DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', AppPrincipal.init);
+    <script src="js/app.js"></script>
+    
+    <script>
+        // CORREÇÃO FINAL: Injeta a lógica de alternância diretamente no DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            // Rotas de alternância (Login/Registro)
+            document.getElementById('toggleToRegister').addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthLogic.showView('register');
+            });
+            document.getElementById('toggleToLogin').addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthLogic.showView('login');
+            });
+
+            // Inicializa a lógica principal (Roteamento para app.html/Autenticação)
+            AppPrincipal.init();
+        });
     </script>
 </body>
 </html>
