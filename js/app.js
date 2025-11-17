@@ -1,7 +1,7 @@
 /* =================================================================== */
-/* ARQUIVO DE LÓGICA UNIFICADO (V3.2.9 - ÍNTEGRA TOTAL 100%)
+/* ARQUIVO DE LÓGICA UNIFICADO (V3.3.0 - ÍNTEGRA TOTAL 100%)
 /* ARQUITETURA: Refatorada (app.js + panels.js)
-/* FIX DE LOGIN/STRAVA (V3.2.7): Estável + Completo.
+/* FIX DE LOGIN/STRAVA: Versão final, completa e estável.
 /* =================================================================== */
 
 // ===================================================================
@@ -26,7 +26,7 @@ const AppPrincipal = {
 
     // Inicialização principal: Decisão se está em app.html ou index.html (V2.2 Roteamento)
     init: () => {
-        console.log("Iniciando AppPrincipal V3.2.9...");
+        console.log("Iniciando AppPrincipal V3.3.0...");
         
         if (typeof window.firebaseConfig === 'undefined') {
             document.body.innerHTML = "<h1>Erro Crítico: O arquivo js/config.js não foi configurado.</h1>";
@@ -1110,6 +1110,7 @@ const AuthLogic = {
         AuthLogic.auth = auth;
         AuthLogic.db = db;
 
+        // Mapeamento de elementos de login/registro (usando IDs no HTML)
         AuthLogic.elements = {
             loginForm: document.getElementById('login-form'),
             registerForm: document.getElementById('register-form'),
@@ -1121,15 +1122,16 @@ const AuthLogic = {
             toggleToRegister: document.getElementById('toggleToRegister'),
             toggleToLogin: document.getElementById('toggleToLogin'),
             
-            // IDs de botões de submit do index.html (Obrigatório ter ID)
             btnSubmitLogin: document.getElementById('btn-submit-login'),
             btnSubmitRegister: document.getElementById('btn-submit-register')
         };
         
+        // Registra Listeners
         AuthLogic.elements.toggleToRegister.addEventListener('click', AuthLogic.handleToggle);
         AuthLogic.elements.toggleToLogin.addEventListener('click', AuthLogic.handleToggle);
         AuthLogic.elements.btnLogoutPending.addEventListener('click', () => AuthLogic.auth.signOut());
         
+        // CRÍTICO: Registra os handlers de submit nos formulários
         if(AuthLogic.elements.loginForm) {
              AuthLogic.elements.loginForm.addEventListener('submit', AuthLogic.handleLogin);
         }
