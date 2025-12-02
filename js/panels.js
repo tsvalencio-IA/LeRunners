@@ -1,18 +1,17 @@
 /* =================================================================== */
-/* PANELS.JS V16 - SISRUN DASHBOARD + PRESCRIÇÃO DETALHADA
+/* PANELS.JS V17 - SISRUN COMPLETO
 /* =================================================================== */
 
 const AdminPanel = {
-    state: { db: null, currentUser: null, selectedAthleteId: null, athletes: {} },
-    elements: {},
+    state: {}, elements: {},
 
     init: (user, db) => {
-        AdminPanel.state.db = db;
-        AdminPanel.state.currentUser = user;
+        console.log("AdminPanel V17 Carregado"); // Para verificar no console
+        AdminPanel.state = { db, currentUser: user, athletes: {} };
         
-        const mainContent = document.getElementById('app-main-content');
-        if(mainContent) {
-            mainContent.innerHTML = `
+        const main = document.getElementById('app-main-content');
+        if(main) {
+            main.innerHTML = `
                 <div class="sisrun-dashboard">
                     <div class="dashboard-header">
                         <h2>Painel do Treinador</h2>
@@ -42,13 +41,10 @@ const AdminPanel = {
         AdminPanel.state.db.ref('users').on('value', s => AdminPanel.state.athletes = s.val() || {});
         AdminPanel.state.db.ref('publicWorkouts').limitToLast(100).on('value', s => {
             if(!s.exists()) return;
-            let happy=0, neutral=0, sad=0;
-            s.forEach(c => {
-                const w = c.val();
-                if(w.status === 'nao_realizado') sad++; else if(w.stravaData) happy++; else neutral++;
-            });
-            if(document.getElementById('count-happy')) document.getElementById('count-happy').textContent = happy;
-            if(document.getElementById('count-sad')) document.getElementById('count-sad').textContent = sad;
+            let h=0, n=0, sa=0;
+            s.forEach(c => { const w=c.val(); if(w.status==='nao_realizado') sa++; else if(w.stravaData) h++; else n++; });
+            if(document.getElementById('count-happy')) document.getElementById('count-happy').textContent = h;
+            if(document.getElementById('count-sad')) document.getElementById('count-sad').textContent = sa;
             if(AdminPanel.state.currentSection === 'feedbacks') AdminPanel.renderFeedbackTable();
         });
         AdminPanel.state.db.ref('pendingApprovals').on('value', s => {
@@ -71,8 +67,9 @@ const AdminPanel = {
         }
         else if (section === 'ia') {
             area.innerHTML = `
-                <h3>Central de Inteligência</h3>
-                <select id="ia-select" class="search-input"><option value="">Selecione o Aluno...</option></select>
+                <h3>Central de Inteligência (KPIs)</h3>
+                <p>Selecione um aluno:</p>
+                <select id="ia-select" class="search-input"><option value="">Selecione...</option></select>
                 <button class="btn btn-primary" style="margin-top:10px" onclick="AdminPanel.runGlobalIA()">Gerar Relatório</button>
                 <div id="ia-output" style="margin-top:20px; white-space:pre-wrap; background:#fff; padding:10px;"></div>
             `;
@@ -88,8 +85,9 @@ const AdminPanel = {
         AdminPanel.state.db.ref('publicWorkouts').limitToLast(50).once('value', snap => {
             const div = document.getElementById('feedback-list');
             if(!snap.exists()) { div.innerHTML = "Sem dados."; return; }
-            let html = `<table class="sisrun-table"><thead><tr><th>Aluno</th><th>Treino</th><th>Detalhes</th><th>Ver</th></tr></thead><tbody>`;
+            let html = `<table class="sisrun-table"><thead><tr><th>Aluno</th><th>Treino</th><th>Status</th><th>Ver</th></tr></thead><tbody>`;
             const list = []; snap.forEach(c => list.push({k:c.key, ...c.val()})); list.reverse();
+            
             list.forEach(w => {
                 let det = w.stravaData ? `<span class="strava-pill">Strava: ${w.stravaData.distancia}</span>` : "Manual";
                 html += `<tr><td>${w.ownerName}</td><td>${w.title}</td><td>${det}</td><td><button class="btn-icon" onclick="AppPrincipal.openFeedbackModal('${w.k}','${w.ownerId}','${w.title}')">👁️</button></td></tr>`;
@@ -127,17 +125,17 @@ const AdminPanel = {
         });
     },
 
+    // --- FORMULÁRIO DETALHADO (IGUAL SISRUN) ---
     openWS: (uid, name) => {
         document.getElementById('list').classList.add('hidden');
         const ws = document.getElementById('ws');
         ws.classList.remove('hidden');
         
-        // FORMULÁRIO COMPLETO ESTILO SISRUN
         ws.innerHTML = `
             <h3>${name}</h3>
             <button class="btn btn-secondary" onclick="document.getElementById('ws').classList.add('hidden');document.getElementById('list').classList.remove('hidden')">Voltar</button>
             
-            <div class="prescription-box" style="margin-top:20px;">
+            <div class="prescription-box">
                 <h4 style="border-bottom:1px solid #eee; padding-bottom:10px;">Adicionar Treino</h4>
                 <form id="ws-add-form">
                     <div class="form-grid-2col">
@@ -147,26 +145,18 @@ const AdminPanel = {
                     <div class="form-grid-2col">
                         <div class="form-group">
                             <label>Modalidade</label>
-                            <select id="w-mod">
-                                <option>Corrida</option><option>Caminhada</option><option>Bike</option><option>Musculação</option>
-                            </select>
+                            <select id="w-mod"><option>Corrida</option><option>Caminhada</option><option>Bike</option></select>
                         </div>
                         <div class="form-group">
                             <label>Tipo</label>
-                            <select id="w-type">
-                                <option>Rodagem</option><option>Intervalado</option><option>Longo</option><option>Fartlek</option><option>Regenerativo</option>
-                            </select>
+                            <select id="w-type"><option>Rodagem</option><option>Intervalado</option><option>Longo</option><option>Fartlek</option></select>
                         </div>
-                    </div>
-                    <div class="form-grid-2col">
-                        <div class="form-group"><label>Distância Planejada</label><input type="text" id="w-dist" placeholder="Ex: 10 km"></div>
-                        <div class="form-group"><label>Intensidade</label><select id="w-int"><option>Leve (Z1/Z2)</option><option>Moderado (Z3)</option><option>Forte (Z4)</option></select></div>
                     </div>
                     <div class="form-group">
                         <label>Descrição Detalhada</label>
-                        <textarea id="w-obs" rows="4" placeholder="Aquecimento: 10min... Principal: 5x 1km..."></textarea>
+                        <textarea id="w-obs" rows="4" placeholder="Aquecimento, Principal, Desaquecimento..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-success" style="width:100%">Salvar na Planilha</button>
+                    <button type="submit" class="btn btn-success" style="width:100%">Salvar</button>
                 </form>
             </div>
             
@@ -174,16 +164,7 @@ const AdminPanel = {
         
         document.getElementById('ws-add-form').onsubmit = (e) => {
             e.preventDefault();
-            
-            // Constrói descrição rica
-            const mod = document.getElementById('w-mod').value;
-            const type = document.getElementById('w-type').value;
-            const int = document.getElementById('w-int').value;
-            const dist = document.getElementById('w-dist').value;
-            const obs = document.getElementById('w-obs').value;
-            
-            const fullDesc = `[${mod}] ${type} (${int})\nMeta: ${dist}\n\n${obs}`;
-            
+            const fullDesc = `[${document.getElementById('w-mod').value}] ${document.getElementById('w-type').value}\n\n${document.getElementById('w-obs').value}`;
             AdminPanel.state.db.ref(`data/${uid}/workouts`).push({
                 date: document.getElementById('w-date').value,
                 title: document.getElementById('w-title').value,
@@ -199,6 +180,7 @@ const AdminPanel = {
         AdminPanel.loadWorkspaceWorkouts(uid);
     },
     
+    // Lista segura que não trava com dados antigos
     loadWorkspaceWorkouts: (uid) => {
         const div = document.getElementById('timeline');
         AdminPanel.state.db.ref(`data/${uid}/workouts`).orderByChild('date').limitToLast(50).on('value', snap => {
@@ -207,11 +189,11 @@ const AdminPanel = {
             
             const list = [];
             snap.forEach(c => list.push({k:c.key, ...c.val()}));
-            list.sort((a,b) => new Date(b.date) - new Date(a.date));
+            // Ordenação segura
+            list.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
             
             list.forEach(w => {
-                const s = w.stravaData ? `<br><small style='color:orange'><b>Strava:</b> ${w.stravaData.distancia} | ${w.stravaData.ritmo}</small>` : '';
-                // Mostra se foi planejado ou se já foi realizado (match)
+                const s = w.stravaData ? `<br><small style='color:orange'><b>Strava:</b> ${w.stravaData.distancia}</small>` : '';
                 const statusColor = w.status === 'realizado' ? 'green' : '#999';
                 
                 div.innerHTML += `
@@ -250,8 +232,7 @@ const AtletaPanel = {
         const list = document.getElementById('atleta-workouts-list');
         document.getElementById('log-manual-activity-btn').onclick = AppPrincipal.openLogActivityModal;
         db.ref(`data/${user.uid}/workouts`).orderByChild('date').on('value', s => {
-            list.innerHTML = "";
-            if(!s.exists()) { list.innerHTML = "Sem treinos."; return; }
+            list.innerHTML = ""; if(!s.exists()) { list.innerHTML = "Sem treinos."; return; }
             const l = []; s.forEach(c => l.push({k:c.key, ...c.val()})); l.sort((a,b)=>new Date(b.date)-new Date(a.date));
             l.forEach(w => {
                 list.innerHTML += `<div class="workout-card" onclick="AppPrincipal.openFeedbackModal('${w.k}','${user.uid}','${w.title}')"><b>${w.date}</b> - ${w.title}<br>${w.status}</div>`;
