@@ -1,5 +1,5 @@
 {
-  "name": "lerunners-vercel-api",
+  "name": "lerunners-strava-api",
   "version": "1.0.0",
   "description": "Dependencies for Vercel Serverless Functions.",
   "main": "api/strava-exchange.js",
