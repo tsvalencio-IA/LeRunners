@@ -29,7 +29,8 @@ const STRAVA_PUBLIC_CONFIG = {
     
     // URL FINAL DO VERCEL (O SEU BACKEND)
     // CORREÇÃO CRÍTICA: Usar o domínio principal do Vercel
-    vercelAPI: 'https://le-runners2.vercel.app/api/strava-exchange' 
+    vercelExchangeAPI: 'https://le-runners2.vercel.app/api/strava-exchange', // Endpoint de troca inicial
+    vercelRefreshAPI: 'https://le-runners2.vercel.app/api/strava-refresh' // Endpoint de renovação
 };
 
 // ===================================================================
