@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeRunners - Café da Manhã</title>
-    <!-- Tailwind CSS para estilização moderna e responsiva -->
+    <title>LeRunners - Café da Manhã - 01/03</title>
+    <!-- Tailwind CSS para estilização moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -18,7 +19,6 @@
             padding: 1rem;
         }
         
-        /* Efeito de vidro (Glassmorphism) para o card da lista */
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -26,7 +26,6 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
-        /* Animação suave para a lista */
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -34,178 +33,358 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Animação de Loading Moderno */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ea580c;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
 
-    <main class="w-full max-w-md w-full mt-4 mb-8">
-        <!-- Card Principal -->
-        <div class="glass-card rounded-3xl overflow-hidden fade-in">
+    <main class="w-full max-w-md mt-4 mb-2 flex flex-col min-h-[90vh]">
+        
+        <!-- Cartão Principal -->
+        <div class="glass-card rounded-3xl overflow-hidden fade-in flex-grow relative flex flex-col">
             
+            <!-- Indicador de Estado da Nuvem -->
+            <div id="cloudStatus" class="absolute top-4 right-4 z-20 flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-bold border border-white/30 transition-all">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" id="statusPing"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500" id="statusDot"></span>
+                </span>
+                <span id="statusText">A Ligar...</span>
+            </div>
+
             <!-- Cabeçalho Visual -->
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-center relative overflow-hidden">
-                <!-- Ícone decorativo de fundo -->
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-center relative overflow-hidden pt-10">
                 <svg class="absolute -right-4 -top-4 w-24 h-24 text-white opacity-10" fill="currentColor" viewBox="0 0 24 24"><path d="M13.4 2.096a10.08 10.08 0 0 0-8.937 3.331A10.054 10.054 0 0 0 2.096 13.4c.53 3.894 3.458 7.207 7.285 8.246a9.982 9.982 0 0 0 2.618.354l.142-.001a3.001 3.001 0 0 0 2.516-1.426 2.989 2.989 0 0 0 .153-2.879l-.199-.416a1.919 1.919 0 0 1 .094-1.912 2.004 2.004 0 0 1 2.576-.755l.412.197c.412.198.85.299 1.301.299A3.022 3.022 0 0 0 22 12.14a9.935 9.935 0 0 0-.353-2.618c-1.04-3.827-4.353-6.755-8.247-7.426z"/></svg>
                 
                 <div class="relative z-10">
                     <h1 class="text-3xl font-extrabold text-white tracking-tight drop-shadow-md">LeRunners</h1>
-                    <p class="text-orange-100 font-medium mt-1 text-sm uppercase tracking-wider">Lista do Café da Manhã ☕</p>
+                    <p class="text-orange-100 font-medium mt-1 text-sm uppercase tracking-wider">Lista do Café da Manha - 01/03 ☕</p>
                 </div>
             </div>
 
-            <!-- Área da Lista Atual -->
-            <div class="p-6 bg-orange-50/50 border-b border-orange-100">
+            <!-- Área da Lista da Base de Dados (Realtime) -->
+            <div class="p-6 bg-orange-50/50 border-b border-orange-100 flex-grow min-h-[200px]">
                 <h2 class="text-sm font-bold text-orange-800 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                    Já confirmados na lista:
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Salvos na Nuvem (Tempo Real):
                 </h2>
                 
-                <!-- Container onde a lista será renderizada dinamicamente -->
                 <ul id="listaConfirmados" class="space-y-2 text-sm text-gray-700">
-                    <!-- Itens inseridos via JavaScript -->
+                    <li class="flex justify-center py-4"><div class="loader"></div></li>
                 </ul>
             </div>
 
-            <!-- Formulário do Usuário -->
-            <div class="p-6 space-y-4">
+            <!-- Formulário de Adição (Apenas Guarda) -->
+            <div class="p-6 bg-white space-y-4">
                 <div class="relative flex items-center py-1">
                     <div class="flex-grow border-t border-gray-200"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase font-bold tracking-wider">Adicione seu Item</span>
+                    <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase font-bold tracking-wider text-center">Adicionar à Lista</span>
                     <div class="flex-grow border-t border-gray-200"></div>
                 </div>
 
-                <!-- Campo Nome -->
-                <div>
-                    <label for="userName" class="block text-sm font-bold text-gray-700 mb-1">Seu Nome</label>
-                    <input type="text" id="userName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Enzo">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1">
+                        <label for="userName" class="block text-sm font-bold text-gray-700 mb-1">Seu Nome</label>
+                        <input type="text" id="userName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Enzo">
+                    </div>
+                    <div class="flex-1">
+                        <label for="item" class="block text-sm font-bold text-gray-700 mb-1">O que vai levar?</label>
+                        <input type="text" id="item" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Sumo, Pão...">
+                    </div>
                 </div>
 
-                <!-- Campo Item -->
-                <div>
-                    <label for="item" class="block text-sm font-bold text-gray-700 mb-1">O que vai levar?</label>
-                    <input type="text" id="item" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Suco, Pão de Queijo...">
-                </div>
+                <!-- Botão 1: Apenas Guarda na Base de Dados -->
+                <button id="btnAdd" onclick="addToList()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 active:transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Gravar na Lista
+                </button>
+            </div>
 
-                <!-- Botão de Ação -->
-                <button onclick="processAndSend()" class="w-full mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/30 flex items-center justify-center gap-3 active:transform active:scale-95">
+            <!-- Área de Partilha (Apenas Envia) -->
+            <div class="p-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
+                <!-- Botão 2: Apenas Envia para o WhatsApp -->
+                <button onclick="shareToWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/30 flex items-center justify-center gap-3 active:transform active:scale-95">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
                     </svg>
-                    Confirmar e Enviar no WhatsApp
+                    Enviar Lista para o WhatsApp
                 </button>
+                <p class="text-xs text-center text-gray-400 mt-2">Adicione ou elimine itens primeiro e depois clique aqui para enviar o link limpo ao grupo.</p>
             </div>
         </div>
         
-        <!-- Alerta de Erro -->
-        <div id="errorMsg" class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md text-sm font-medium">
-            Por favor, preencha seu nome e o que vai levar!
-        </div>
+        <!-- Alerta de Erro Dinâmico -->
+        <div id="errorMsg" class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md text-sm font-medium w-full text-center z-50"></div>
+
+        <!-- Rodapé da Empresa -->
+        <footer class="mt-8 mb-4 text-center">
+            <p class="text-orange-200 text-sm font-medium opacity-90">
+                Desenvolvido por <span class="font-bold text-white tracking-wide">Thiaguinho soluções</span>
+            </p>
+        </footer>
     </main>
 
-    <!-- Lógica de Estado no Link (Magic Link Logic) -->
-    <script>
-        // ESTADO INICIAL PADRÃO (Caso não haja nada na URL)
-        // Usamos arrays curtos [Nome, Item] para economizar espaço na URL
-        const defaultData = [
-            ["Leandro", "Café 🍵, Água, Banana, Melão, Pão de forma"]
-        ];
+    <!-- MOTOR DA BASE DE DADOS (Firebase Realtime Database Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Importações específicas do Realtime Database em vez do Firestore
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
+        // ==========================================
+        // CONFIGURAÇÃO DA SUA BASE DE DADOS FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3EVOgmqKHHzTncjeHhhm1_ugdPEV1u2s",
+            authDomain: "cafe-ba7b6.firebaseapp.com",
+            projectId: "cafe-ba7b6",
+            storageBucket: "cafe-ba7b6.firebasestorage.app",
+            messagingSenderId: "541434175333",
+            appId: "1:541434175333:web:6abbc9adb95637ecf0cb8c",
+            // URL OBRIGATÓRIO PARA O REALTIME DATABASE
+            databaseURL: "https://cafe-ba7b6-default-rtdb.firebaseio.com" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        
+        // Caminho do nó principal no Realtime Database
+        const dbPath = 'lerunners_lista';
+        const listaRef = ref(db, dbPath);
+        
         let currentList = [];
+        let isFirstLoad = true;
 
-        // Funções para codificar e decodificar os dados na URL de forma segura com acentos
-        const encodeData = (data) => btoa(encodeURIComponent(JSON.stringify(data)));
-        const decodeData = (str) => JSON.parse(decodeURIComponent(atob(str)));
-
-        // Função que roda ao carregar a página
-        function initApp() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const dataParam = urlParams.get('d');
-
-            if (dataParam) {
-                try {
-                    currentList = decodeData(dataParam);
-                } catch (e) {
-                    console.error("Erro ao decodificar dados da URL, usando padrão.", e);
-                    currentList = [...defaultData];
-                }
-            } else {
-                currentList = [...defaultData];
+        // Atualização Visual de Estado
+        function updateStatus(status) {
+            const dot = document.getElementById('statusDot');
+            const ping = document.getElementById('statusPing');
+            const text = document.getElementById('statusText');
+            
+            if (status === 'connected') {
+                dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500';
+                ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75';
+                ping.classList.remove('hidden');
+                text.textContent = 'Sincronizado';
+            } else if (status === 'error') {
+                dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500';
+                ping.classList.add('hidden');
+                text.textContent = 'Erro de Ligação';
             }
-
-            renderList();
         }
 
-        // Renderiza a lista visualmente na tela
+        function showError(msg, timeout = 7000) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.innerHTML = msg; 
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), timeout);
+        }
+
+        // ==========================================
+        // LÓGICA DE AUTENTICAÇÃO E TEMPO REAL
+        // ==========================================
+        
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Erro Técnico de Autenticação:", error.code, error.message);
+                updateStatus('error');
+                
+                if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
+                    showError("<b>ERRO CRÍTICO:</b> Autenticação Anónima Desligada!<br><br>Vá ao Firebase > Authentication > Sign-in method > Ative o 'Anonymous'.", 15000);
+                } else {
+                    showError("Falha na autenticação: " + error.message);
+                }
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) return; 
+
+            // Ativa o Listener do Realtime Database (Substitui o onSnapshot do Firestore)
+            onValue(listaRef, (snapshot) => {
+                currentList = [];
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        currentList.push({
+                            id: childSnapshot.key, // Guarda a chave única gerada pelo push()
+                            ...childSnapshot.val()
+                        });
+                    });
+                }
+                
+                // Ordenação cronológica baseada no timestamp
+                currentList.sort((a, b) => a.timestamp - b.timestamp);
+                
+                // SEMENTE INTELIGENTE: Restaura o Leandro se a base estiver totalmente vazia e for o primeiro acesso
+                if (!snapshot.exists() && isFirstLoad) {
+                    const hasSeeded = localStorage.getItem('leandro_seeded_rtdb');
+                    if (!hasSeeded) {
+                        localStorage.setItem('leandro_seeded_rtdb', 'true');
+                        // Inserção inicial no Realtime Database
+                        push(listaRef, {
+                            nome: "Leandro",
+                            item: "Café 🍵, Água, Banana, Melão, Pão de forma",
+                            timestamp: Date.now()
+                        }).catch(e => console.error("Erro ao injetar semente inicial:", e));
+                        return; // O listener será acionado novamente pelo push
+                    }
+                }
+                
+                isFirstLoad = false;
+                renderList();
+                updateStatus('connected');
+                
+            }, (error) => {
+                console.error("Erro do Realtime Database:", error);
+                updateStatus('error');
+                document.getElementById('listaConfirmados').innerHTML = '<li class="text-center text-red-500 font-bold py-4">Acesso Bloqueado.</li>';
+                showError("<b>ERRO DE SEGURANÇA:</b> Base de Dados Bloqueada!<br><br>Vá ao Firebase > Realtime Database > Rules e coloque .read e .write como true.", 15000);
+            });
+        });
+
+        // ==========================================
+        // FUNÇÕES DE INTERFACE (Renderizar, Adicionar, Excluir)
+        // ==========================================
+
         function renderList() {
             const ul = document.getElementById('listaConfirmados');
-            ul.innerHTML = ''; // Limpa atual
+            ul.innerHTML = ''; 
 
-            currentList.forEach(entry => {
-                const nome = entry[0];
-                const item = entry[1];
-                
+            if (currentList.length === 0) {
+                ul.innerHTML = '<li class="text-center text-orange-400 font-medium py-6">A lista está vazia.</li>';
+                return;
+            }
+
+            currentList.forEach((entry) => {
                 const li = document.createElement('li');
-                li.className = "flex items-start gap-2 bg-white p-3 rounded-lg border border-orange-100 shadow-sm";
-                li.innerHTML = `
-                    <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    <div>
-                        <span class="font-bold text-gray-800">${nome}</span>
-                        <span class="text-gray-600 block sm:inline sm:ml-1">- ${item}</span>
-                    </div>
-                `;
+                li.className = "flex items-start justify-between gap-2 bg-white p-3 rounded-xl border border-orange-100 shadow-sm group transition-all hover:border-orange-300";
+
+                const leftDiv = document.createElement('div');
+                leftDiv.className = "flex items-start gap-2 pr-2";
+                leftDiv.innerHTML = `<svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                
+                const textDiv = document.createElement('div');
+                
+                const spanNome = document.createElement('span');
+                spanNome.className = "font-bold text-gray-800";
+                spanNome.textContent = entry.nome; 
+                
+                const spanItem = document.createElement('span');
+                spanItem.className = "text-gray-600 block sm:inline sm:ml-1";
+                spanItem.textContent = `- ${entry.item}`;
+
+                textDiv.appendChild(spanNome);
+                textDiv.appendChild(spanItem);
+                leftDiv.appendChild(textDiv);
+
+                const btnDelete = document.createElement('button');
+                btnDelete.className = "text-red-300 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 flex-shrink-0 cursor-pointer";
+                btnDelete.title = "Eliminar da Nuvem";
+                
+                // Associa o ID para eliminação
+                btnDelete.onclick = () => window.deleteItem(entry.id);
+                btnDelete.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+
+                li.appendChild(leftDiv);
+                li.appendChild(btnDelete);
                 ul.appendChild(li);
             });
         }
 
-        // Função executada ao clicar no botão Enviar
-        function processAndSend() {
+        // Função de Eliminar (Realtime Database)
+        window.deleteItem = async function(nodeId) {
+            try {
+                // Referencia especificamente o nó do item para remoção
+                const itemRef = ref(db, `${dbPath}/${nodeId}`);
+                await remove(itemRef);
+            } catch (error) {
+                console.error("Erro ao eliminar:", error);
+                showError("Erro ao tentar eliminar da base de dados. Verifique as Regras de acesso.");
+            }
+        };
+
+        // Função de Adicionar (Realtime Database)
+        window.addToList = async function() {
             const userNameInput = document.getElementById('userName');
             const itemInput = document.getElementById('item');
-            const errorMsg = document.getElementById('errorMsg');
+            const btn = document.getElementById('btnAdd');
             
             const userName = userNameInput.value.trim();
             const item = itemInput.value.trim();
 
             if (!userName || !item) {
-                errorMsg.classList.remove('hidden');
-                setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+                showError("⚠️ Preencha o seu Nome e o que vai levar para gravar na lista.");
                 return;
             }
 
-            // 1. Adiciona o novo usuário na lista em memória
-            currentList.push([userName, item]);
+            const btnOriginalHtml = btn.innerHTML;
+            btn.innerHTML = `<div class="loader mr-2 border-white border-t-orange-600 w-5 h-5"></div> A Guardar...`;
+            btn.disabled = true;
 
-            // 2. Gera a nova String Base64 com a lista atualizada
-            const newDataEncoded = encodeData(currentList);
+            try {
+                // Insere um novo registo gerando um ID único
+                await push(listaRef, {
+                    nome: userName,
+                    item: item,
+                    timestamp: Date.now()
+                });
+                
+                userNameInput.value = '';
+                itemInput.value = '';
+                
+            } catch (error) {
+                console.error("Erro Técnico ao guardar:", error);
+                showError("Falha na ligação à nuvem. Verifique as Regras do Realtime Database.");
+            } finally {
+                btn.innerHTML = btnOriginalHtml;
+                btn.disabled = false;
+            }
+        };
 
-            // 3. Monta o NOVO link mágico (pega a URL atual, remove os parâmetros velhos e adiciona o novo)
-            const baseUrl = window.location.origin + window.location.pathname;
-            const magicLink = `${baseUrl}?d=${newDataEncoded}`;
+        // ==========================================
+        // LÓGICA DE PARTILHA NO WHATSAPP
+        // ==========================================
+        
+        window.shareToWhatsApp = function() {
+            if (currentList.length === 0) {
+                showError("⚠️ A lista está vazia. Adicione algo antes de enviar para o grupo.");
+                return;
+            }
 
-            // 4. Monta o texto lindo para o WhatsApp
-            let waText = "🏃‍♂️ *LeRunners - Café da Manhã* 🍵\n";
+            const cleanUrl = window.location.origin + window.location.pathname;
+
+            let waText = "🏃‍♂️ *LeRunners - Café da Manhã 01/03* 🍵\n";
             waText += "-----------------------------------\n";
             currentList.forEach(entry => {
-                waText += `✅ *${entry[0]}* - ${entry[1]}\n`;
+                waText += `✅ *${entry.nome}* - ${entry.item}\n`;
             });
             waText += "-----------------------------------\n\n";
-            waText += "👇 *Clique no link abaixo para adicionar o seu na lista:* 👇\n";
-            waText += magicLink;
+            waText += "👇 *Clique no link abaixo para ver a lista em tempo real ou adicionar o seu nome:* 👇\n";
+            waText += cleanUrl;
 
-            // 5. Atualiza a tela localmente (opcional, dá um feedback visual rápido)
-            renderList();
-            userNameInput.value = '';
-            itemInput.value = '';
-
-            // 6. Abre o WhatsApp com a mensagem pronta
             const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
             window.open(waUrl, '_blank');
-        }
+        };
 
-        // Inicializa o aplicativo
-        window.onload = initApp;
     </script>
 </body>
 </html>
-
-
