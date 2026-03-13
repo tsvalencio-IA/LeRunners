@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeRunners - Café da Manhã - 01/03</title>
-    <!-- Tailwind CSS para estilização moderna -->
+    <title>LeRunners - Eventos</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Biblioteca para gerar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #ea580c 0%, #9a3412 100%);
+            background: linear-gradient(135deg, #18181b 0%, #000000 100%); /* Preto e Cinza escuro */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -20,10 +22,10 @@
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         .fade-in {
@@ -34,10 +36,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Animação de Loading Moderno */
         .loader {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #ea580c;
+            border-top: 3px solid #000000; /* Loader preto */
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -54,100 +55,127 @@
 
     <main class="w-full max-w-md mt-4 mb-2 flex flex-col min-h-[90vh]">
         
-        <!-- Cartão Principal -->
         <div class="glass-card rounded-3xl overflow-hidden fade-in flex-grow relative flex flex-col">
             
-            <!-- Indicador de Estado da Nuvem -->
-            <div id="cloudStatus" class="absolute top-4 right-4 z-20 flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-bold border border-white/30 transition-all">
-                <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" id="statusPing"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500" id="statusDot"></span>
-                </span>
-                <span id="statusText">A Ligar...</span>
+            <!-- Indicador de Estado e Botão Admin -->
+            <div class="absolute top-4 right-4 z-20 flex items-center gap-2">
+                <div id="cloudStatus" class="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-bold border border-white/20">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" id="statusPing"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500" id="statusDot"></span>
+                    </span>
+                    <span id="statusText">A Ligar...</span>
+                </div>
+                <!-- Botão Secreto do Leandro -->
+                <button onclick="toggleAdminPanel()" class="bg-black/40 backdrop-blur-sm p-1.5 rounded-full text-white/70 hover:text-white transition-colors" title="Painel do Professor">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
             </div>
 
-            <!-- Cabeçalho Visual -->
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-center relative overflow-hidden pt-10">
-                <svg class="absolute -right-4 -top-4 w-24 h-24 text-white opacity-10" fill="currentColor" viewBox="0 0 24 24"><path d="M13.4 2.096a10.08 10.08 0 0 0-8.937 3.331A10.054 10.054 0 0 0 2.096 13.4c.53 3.894 3.458 7.207 7.285 8.246a9.982 9.982 0 0 0 2.618.354l.142-.001a3.001 3.001 0 0 0 2.516-1.426 2.989 2.989 0 0 0 .153-2.879l-.199-.416a1.919 1.919 0 0 1 .094-1.912 2.004 2.004 0 0 1 2.576-.755l.412.197c.412.198.85.299 1.301.299A3.022 3.022 0 0 0 22 12.14a9.935 9.935 0 0 0-.353-2.618c-1.04-3.827-4.353-6.755-8.247-7.426z"/></svg>
+            <!-- Cabeçalho Visual (Preto e Branco) -->
+            <div class="bg-gradient-to-r from-zinc-900 to-black p-6 text-center relative overflow-hidden pt-10">
+                <!-- Ícone de Corrida/Sapatilha abstrato -->
+                <svg class="absolute -right-4 -top-4 w-28 h-28 text-white opacity-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.5 10c-2.481 0-4.5 2.019-4.5 4.5s2.019 4.5 4.5 4.5 4.5-2.019 4.5-4.5-2.019-4.5-4.5-4.5zm0 7c-1.379 0-2.5-1.121-2.5-2.5s1.121-2.5 2.5-2.5 2.5 1.121 2.5 2.5-1.121 2.5-2.5 2.5zm-15-7c-2.481 0-4.5 2.019-4.5 4.5s2.019 4.5 4.5 4.5 4.5-2.019 4.5-4.5-2.019-4.5-4.5-4.5zm0 7c-1.379 0-2.5-1.121-2.5-2.5s1.121-2.5 2.5-2.5 2.5 1.121 2.5 2.5-1.121 2.5-2.5 2.5zm7.5-12c-2.481 0-4.5 2.019-4.5 4.5s2.019 4.5 4.5 4.5 4.5-2.019 4.5-4.5-2.019-4.5-4.5-4.5zm0 7c-1.379 0-2.5-1.121-2.5-2.5s1.121-2.5 2.5-2.5 2.5 1.121 2.5 2.5-1.121 2.5-2.5 2.5z"/></svg>
                 
                 <div class="relative z-10">
-                    <h1 class="text-3xl font-extrabold text-white tracking-tight drop-shadow-md">LeRunners</h1>
-                    <p class="text-orange-100 font-medium mt-1 text-sm uppercase tracking-wider">Lista do Café da Manha - 01/03 ☕</p>
+                    <h1 class="text-3xl font-black text-white tracking-tight drop-shadow-md uppercase italic">LeRunners</h1>
+                    <p id="displayTitle" class="text-gray-300 font-bold mt-2 text-lg">A Carregar Evento...</p>
+                    <p id="displaySubtitle" class="text-gray-400 font-medium text-xs uppercase tracking-wider mt-1"></p>
                 </div>
             </div>
 
-            <!-- Área da Lista da Base de Dados (Realtime) -->
-            <div class="p-6 bg-orange-50/50 border-b border-orange-100 flex-grow min-h-[200px]">
-                <h2 class="text-sm font-bold text-orange-800 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    Salvos na Nuvem (Tempo Real):
-                </h2>
+            <!-- PAINEL ADMIN (Oculto por padrão) -->
+            <div id="adminPanel" class="hidden bg-zinc-100 p-5 border-b-4 border-zinc-800">
+                <h3 class="font-bold text-black mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Editar Evento (Professor Leandro)
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Título do Evento</label>
+                        <input type="text" id="configTitle" class="w-full px-3 py-2 border border-gray-300 rounded focus:border-black outline-none" placeholder="Ex: Treino na Represa">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Subtítulo / Data / Hora</label>
+                        <input type="text" id="configSubtitle" class="w-full px-3 py-2 border border-gray-300 rounded focus:border-black outline-none" placeholder="Ex: Sábado, 05/04 às 06:30">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Pergunta para os corredores</label>
+                        <input type="text" id="configQuestion" class="w-full px-3 py-2 border border-gray-300 rounded focus:border-black outline-none" placeholder="Ex: Qual o seu Pace? / O que vai levar?">
+                    </div>
+                    
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="saveEventConfig()" class="flex-1 bg-black text-white font-bold py-2 rounded shadow hover:bg-zinc-800 transition">Atualizar Evento</button>
+                        <button onclick="clearList()" class="bg-red-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-red-700 transition">Apagar Lista</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área da Lista da Base de Dados -->
+            <div class="p-6 bg-zinc-50 border-b border-zinc-200 flex-grow min-h-[200px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-bold text-zinc-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        Confirmados: <span id="contador">0</span>
+                    </h2>
+                    <!-- Botão Exportar PDF -->
+                    <button onclick="downloadPDF()" class="text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-bold py-1.5 px-3 rounded flex items-center gap-1 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Gerar PDF
+                    </button>
+                </div>
                 
                 <ul id="listaConfirmados" class="space-y-2 text-sm text-gray-700">
                     <li class="flex justify-center py-4"><div class="loader"></div></li>
                 </ul>
             </div>
 
-            <!-- Formulário de Adição (Apenas Guarda) -->
+            <!-- Formulário de Adição -->
             <div class="p-6 bg-white space-y-4">
-                <div class="relative flex items-center py-1">
-                    <div class="flex-grow border-t border-gray-200"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase font-bold tracking-wider text-center">Adicionar à Lista</span>
-                    <div class="flex-grow border-t border-gray-200"></div>
-                </div>
-
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="flex-1">
                         <label for="userName" class="block text-sm font-bold text-gray-700 mb-1">Seu Nome</label>
-                        <input type="text" id="userName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Enzo">
+                        <input type="text" id="userName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Enzo">
                     </div>
                     <div class="flex-1">
-                        <label for="item" class="block text-sm font-bold text-gray-700 mb-1">O que vai levar?</label>
-                        <input type="text" id="item" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Sumo, Pão...">
+                        <label for="item" id="labelQuestion" class="block text-sm font-bold text-gray-700 mb-1">Carregando...</label>
+                        <input type="text" id="item" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Sua resposta...">
                     </div>
                 </div>
 
-                <!-- Botão 1: Apenas Guarda na Base de Dados -->
-                <button id="btnAdd" onclick="addToList()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 active:transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
+                <button id="btnAdd" onclick="addToList()" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-black/30 flex items-center justify-center gap-2 active:transform active:scale-95">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Gravar na Lista
+                    Confirmar Presença
                 </button>
             </div>
 
-            <!-- Área de Partilha (Apenas Envia) -->
-            <div class="p-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
-                <!-- Botão 2: Apenas Envia para o WhatsApp -->
-                <button onclick="shareToWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/30 flex items-center justify-center gap-3 active:transform active:scale-95">
+            <!-- Área de Partilha -->
+            <div class="p-6 bg-zinc-100 border-t border-zinc-200 rounded-b-3xl">
+                <button onclick="shareToWhatsApp()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/30 flex items-center justify-center gap-3 active:transform active:scale-95">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
                     </svg>
-                    Enviar Lista para o WhatsApp
+                    Partilhar no Grupo WhatsApp
                 </button>
-                <p class="text-xs text-center text-gray-400 mt-2">Adicione ou elimine itens primeiro e depois clique aqui para enviar o link limpo ao grupo.</p>
             </div>
         </div>
         
-        <!-- Alerta de Erro Dinâmico -->
-        <div id="errorMsg" class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md text-sm font-medium w-full text-center z-50"></div>
+        <div id="errorMsg" class="hidden mt-4 bg-red-100 border-l-4 border-red-600 text-red-700 p-4 rounded shadow-md text-sm font-medium w-full text-center z-50"></div>
 
-        <!-- Rodapé da Empresa -->
         <footer class="mt-8 mb-4 text-center">
-            <p class="text-orange-200 text-sm font-medium opacity-90">
+            <p class="text-zinc-500 text-sm font-medium">
                 Desenvolvido por <span class="font-bold text-white tracking-wide">thIAguinho Soluções</span>
             </p>
         </footer>
     </main>
 
-    <!-- MOTOR DA BASE DE DADOS (Firebase Realtime Database Modular) -->
+    <!-- MOTOR DA BASE DE DADOS (Firebase) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Importações específicas do Realtime Database em vez do Firestore
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // ==========================================
-        // CONFIGURAÇÃO DA SUA BASE DE DADOS FIREBASE
-        // ==========================================
+        // Configuração original do utilizador
         const firebaseConfig = {
             apiKey: "AIzaSyC3EVOgmqKHHzTncjeHhhm1_ugdPEV1u2s",
             authDomain: "cafe-ba7b6.firebaseapp.com",
@@ -155,7 +183,6 @@
             storageBucket: "cafe-ba7b6.firebasestorage.app",
             messagingSenderId: "541434175333",
             appId: "1:541434175333:web:6abbc9adb95637ecf0cb8c",
-            // URL OBRIGATÓRIO PARA O REALTIME DATABASE
             databaseURL: "https://cafe-ba7b6-default-rtdb.firebaseio.com" 
         };
 
@@ -163,14 +190,22 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         
-        // Caminho do nó principal no Realtime Database
-        const dbPath = 'lerunners_lista';
+        // Caminhos na Base de Dados
+        const dbPath = 'lerunners_lista'; // Onde ficam as pessoas
+        const configPath = 'lerunners_config'; // Onde fica a configuração do evento
+        
         const listaRef = ref(db, dbPath);
+        const configRef = ref(db, configPath);
         
         let currentList = [];
-        let isFirstLoad = true;
+        
+        // Estado inicial padrão do formulário (caso não exista na base de dados)
+        let eventConfig = {
+            title: "Treino LeRunners",
+            subtitle: "Detalhes a definir",
+            question: "Categoria/Pace?"
+        };
 
-        // Atualização Visual de Estado
         function updateStatus(status) {
             const dot = document.getElementById('statusDot');
             const ping = document.getElementById('statusPing');
@@ -195,101 +230,88 @@
             setTimeout(() => errorMsg.classList.add('hidden'), timeout);
         }
 
-        // ==========================================
-        // LÓGICA DE AUTENTICAÇÃO E TEMPO REAL
-        // ==========================================
-        
+        // --- AUTENTICAÇÃO ---
         const initAuth = async () => {
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Erro Técnico de Autenticação:", error.code, error.message);
-                updateStatus('error');
-                
-                if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
-                    showError("<b>ERRO CRÍTICO:</b> Autenticação Anónima Desligada!<br><br>Vá ao Firebase > Authentication > Sign-in method > Ative o 'Anonymous'.", 15000);
-                } else {
-                    showError("Falha na autenticação: " + error.message);
-                }
-            }
+            try { await signInAnonymously(auth); } 
+            catch (error) { showError("Falha na autenticação: " + error.message); }
         };
         initAuth();
 
         onAuthStateChanged(auth, (user) => {
             if (!user) return; 
 
-            // Ativa o Listener do Realtime Database (Substitui o onSnapshot do Firestore)
+            // 1. Ouvir as configurações do Evento (Títulos e Perguntas)
+            onValue(configRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    eventConfig = snapshot.val();
+                } else {
+                    // Se não existir, grava a padrão na base
+                    set(configRef, eventConfig);
+                }
+                updateUIWithConfig();
+            });
+
+            // 2. Ouvir a Lista de Pessoas
             onValue(listaRef, (snapshot) => {
                 currentList = [];
-                
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
-                        currentList.push({
-                            id: childSnapshot.key, // Guarda a chave única gerada pelo push()
-                            ...childSnapshot.val()
-                        });
+                        currentList.push({ id: childSnapshot.key, ...childSnapshot.val() });
                     });
                 }
                 
-                // Ordenação cronológica baseada no timestamp
                 currentList.sort((a, b) => a.timestamp - b.timestamp);
-                
-                // SEMENTE INTELIGENTE: Restaura o Leandro se a base estiver totalmente vazia e for o primeiro acesso
-                if (!snapshot.exists() && isFirstLoad) {
-                    const hasSeeded = localStorage.getItem('leandro_seeded_rtdb');
-                    if (!hasSeeded) {
-                        localStorage.setItem('leandro_seeded_rtdb', 'true');
-                        // Inserção inicial no Realtime Database
-                        push(listaRef, {
-                            nome: "Leandro",
-                            item: "Café 🍵, Água, Banana, Melão, Pão de forma",
-                            timestamp: Date.now()
-                        }).catch(e => console.error("Erro ao injetar semente inicial:", e));
-                        return; // O listener será acionado novamente pelo push
-                    }
-                }
-                
-                isFirstLoad = false;
                 renderList();
                 updateStatus('connected');
                 
             }, (error) => {
-                console.error("Erro do Realtime Database:", error);
                 updateStatus('error');
-                document.getElementById('listaConfirmados').innerHTML = '<li class="text-center text-red-500 font-bold py-4">Acesso Bloqueado.</li>';
-                showError("<b>ERRO DE SEGURANÇA:</b> Base de Dados Bloqueada!<br><br>Vá ao Firebase > Realtime Database > Rules e coloque .read e .write como true.", 15000);
+                showError("Erro na Base de Dados. Verifique as Regras de acesso.");
             });
         });
 
-        // ==========================================
-        // FUNÇÕES DE INTERFACE (Renderizar, Adicionar, Excluir)
-        // ==========================================
+        // --- ATUALIZAR INTERFACE COM AS CONFIGURAÇÕES ---
+        function updateUIWithConfig() {
+            // Atualiza Visão do Corredor
+            document.getElementById('displayTitle').textContent = eventConfig.title;
+            document.getElementById('displaySubtitle').textContent = eventConfig.subtitle;
+            document.getElementById('labelQuestion').textContent = eventConfig.question;
+            document.title = "LeRunners - " + eventConfig.title;
 
+            // Atualiza os inputs do Painel Admin
+            document.getElementById('configTitle').value = eventConfig.title;
+            document.getElementById('configSubtitle').value = eventConfig.subtitle;
+            document.getElementById('configQuestion').value = eventConfig.question;
+        }
+
+        // --- FUNÇÕES DE INTERFACE DA LISTA ---
         function renderList() {
             const ul = document.getElementById('listaConfirmados');
+            document.getElementById('contador').textContent = currentList.length;
             ul.innerHTML = ''; 
 
             if (currentList.length === 0) {
-                ul.innerHTML = '<li class="text-center text-orange-400 font-medium py-6">A lista está vazia.</li>';
+                ul.innerHTML = '<li class="text-center text-zinc-400 font-medium py-6">A lista está vazia. Seja o primeiro!</li>';
                 return;
             }
 
             currentList.forEach((entry) => {
                 const li = document.createElement('li');
-                li.className = "flex items-start justify-between gap-2 bg-white p-3 rounded-xl border border-orange-100 shadow-sm group transition-all hover:border-orange-300";
+                li.className = "flex items-start justify-between gap-2 bg-white p-3 rounded-xl border border-zinc-200 shadow-sm group transition-all hover:border-black";
 
                 const leftDiv = document.createElement('div');
                 leftDiv.className = "flex items-start gap-2 pr-2";
-                leftDiv.innerHTML = `<svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                
+                // Ícone de check
+                leftDiv.innerHTML = `<svg class="w-5 h-5 text-black mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
                 
                 const textDiv = document.createElement('div');
-                
                 const spanNome = document.createElement('span');
-                spanNome.className = "font-bold text-gray-800";
+                spanNome.className = "font-bold text-black";
                 spanNome.textContent = entry.nome; 
                 
                 const spanItem = document.createElement('span');
-                spanItem.className = "text-gray-600 block sm:inline sm:ml-1";
+                spanItem.className = "text-zinc-500 block sm:inline sm:ml-1";
                 spanItem.textContent = `- ${entry.item}`;
 
                 textDiv.appendChild(spanNome);
@@ -297,10 +319,8 @@
                 leftDiv.appendChild(textDiv);
 
                 const btnDelete = document.createElement('button');
-                btnDelete.className = "text-red-300 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 flex-shrink-0 cursor-pointer";
-                btnDelete.title = "Eliminar da Nuvem";
-                
-                // Associa o ID para eliminação
+                btnDelete.className = "text-red-300 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 flex-shrink-0 cursor-pointer pdf-hide"; // class pdf-hide importante
+                btnDelete.title = "Remover da lista";
                 btnDelete.onclick = () => window.deleteItem(entry.id);
                 btnDelete.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
 
@@ -310,19 +330,11 @@
             });
         }
 
-        // Função de Eliminar (Realtime Database)
         window.deleteItem = async function(nodeId) {
-            try {
-                // Referencia especificamente o nó do item para remoção
-                const itemRef = ref(db, `${dbPath}/${nodeId}`);
-                await remove(itemRef);
-            } catch (error) {
-                console.error("Erro ao eliminar:", error);
-                showError("Erro ao tentar eliminar da base de dados. Verifique as Regras de acesso.");
-            }
+            try { await remove(ref(db, `${dbPath}/${nodeId}`)); } 
+            catch (error) { showError("Erro ao eliminar."); }
         };
 
-        // Função de Adicionar (Realtime Database)
         window.addToList = async function() {
             const userNameInput = document.getElementById('userName');
             const itemInput = document.getElementById('item');
@@ -332,57 +344,146 @@
             const item = itemInput.value.trim();
 
             if (!userName || !item) {
-                showError("⚠️ Preencha o seu Nome e o que vai levar para gravar na lista.");
+                showError("⚠️ Preencha os campos para confirmar presença.");
                 return;
             }
 
             const btnOriginalHtml = btn.innerHTML;
-            btn.innerHTML = `<div class="loader mr-2 border-white border-t-orange-600 w-5 h-5"></div> A Guardar...`;
+            btn.innerHTML = `<div class="loader mr-2 border-white border-t-black w-5 h-5"></div> A Guardar...`;
             btn.disabled = true;
 
             try {
-                // Insere um novo registo gerando um ID único
-                await push(listaRef, {
-                    nome: userName,
-                    item: item,
-                    timestamp: Date.now()
-                });
-                
+                await push(listaRef, { nome: userName, item: item, timestamp: Date.now() });
                 userNameInput.value = '';
                 itemInput.value = '';
-                
             } catch (error) {
-                console.error("Erro Técnico ao guardar:", error);
-                showError("Falha na ligação à nuvem. Verifique as Regras do Realtime Database.");
+                showError("Falha ao guardar. Tente novamente.");
             } finally {
                 btn.innerHTML = btnOriginalHtml;
                 btn.disabled = false;
             }
         };
 
-        // ==========================================
-        // LÓGICA DE PARTILHA NO WHATSAPP
-        // ==========================================
+        // --- FUNÇÕES DO PROFESSOR LEANDRO (ADMIN) ---
+        
+        window.toggleAdminPanel = function() {
+            // Pequena proteção por senha
+            const senha = prompt("Área do Professor. Digite a senha:");
+            if (senha === "leandro") {
+                const panel = document.getElementById('adminPanel');
+                panel.classList.toggle('hidden');
+            } else if(senha !== null) {
+                alert("Senha incorreta!");
+            }
+        };
+
+        window.saveEventConfig = async function() {
+            const title = document.getElementById('configTitle').value.trim();
+            const subtitle = document.getElementById('configSubtitle').value.trim();
+            const question = document.getElementById('configQuestion').value.trim();
+
+            if (!title) { alert("O título não pode estar vazio!"); return; }
+
+            try {
+                await set(configRef, { title, subtitle, question });
+                alert("Evento atualizado com sucesso!");
+                document.getElementById('adminPanel').classList.add('hidden');
+            } catch (error) {
+                showError("Erro ao guardar configuração.");
+            }
+        };
+
+        window.clearList = async function() {
+            if(confirm("ATENÇÃO: Tens a certeza que queres apagar TODA a lista de confirmados? Esta ação não pode ser desfeita.")) {
+                try {
+                    await remove(listaRef);
+                    alert("Lista apagada! Pronta para o novo evento.");
+                } catch (error) {
+                    showError("Erro ao limpar a lista.");
+                }
+            }
+        };
+
+        // --- PARTILHA E EXPORTAÇÃO ---
         
         window.shareToWhatsApp = function() {
             if (currentList.length === 0) {
-                showError("⚠️ A lista está vazia. Adicione algo antes de enviar para o grupo.");
+                showError("⚠️ A lista está vazia.");
                 return;
             }
 
             const cleanUrl = window.location.origin + window.location.pathname;
 
-            let waText = "🏃‍♂️ *LeRunners - Café da Manhã 01/03* 🍵\n";
+            let waText = `🏃‍♂️ *LeRunners - ${eventConfig.title}* 🏃‍♀️\n`;
+            if(eventConfig.subtitle) waText += `📅 _${eventConfig.subtitle}_\n`;
             waText += "-----------------------------------\n";
-            currentList.forEach(entry => {
-                waText += `✅ *${entry.nome}* - ${entry.item}\n`;
+            currentList.forEach((entry, index) => {
+                waText += `${index + 1}. *${entry.nome}* - ${entry.item}\n`;
             });
             waText += "-----------------------------------\n\n";
-            waText += "👇 *Clique no link abaixo para ver a lista em tempo real ou adicionar o seu nome:* 👇\n";
+            waText += "👇 *Clique para ver a lista em tempo real ou confirmar presença:* 👇\n";
             waText += cleanUrl;
 
             const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
             window.open(waUrl, '_blank');
+        };
+
+        window.downloadPDF = function() {
+            if (currentList.length === 0) {
+                showError("⚠️ A lista está vazia. Nada para exportar.");
+                return;
+            }
+
+            // Criar um documento HTML temporário e limpo só para o PDF
+            let pdfContent = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h1 style="text-align: center; color: #000; text-transform: uppercase;">LeRunners</h1>
+                    <h2 style="text-align: center; color: #333;">${eventConfig.title}</h2>
+                    <h4 style="text-align: center; color: #666; margin-bottom: 30px;">${eventConfig.subtitle}</h4>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #f3f4f6; text-align: left;">
+                                <th style="padding: 10px; border-bottom: 2px solid #000;">Nº</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #000;">Nome</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #000;">${eventConfig.question}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            currentList.forEach((entry, index) => {
+                pdfContent += `
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${index + 1}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">${entry.nome}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${entry.item}</td>
+                    </tr>
+                `;
+            });
+
+            pdfContent += `
+                        </tbody>
+                    </table>
+                    <p style="text-align: center; margin-top: 30px; font-size: 12px; color: #888;">Gerado automaticamente via App LeRunners</p>
+                </div>
+            `;
+
+            // Elemento invisível na tela para gerar o PDF
+            const container = document.createElement('div');
+            container.innerHTML = pdfContent;
+            
+            // Configuração do html2pdf
+            const opt = {
+              margin:       10,
+              filename:     `LeRunners_${eventConfig.title.replace(/\s+/g, '_')}.pdf`,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2 },
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Gera o PDF
+            html2pdf().set(opt).from(container).save();
         };
 
     </script>
