@@ -1,490 +1,316 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeRunners - Eventos</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Biblioteca para gerar PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #18181b 0%, #000000 100%); /* Preto e Cinza escuro */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1rem;
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #000000; /* Loader preto */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#7f1d1d">
+  <title>3º Treinão em Prol da AMICC | Lista Solidária</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; background: radial-gradient(circle at top, #7f1d1d 0, #2b0808 45%, #090909 100%); min-height: 100vh; }
+    .glass { background: rgba(255,255,255,.98); box-shadow: 0 24px 70px rgba(0,0,0,.4); }
+    .fade-in { animation: fadeIn .35s ease both; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+    .loader { width:22px; height:22px; border:3px solid #e5e7eb; border-top-color:#991b1b; border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg) } }
+    .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+    input, select, textarea, button { font: inherit; }
+  </style>
 </head>
-<body class="antialiased text-gray-800">
-
-    <main class="w-full max-w-md mt-4 mb-2 flex flex-col min-h-[90vh]">
-        
-        <div class="glass-card rounded-3xl overflow-hidden fade-in flex-grow relative flex flex-col">
-            
-            <!-- Indicador de Estado e Botão Admin -->
-            <div class="absolute top-4 right-4 z-20 flex items-center gap-2">
-                <div id="cloudStatus" class="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-bold border border-white/20">
-                    <span class="relative flex h-3 w-3">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" id="statusPing"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500" id="statusDot"></span>
-                    </span>
-                    <span id="statusText">A Ligar...</span>
-                </div>
-                <!-- Botão Secreto do Leandro -->
-                <button onclick="toggleAdminPanel()" class="bg-black/40 backdrop-blur-sm p-1.5 rounded-full text-white/70 hover:text-white transition-colors" title="Painel do Professor">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </button>
-            </div>
-
-            <!-- Cabeçalho Visual (Preto e Branco) -->
-            <div class="bg-gradient-to-r from-zinc-900 to-black p-6 text-center relative overflow-hidden pt-10">
-                <!-- Ícone de Corrida/Sapatilha abstrato -->
-                <svg class="absolute -right-4 -top-4 w-28 h-28 text-white opacity-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.5 10c-2.481 0-4.5 2.019-4.5 4.5s2.019 4.5 4.5 4.5 4.5-2.019 4.5-4.5-2.019-4.5-4.5-4.5zm0 7c-1.379 0-2.5-1.121-2.5-2.5s1.121-2.5 2.5-2.5 2.5 1.121 2.5 2.5-1.121 2.5-2.5 2.5zm-15-7c-2.481 0-4.5 2.019-4.5 4.5s2.019 4.5 4.5 4.5 4.5-2.019 4.5-4.5-2.019-4.5-4.5-4.5zm0 7c-1.379 0-2.5-1.121-2.5-2.5s1.121-2.5 2.5-2.5 2.5 1.121 2.5 2.5-1.121 2.5-2.5 2.5zm7.5-12c-2.481 0-4.5 2.019-4.5 4.5s2.019 4.5 4.5 4.5 4.5-2.019 4.5-4.5-2.019-4.5-4.5-4.5zm0 7c-1.379 0-2.5-1.121-2.5-2.5s1.121-2.5 2.5-2.5 2.5 1.121 2.5 2.5-1.121 2.5-2.5 2.5z"/></svg>
-                
-                <div class="relative z-10">
-                    <h1 class="text-3xl font-black text-white tracking-tight drop-shadow-md uppercase italic">LeRunners</h1>
-                    <p id="displayTitle" class="text-gray-300 font-bold mt-2 text-lg">A Carregar Evento...</p>
-                    <p id="displaySubtitle" class="text-gray-400 font-medium text-xs uppercase tracking-wider mt-1"></p>
-                </div>
-            </div>
-
-            <!-- PAINEL ADMIN (Oculto por padrão) -->
-            <div id="adminPanel" class="hidden bg-zinc-100 p-5 border-b-4 border-zinc-800">
-                <h3 class="font-bold text-black mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    Editar Evento (Professor Leandro)
-                </h3>
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Título do Evento</label>
-                        <input type="text" id="configTitle" class="w-full px-3 py-2 border border-gray-300 rounded focus:border-black outline-none" placeholder="Ex: Treino na Represa">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Subtítulo / Data / Hora</label>
-                        <input type="text" id="configSubtitle" class="w-full px-3 py-2 border border-gray-300 rounded focus:border-black outline-none" placeholder="Ex: Sábado, 05/04 às 06:30">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Pergunta para os corredores</label>
-                        <input type="text" id="configQuestion" class="w-full px-3 py-2 border border-gray-300 rounded focus:border-black outline-none" placeholder="Ex: Qual o seu Pace? / O que vai levar?">
-                    </div>
-                    
-                    <div class="flex gap-2 pt-2">
-                        <button onclick="saveEventConfig()" class="flex-1 bg-black text-white font-bold py-2 rounded shadow hover:bg-zinc-800 transition">Atualizar Evento</button>
-                        <button onclick="clearList()" class="bg-red-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-red-700 transition">Apagar Lista</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Área da Lista da Base de Dados -->
-            <div class="p-6 bg-zinc-50 border-b border-zinc-200 flex-grow min-h-[200px]">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-sm font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        Confirmados: <span id="contador">0</span>
-                    </h2>
-                    <!-- Botão Exportar PDF -->
-                    <button onclick="downloadPDF()" class="text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-bold py-1.5 px-3 rounded flex items-center gap-1 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Gerar PDF
-                    </button>
-                </div>
-                
-                <ul id="listaConfirmados" class="space-y-2 text-sm text-gray-700">
-                    <li class="flex justify-center py-4"><div class="loader"></div></li>
-                </ul>
-            </div>
-
-            <!-- Formulário de Adição -->
-            <div class="p-6 bg-white space-y-4">
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1">
-                        <label for="userName" class="block text-sm font-bold text-gray-700 mb-1">Seu Nome</label>
-                        <input type="text" id="userName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Ex: Enzo">
-                    </div>
-                    <div class="flex-1">
-                        <label for="item" id="labelQuestion" class="block text-sm font-bold text-gray-700 mb-1">Carregando...</label>
-                        <input type="text" id="item" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all text-sm text-gray-800 font-medium" placeholder="Sua resposta...">
-                    </div>
-                </div>
-
-                <button id="btnAdd" onclick="addToList()" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-black/30 flex items-center justify-center gap-2 active:transform active:scale-95">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Confirmar Presença
-                </button>
-            </div>
-
-            <!-- Área de Partilha -->
-            <div class="p-6 bg-zinc-100 border-t border-zinc-200 rounded-b-3xl">
-                <button onclick="shareToWhatsApp()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/30 flex items-center justify-center gap-3 active:transform active:scale-95">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                    </svg>
-                    Partilhar no Grupo WhatsApp
-                </button>
-            </div>
+<body class="text-zinc-900 antialiased p-3 sm:p-6">
+  <main class="mx-auto w-full max-w-3xl">
+    <section class="glass overflow-hidden rounded-[28px] fade-in">
+      <header class="relative overflow-hidden bg-gradient-to-br from-red-950 via-red-900 to-black px-5 pb-7 pt-6 text-white sm:px-8">
+        <div class="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-white/5"></div>
+        <div class="absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-red-500/10"></div>
+        <div class="relative z-10 flex items-start justify-between gap-3">
+          <div>
+            <span class="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest">Lista colaborativa</span>
+            <h1 id="displayTitle" class="mt-4 text-2xl font-black leading-tight sm:text-4xl">3º Treinão em Prol da AMICC</h1>
+            <p id="displaySubtitle" class="mt-2 max-w-xl text-sm font-semibold text-red-100">Vamos correr e transformar solidariedade em ajuda.</p>
+          </div>
+          <button onclick="toggleAdminPanel()" class="rounded-full bg-black/30 p-2 text-white/70 transition hover:text-white" aria-label="Abrir painel do organizador" title="Painel do organizador">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.3 4.3c.4-1.7 3-1.7 3.4 0a1.7 1.7 0 002.6 1.1c1.5-.9 3.3.8 2.3 2.3a1.7 1.7 0 001.1 2.6c1.7.4 1.7 3 0 3.4a1.7 1.7 0 00-1.1 2.6c1 1.5-.8 3.3-2.3 2.3a1.7 1.7 0 00-2.6 1.1c-.4 1.7-3 1.7-3.4 0a1.7 1.7 0 00-2.6-1.1c-1.5 1-3.3-.8-2.3-2.3a1.7 1.7 0 00-1.1-2.6c-1.7-.4-1.7-3 0-3.4a1.7 1.7 0 001.1-2.6c-1-1.5.8-3.2 2.3-2.3a1.7 1.7 0 002.6-1.1z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </button>
         </div>
-        
-        <div id="errorMsg" class="hidden mt-4 bg-red-100 border-l-4 border-red-600 text-red-700 p-4 rounded shadow-md text-sm font-medium w-full text-center z-50"></div>
+        <div id="cloudStatus" class="relative z-10 mt-5 inline-flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5 text-xs font-bold">
+          <span id="statusDot" class="h-2.5 w-2.5 rounded-full bg-amber-400"></span><span id="statusText">Conectando...</span>
+        </div>
+      </header>
 
-        <footer class="mt-8 mb-4 text-center">
-            <p class="text-zinc-500 text-sm font-medium">
-                Desenvolvido por <span class="font-bold text-white tracking-wide">thIAguinho Soluções</span>
-            </p>
-        </footer>
-    </main>
+      <div id="adminPanel" class="hidden border-b-4 border-red-900 bg-zinc-100 p-5 sm:p-7">
+        <h2 class="mb-4 text-lg font-black">Configuração do organizador</h2>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="text-sm font-bold">Título<input id="configTitle" class="mt-1 w-full rounded-xl border p-3 font-medium outline-none focus:border-red-800" type="text"></label>
+          <label class="text-sm font-bold">Data, horário ou local<input id="configSubtitle" class="mt-1 w-full rounded-xl border p-3 font-medium outline-none focus:border-red-800" type="text"></label>
+        </div>
+        <label class="mt-3 block text-sm font-bold">Mensagem de orientação<input id="configQuestion" class="mt-1 w-full rounded-xl border p-3 font-medium outline-none focus:border-red-800" type="text"></label>
+        <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+          <button onclick="saveEventConfig()" class="flex-1 rounded-xl bg-zinc-950 px-4 py-3 font-extrabold text-white">Salvar informações</button>
+          <button onclick="clearList()" class="rounded-xl bg-red-700 px-4 py-3 font-extrabold text-white">Apagar toda a lista</button>
+        </div>
+      </div>
 
-    <!-- MOTOR DA BASE DE DADOS (Firebase) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+      <section class="border-b bg-red-50 px-5 py-5 sm:px-8">
+        <p id="displayQuestion" class="text-sm font-bold text-red-950">Escolha abaixo o que você poderá levar. A lista atualiza para todos em tempo real.</p>
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorPessoas" class="block text-2xl font-black text-red-900">0</strong><span class="text-[11px] font-bold text-zinc-500">pessoas</span></div>
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorItens" class="block text-2xl font-black text-red-900">0</strong><span class="text-[11px] font-bold text-zinc-500">itens</span></div>
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorTipos" class="block text-2xl font-black text-red-900">0</strong><span class="text-[11px] font-bold text-zinc-500">tipos</span></div>
+        </div>
+      </section>
 
-        // Configuração original do utilizador
-        const firebaseConfig = {
-    apiKey: "AIzaSyCo4nKN6xtKT_qlAcVXB_h1voYt10NwBwA",
-    authDomain: "lerunners-evento.firebaseapp.com",
-    databaseURL: "https://lerunners-evento-default-rtdb.firebaseio.com",
-    projectId: "lerunners-evento",
-    storageBucket: "lerunners-evento.firebasestorage.app",
-    messagingSenderId: "437924326674",
-    appId: "1:437924326674:web:051968a5466ee6518117cb"
-};
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        
-        // Caminhos na Base de Dados
-        const dbPath = 'lerunners_lista'; // Onde ficam as pessoas
-        const configPath = 'lerunners_config'; // Onde fica a configuração do evento
-        
-        const listaRef = ref(db, dbPath);
-        const configRef = ref(db, configPath);
-        
-        let currentList = [];
-        
-        // Estado inicial padrão do formulário (caso não exista na base de dados)
-        let eventConfig = {
-            title: "Treino LeRunners",
-            subtitle: "Detalhes a definir",
-            question: "Categoria/Pace?"
-        };
+      <section class="bg-white px-5 py-6 sm:px-8">
+        <div class="mb-5">
+          <h2 class="text-xl font-black">O que você vai levar?</h2>
+          <p class="mt-1 text-sm text-zinc-500">Informe um item por vez. Depois você pode cadastrar outro.</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="text-sm font-extrabold">Seu nome completo *<input id="userName" type="text" autocomplete="name" maxlength="80" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-red-800 focus:ring-2 focus:ring-red-100" placeholder="Ex.: Thiago Valencio"></label>
+          <label class="text-sm font-extrabold">Categoria *<select id="category" onchange="updateItemOptions()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-red-800"><option value="">Selecione...</option><option>Leite</option><option>Alimento não perecível</option><option>Bebida</option><option>Higiene e limpeza</option><option>Descartáveis</option><option>Outro</option></select></label>
+          <label class="text-sm font-extrabold">Item *<select id="itemSelect" onchange="toggleCustomItem()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-red-800" disabled><option value="">Escolha a categoria primeiro</option></select><input id="customItem" type="text" maxlength="80" class="mt-2 hidden w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-red-800" placeholder="Digite qual item"></label>
+          <div class="grid grid-cols-[1fr_1.35fr] gap-2">
+            <label class="text-sm font-extrabold">Quantidade *<input id="quantity" type="number" min="0.1" step="0.1" inputmode="decimal" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-red-800" placeholder="1"></label>
+            <label class="text-sm font-extrabold">Unidade *<select id="unit" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-3 outline-none focus:border-red-800"><option value="unidade(s)">unidade(s)</option><option value="litro(s)">litro(s)</option><option value="caixa(s)">caixa(s)</option><option value="pacote(s)">pacote(s)</option><option value="kg">kg</option><option value="fardo(s)">fardo(s)</option></select></label>
+          </div>
+        </div>
+        <label class="mt-4 block text-sm font-extrabold">Observação <span class="font-medium text-zinc-400">(opcional)</span><input id="note" type="text" maxlength="120" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-red-800" placeholder="Ex.: leite integral, entregarei no dia"></label>
+        <button id="btnAdd" onclick="addToList()" class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-red-900 px-4 py-4 font-black text-white shadow-lg shadow-red-900/20 transition active:scale-[.98]">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>Adicionar minha contribuição
+        </button>
+      </section>
 
-        function updateStatus(status) {
-            const dot = document.getElementById('statusDot');
-            const ping = document.getElementById('statusPing');
-            const text = document.getElementById('statusText');
-            
-            if (status === 'connected') {
-                dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500';
-                ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75';
-                ping.classList.remove('hidden');
-                text.textContent = 'Sincronizado';
-            } else if (status === 'error') {
-                dot.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500';
-                ping.classList.add('hidden');
-                text.textContent = 'Erro de Ligação';
-            }
-        }
+      <section class="border-t bg-zinc-50 px-5 py-6 sm:px-8">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div><h2 class="text-xl font-black">Lista solidária</h2><p class="text-xs font-semibold text-zinc-500">Veja o que o grupo já escolheu.</p></div>
+          <button onclick="downloadPDF()" class="rounded-xl bg-zinc-200 px-3 py-2 text-xs font-extrabold text-zinc-800">Baixar PDF</button>
+        </div>
+        <div id="summary" class="mt-5 grid gap-2 sm:grid-cols-2"></div>
+        <div class="mt-5 flex gap-2">
+          <input id="searchInput" oninput="renderList()" type="search" class="w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-red-800" placeholder="Buscar pessoa ou alimento...">
+        </div>
+        <div id="listaConfirmados" class="mt-5 space-y-3"><div class="flex justify-center py-8"><div class="loader"></div></div></div>
+      </section>
 
-        function showError(msg, timeout = 7000) {
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.innerHTML = msg; 
-            errorMsg.classList.remove('hidden');
-            setTimeout(() => errorMsg.classList.add('hidden'), timeout);
-        }
+      <section class="safe-bottom border-t bg-zinc-100 px-5 py-6 sm:px-8">
+        <button onclick="shareToWhatsApp()" class="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 font-black text-white shadow-lg shadow-green-600/20">
+          <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-1.74-.87-2.88-1.55-4.03-3.53-.3-.52.3-.48.87-1.61.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.91-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49 1.89.81 2.63.88 3.58.74.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 01-1.51-5.26C2.17 6.44 6.6 2.01 12.05 2.01c2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 012.89 7c0 5.45-4.43 9.88-9.88 9.88M20.47 3.49A11.82 11.82 0 0012.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 005.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.9 0-3.18-1.23-6.16-3.47-8.41z"/></svg>Compartilhar a lista no WhatsApp
+        </button>
+      </section>
+    </section>
+    <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-50 hidden w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white shadow-2xl"></div>
+    <footer class="py-7 text-center text-xs font-semibold text-zinc-400">Powered by <span class="font-black text-white">thIAguinho Soluções Digitais</span></footer>
+  </main>
 
-        // --- AUTENTICAÇÃO ---
-        const initAuth = async () => {
-            try { await signInAnonymously(auth); } 
-            catch (error) { showError("Falha na autenticação: " + error.message); }
-        };
-        initAuth();
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user) return; 
+    const firebaseConfig = {
+      apiKey: "AIzaSyCo4nKN6xtKT_qlAcVXB_h1voYt10NwBwA",
+      authDomain: "lerunners-evento.firebaseapp.com",
+      databaseURL: "https://lerunners-evento-default-rtdb.firebaseio.com",
+      projectId: "lerunners-evento",
+      storageBucket: "lerunners-evento.firebasestorage.app",
+      messagingSenderId: "437924326674",
+      appId: "1:437924326674:web:051968a5466ee6518117cb"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const dbPath = 'amicc_terceiro_treinao_doacoes';
+    const configPath = 'amicc_terceiro_treinao_config';
+    const listaRef = ref(db, dbPath);
+    const configRef = ref(db, configPath);
+    let currentList = [];
+    let eventConfig = {
+      title: "3º Treinão em Prol da AMICC",
+      subtitle: "Corrida/Caminhada • Pista de Atletismo do Eldorado",
+      question: "Escolha abaixo o que você poderá levar. A lista atualiza para todos em tempo real."
+    };
 
-            // 1. Ouvir as configurações do Evento (Títulos e Perguntas)
-            onValue(configRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    eventConfig = snapshot.val();
-                } else {
-                    // Se não existir, grava a padrão na base
-                    set(configRef, eventConfig);
-                }
-                updateUIWithConfig();
-            });
+    const itemMap = {
+      "Leite": ["Leite integral", "Leite semidesnatado", "Leite desnatado", "Leite em pó", "Outro leite"],
+      "Alimento não perecível": ["Arroz", "Feijão", "Macarrão", "Óleo", "Açúcar", "Café", "Farinha", "Molho de tomate", "Biscoito", "Achocolatado", "Enlatado", "Outro alimento"],
+      "Bebida": ["Água", "Suco", "Água de coco", "Isotônico", "Outra bebida"],
+      "Higiene e limpeza": ["Papel higiênico", "Sabonete", "Creme dental", "Detergente", "Água sanitária", "Outro item de higiene/limpeza"],
+      "Descartáveis": ["Copo descartável", "Guardanapo", "Prato descartável", "Talher descartável", "Outro descartável"],
+      "Outro": ["Outro item"]
+    };
 
-            // 2. Ouvir a Lista de Pessoas
-            onValue(listaRef, (snapshot) => {
-                currentList = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        currentList.push({ id: childSnapshot.key, ...childSnapshot.val() });
-                    });
-                }
-                
-                currentList.sort((a, b) => a.timestamp - b.timestamp);
-                renderList();
-                updateStatus('connected');
-                
-            }, (error) => {
-                updateStatus('error');
-                showError("Erro na Base de Dados. Verifique as Regras de acesso.");
-            });
-        });
+    const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const formatQty = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 
-        // --- ATUALIZAR INTERFACE COM AS CONFIGURAÇÕES ---
-        function updateUIWithConfig() {
-            // Atualiza Visão do Corredor
-            document.getElementById('displayTitle').textContent = eventConfig.title;
-            document.getElementById('displaySubtitle').textContent = eventConfig.subtitle;
-            document.getElementById('labelQuestion').textContent = eventConfig.question;
-            document.title = "LeRunners - " + eventConfig.title;
+    function toast(message, error = false) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.className = `fixed bottom-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white shadow-2xl ${error ? 'bg-red-700' : 'bg-zinc-950'}`;
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => el.classList.add('hidden'), 4500);
+    }
 
-            // Atualiza os inputs do Painel Admin
-            document.getElementById('configTitle').value = eventConfig.title;
-            document.getElementById('configSubtitle').value = eventConfig.subtitle;
-            document.getElementById('configQuestion').value = eventConfig.question;
-        }
+    function setStatus(ok, text) {
+      document.getElementById('statusDot').className = `h-2.5 w-2.5 rounded-full ${ok ? 'bg-green-400' : 'bg-red-400'}`;
+      document.getElementById('statusText').textContent = text;
+    }
 
-        // --- FUNÇÕES DE INTERFACE DA LISTA ---
-        function renderList() {
-            const ul = document.getElementById('listaConfirmados');
-            document.getElementById('contador').textContent = currentList.length;
-            ul.innerHTML = ''; 
+    window.updateItemOptions = function() {
+      const category = document.getElementById('category').value;
+      const select = document.getElementById('itemSelect');
+      const options = itemMap[category] || [];
+      select.disabled = !options.length;
+      select.innerHTML = options.length ? '<option value="">Selecione o item...</option>' + options.map(x => `<option>${esc(x)}</option>`).join('') : '<option value="">Escolha a categoria primeiro</option>';
+      document.getElementById('customItem').classList.add('hidden');
+      document.getElementById('customItem').value = '';
+    };
 
-            if (currentList.length === 0) {
-                ul.innerHTML = '<li class="text-center text-zinc-400 font-medium py-6">A lista está vazia. Seja o primeiro!</li>';
-                return;
-            }
+    window.toggleCustomItem = function() {
+      const value = document.getElementById('itemSelect').value;
+      const custom = document.getElementById('customItem');
+      const show = value.startsWith('Outro');
+      custom.classList.toggle('hidden', !show);
+      if (show) custom.focus();
+    };
 
-            currentList.forEach((entry) => {
-                const li = document.createElement('li');
-                li.className = "flex items-start justify-between gap-2 bg-white p-3 rounded-xl border border-zinc-200 shadow-sm group transition-all hover:border-black";
+    function updateUIWithConfig() {
+      document.getElementById('displayTitle').textContent = eventConfig.title;
+      document.getElementById('displaySubtitle').textContent = eventConfig.subtitle || '';
+      document.getElementById('displayQuestion').textContent = eventConfig.question || '';
+      document.getElementById('configTitle').value = eventConfig.title || '';
+      document.getElementById('configSubtitle').value = eventConfig.subtitle || '';
+      document.getElementById('configQuestion').value = eventConfig.question || '';
+      document.title = `${eventConfig.title} | Lista Solidária`;
+    }
 
-                const leftDiv = document.createElement('div');
-                leftDiv.className = "flex items-start gap-2 pr-2";
-                
-                // Ícone de check
-                leftDiv.innerHTML = `<svg class="w-5 h-5 text-black mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-                
-                const textDiv = document.createElement('div');
-                const spanNome = document.createElement('span');
-                spanNome.className = "font-bold text-black";
-                spanNome.textContent = entry.nome; 
-                
-                const spanItem = document.createElement('span');
-                spanItem.className = "text-zinc-500 block sm:inline sm:ml-1";
-                spanItem.textContent = `- ${entry.item}`;
+    function getTotals() {
+      const totals = {};
+      currentList.forEach(e => {
+        const key = `${e.item}|${e.unit}`;
+        if (!totals[key]) totals[key] = { item: e.item, unit: e.unit, quantity: 0 };
+        totals[key].quantity += Number(e.quantity) || 0;
+      });
+      return Object.values(totals).sort((a,b) => a.item.localeCompare(b.item, 'pt-BR'));
+    }
 
-                textDiv.appendChild(spanNome);
-                textDiv.appendChild(spanItem);
-                leftDiv.appendChild(textDiv);
+    function renderSummary() {
+      const totals = getTotals();
+      document.getElementById('contadorItens').textContent = formatQty(currentList.reduce((s,e) => s + (Number(e.quantity) || 0), 0));
+      document.getElementById('contadorTipos').textContent = totals.length;
+      document.getElementById('contadorPessoas').textContent = new Set(currentList.map(e => normalize(e.nome))).size;
+      document.getElementById('summary').innerHTML = totals.length ? totals.map(t => `<div class="flex items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 p-3"><span class="text-sm font-bold">${esc(t.item)}</span><strong class="whitespace-nowrap text-sm text-red-900">${formatQty(t.quantity)} ${esc(t.unit)}</strong></div>`).join('') : '';
+    }
 
-                const btnDelete = document.createElement('button');
-                btnDelete.className = "text-red-300 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 flex-shrink-0 cursor-pointer pdf-hide"; // class pdf-hide importante
-                btnDelete.title = "Remover da lista";
-                btnDelete.onclick = () => window.deleteItem(entry.id);
-                btnDelete.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+    window.renderList = function() {
+      renderSummary();
+      const query = normalize(document.getElementById('searchInput').value);
+      const list = currentList.filter(e => normalize(`${e.nome} ${e.item} ${e.category} ${e.note}`).includes(query));
+      const box = document.getElementById('listaConfirmados');
+      if (!currentList.length) { box.innerHTML = '<div class="rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-10 text-center text-sm font-semibold text-zinc-400">Ainda não há contribuições.<br>Seja a primeira pessoa a participar!</div>'; return; }
+      if (!list.length) { box.innerHTML = '<div class="py-8 text-center text-sm font-semibold text-zinc-400">Nenhum resultado encontrado.</div>'; return; }
+      const groups = {};
+      list.forEach(e => (groups[e.category || 'Outros'] ||= []).push(e));
+      box.innerHTML = Object.entries(groups).map(([category, entries]) => `
+        <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+          <div class="flex items-center justify-between bg-zinc-100 px-4 py-3"><h3 class="text-sm font-black text-zinc-800">${esc(category)}</h3><span class="rounded-full bg-white px-2 py-1 text-[10px] font-extrabold text-zinc-500">${entries.length} registro${entries.length === 1 ? '' : 's'}</span></div>
+          <div class="divide-y divide-zinc-100">${entries.map(e => `<article class="flex items-start justify-between gap-3 p-4"><div class="min-w-0"><div class="font-black text-zinc-950">${esc(e.nome)}</div><div class="mt-1 text-sm"><strong class="text-red-900">${formatQty(e.quantity)} ${esc(e.unit)}</strong> de ${esc(e.item)}</div>${e.note ? `<div class="mt-1 text-xs font-medium text-zinc-500">${esc(e.note)}</div>` : ''}</div><button onclick="deleteItem('${esc(e.id)}')" class="rounded-lg p-2 text-red-300 transition hover:bg-red-50 hover:text-red-700" title="Remover este registro" aria-label="Remover este registro"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.9 12.1A2 2 0 0116.1 21H7.9a2 2 0 01-2-1.9L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></article>`).join('')}</div>
+        </div>`).join('');
+    };
 
-                li.appendChild(leftDiv);
-                li.appendChild(btnDelete);
-                ul.appendChild(li);
-            });
-        }
+    window.addToList = async function() {
+      const nome = document.getElementById('userName').value.trim();
+      const category = document.getElementById('category').value;
+      const selected = document.getElementById('itemSelect').value;
+      const custom = document.getElementById('customItem').value.trim();
+      const item = selected.startsWith('Outro') ? custom : selected;
+      const quantity = Number(String(document.getElementById('quantity').value).replace(',', '.'));
+      const unit = document.getElementById('unit').value;
+      const note = document.getElementById('note').value.trim();
+      if (!nome || !category || !item || !quantity || quantity <= 0 || !unit) { toast('Preencha nome, categoria, item, quantidade e unidade.', true); return; }
+      const btn = document.getElementById('btnAdd');
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<div class="loader"></div> Salvando...';
+      try {
+        await push(listaRef, { nome, category, item, quantity, unit, note, timestamp: Date.now() });
+        localStorage.setItem('amicc_nome', nome);
+        document.getElementById('category').value = '';
+        document.getElementById('quantity').value = '';
+        document.getElementById('note').value = '';
+        updateItemOptions();
+        toast('Contribuição adicionada! Obrigado por ajudar a AMICC.');
+      } catch (error) { toast('Não foi possível salvar. Confira a conexão e tente novamente.', true); }
+      finally { btn.disabled = false; btn.innerHTML = original; }
+    };
 
-        window.deleteItem = async function(nodeId) {
-            try { await remove(ref(db, `${dbPath}/${nodeId}`)); } 
-            catch (error) { showError("Erro ao eliminar."); }
-        };
+    window.deleteItem = async function(id) {
+      if (!confirm('Deseja remover este item da lista?')) return;
+      try { await remove(ref(db, `${dbPath}/${id}`)); toast('Item removido da lista.'); }
+      catch { toast('Não foi possível remover o item.', true); }
+    };
 
-        window.addToList = async function() {
-            const userNameInput = document.getElementById('userName');
-            const itemInput = document.getElementById('item');
-            const btn = document.getElementById('btnAdd');
-            
-            const userName = userNameInput.value.trim();
-            const item = itemInput.value.trim();
+    window.toggleAdminPanel = function() {
+      const senha = prompt('Área do organizador. Digite a senha:');
+      if (senha === 'leandro') document.getElementById('adminPanel').classList.toggle('hidden');
+      else if (senha !== null) alert('Senha incorreta.');
+    };
 
-            if (!userName || !item) {
-                showError("⚠️ Preencha os campos para confirmar presença.");
-                return;
-            }
+    window.saveEventConfig = async function() {
+      const title = document.getElementById('configTitle').value.trim();
+      const subtitle = document.getElementById('configSubtitle').value.trim();
+      const question = document.getElementById('configQuestion').value.trim();
+      if (!title) return alert('Informe o título do evento.');
+      try { await set(configRef, { title, subtitle, question }); document.getElementById('adminPanel').classList.add('hidden'); toast('Informações atualizadas.'); }
+      catch { toast('Erro ao salvar as informações.', true); }
+    };
 
-            const btnOriginalHtml = btn.innerHTML;
-            btn.innerHTML = `<div class="loader mr-2 border-white border-t-black w-5 h-5"></div> A Guardar...`;
-            btn.disabled = true;
+    window.clearList = async function() {
+      if (!confirm('ATENÇÃO: deseja apagar TODA a lista solidária? Essa ação não pode ser desfeita.')) return;
+      try { await remove(listaRef); toast('A lista foi apagada.'); }
+      catch { toast('Não foi possível apagar a lista.', true); }
+    };
 
-            try {
-                await push(listaRef, { nome: userName, item: item, timestamp: Date.now() });
-                userNameInput.value = '';
-                itemInput.value = '';
-            } catch (error) {
-                showError("Falha ao guardar. Tente novamente.");
-            } finally {
-                btn.innerHTML = btnOriginalHtml;
-                btn.disabled = false;
-            }
-        };
+    window.shareToWhatsApp = function() {
+      const cleanUrl = location.origin + location.pathname;
+      let text = `❤️ *${eventConfig.title}*\n`;
+      if (eventConfig.subtitle) text += `📍 ${eventConfig.subtitle}\n`;
+      text += `\nEstamos organizando as doações. Cada pessoa pode escolher o que vai levar e informar a quantidade.\n`;
+      const totals = getTotals();
+      if (totals.length) {
+        text += `\n*Já confirmado pelo grupo:*\n`;
+        totals.forEach(t => text += `• ${t.item}: *${formatQty(t.quantity)} ${t.unit}*\n`);
+      }
+      text += `\n👇 Abra a lista e marque sua contribuição:\n${cleanUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    };
 
-        // --- FUNÇÕES DO PROFESSOR LEANDRO (ADMIN) ---
-        
-        window.toggleAdminPanel = function() {
-            // Pequena proteção por senha
-            const senha = prompt("Área do Professor. Digite a senha:");
-            if (senha === "leandro") {
-                const panel = document.getElementById('adminPanel');
-                panel.classList.toggle('hidden');
-            } else if(senha !== null) {
-                alert("Senha incorreta!");
-            }
-        };
+    window.downloadPDF = function() {
+      if (!currentList.length) return toast('A lista ainda está vazia.', true);
+      const totals = getTotals();
+      const rows = currentList.map((e,i) => `<tr><td>${i+1}</td><td><b>${esc(e.nome)}</b></td><td>${esc(e.category)}</td><td>${esc(e.item)}</td><td>${formatQty(e.quantity)} ${esc(e.unit)}</td><td>${esc(e.note || '—')}</td></tr>`).join('');
+      const summary = totals.map(t => `<li>${esc(t.item)}: <b>${formatQty(t.quantity)} ${esc(t.unit)}</b></li>`).join('');
+      const container = document.createElement('div');
+      container.innerHTML = `<div style="font-family:Arial;padding:22px;color:#18181b"><h1 style="color:#7f1d1d;margin-bottom:4px">${esc(eventConfig.title)}</h1><p style="margin-top:0;color:#555">${esc(eventConfig.subtitle)}</p><h3>Resumo das arrecadações</h3><ul>${summary}</ul><h3>Lista completa</h3><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#7f1d1d;color:white"><th>Nº</th><th>Nome</th><th>Categoria</th><th>Item</th><th>Quantidade</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;text-align:center;font-size:10px;color:#777">Powered by thIAguinho Soluções Digitais</p></div>`;
+      container.querySelectorAll('th,td').forEach(el => { el.style.padding='7px'; el.style.border='1px solid #ddd'; el.style.textAlign='left'; });
+      html2pdf().set({ margin:8, filename:'Lista_Solidaria_3_Treinao_AMICC.pdf', image:{type:'jpeg',quality:.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'landscape'} }).from(container).save();
+    };
 
-        window.saveEventConfig = async function() {
-            const title = document.getElementById('configTitle').value.trim();
-            const subtitle = document.getElementById('configSubtitle').value.trim();
-            const question = document.getElementById('configQuestion').value.trim();
-
-            if (!title) { alert("O título não pode estar vazio!"); return; }
-
-            try {
-                await set(configRef, { title, subtitle, question });
-                alert("Evento atualizado com sucesso!");
-                document.getElementById('adminPanel').classList.add('hidden');
-            } catch (error) {
-                showError("Erro ao guardar configuração.");
-            }
-        };
-
-        window.clearList = async function() {
-            if(confirm("ATENÇÃO: Tens a certeza que queres apagar TODA a lista de confirmados? Esta ação não pode ser desfeita.")) {
-                try {
-                    await remove(listaRef);
-                    alert("Lista apagada! Pronta para o novo evento.");
-                } catch (error) {
-                    showError("Erro ao limpar a lista.");
-                }
-            }
-        };
-
-        // --- PARTILHA E EXPORTAÇÃO ---
-        
-        window.shareToWhatsApp = function() {
-            if (currentList.length === 0) {
-                showError("⚠️ A lista está vazia.");
-                return;
-            }
-
-            const cleanUrl = window.location.origin + window.location.pathname;
-
-            let waText = `🏃‍♂️ *LeRunners - ${eventConfig.title}* 🏃‍♀️\n`;
-            if(eventConfig.subtitle) waText += `📅 _${eventConfig.subtitle}_\n`;
-            waText += "-----------------------------------\n";
-            currentList.forEach((entry, index) => {
-                waText += `${index + 1}. *${entry.nome}* - ${entry.item}\n`;
-            });
-            waText += "-----------------------------------\n\n";
-            waText += "👇 *Clique para ver a lista em tempo real ou confirmar presença:* 👇\n";
-            waText += cleanUrl;
-
-            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
-            window.open(waUrl, '_blank');
-        };
-
-        window.downloadPDF = function() {
-            if (currentList.length === 0) {
-                showError("⚠️ A lista está vazia. Nada para exportar.");
-                return;
-            }
-
-            // Criar um documento HTML temporário e limpo só para o PDF
-            let pdfContent = `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h1 style="text-align: center; color: #000; text-transform: uppercase;">LeRunners</h1>
-                    <h2 style="text-align: center; color: #333;">${eventConfig.title}</h2>
-                    <h4 style="text-align: center; color: #666; margin-bottom: 30px;">${eventConfig.subtitle}</h4>
-                    
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background-color: #f3f4f6; text-align: left;">
-                                <th style="padding: 10px; border-bottom: 2px solid #000;">Nº</th>
-                                <th style="padding: 10px; border-bottom: 2px solid #000;">Nome</th>
-                                <th style="padding: 10px; border-bottom: 2px solid #000;">${eventConfig.question}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            currentList.forEach((entry, index) => {
-                pdfContent += `
-                    <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${index + 1}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">${entry.nome}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${entry.item}</td>
-                    </tr>
-                `;
-            });
-
-            pdfContent += `
-                        </tbody>
-                    </table>
-                    <p style="text-align: center; margin-top: 30px; font-size: 12px; color: #888;">Gerado automaticamente via App LeRunners</p>
-                </div>
-            `;
-
-            // Elemento invisível na tela para gerar o PDF
-            const container = document.createElement('div');
-            container.innerHTML = pdfContent;
-            
-            // Configuração do html2pdf
-            const opt = {
-              margin:       10,
-              filename:     `LeRunners_${eventConfig.title.replace(/\s+/g, '_')}.pdf`,
-              image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2 },
-              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Gera o PDF
-            html2pdf().set(opt).from(container).save();
-        };
-
-    </script>
+    document.getElementById('userName').value = localStorage.getItem('amicc_nome') || '';
+    signInAnonymously(auth).catch(() => setStatus(false, 'Falha na conexão'));
+    onAuthStateChanged(auth, user => {
+      if (!user) return;
+      onValue(configRef, snapshot => { if (snapshot.exists()) eventConfig = {...eventConfig, ...snapshot.val()}; else set(configRef, eventConfig); updateUIWithConfig(); });
+      onValue(listaRef, snapshot => {
+        currentList = [];
+        if (snapshot.exists()) snapshot.forEach(child => currentList.push({ id: child.key, ...child.val() }));
+        currentList.sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
+        renderList(); setStatus(true, 'Sincronizado ao vivo');
+      }, () => { setStatus(false, 'Erro na conexão'); toast('A lista não pôde ser carregada. Verifique as regras do Firebase.', true); });
+    });
+  </script>
 </body>
 </html>
