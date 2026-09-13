@@ -321,15 +321,42 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     };
 
-    window.downloadPDF = function() {
+    window.downloadPDF = async function() {
       if (!currentList.length) return toast('A lista ainda está vazia.', true);
       const totals = getTotals();
       const rows = currentList.map((e,i) => `<tr><td>${i+1}</td><td><b>${esc(e.nome)}</b></td><td>${esc(e.category)}</td><td>${esc(e.item)}</td><td>${formatQty(e.quantity)} ${esc(e.unit)}</td><td>${esc(e.note || '—')}</td></tr>`).join('');
       const summary = totals.map(t => `<li>${esc(t.item)}: <b>${formatQty(t.quantity)} ${esc(t.unit)}</b></li>`).join('');
       const container = document.createElement('div');
-      container.innerHTML = `<div style="font-family:Arial;padding:22px;color:#18181b"><h1 style="color:#000;margin-bottom:4px">${esc(eventConfig.title)}</h1><p style="margin-top:0;color:#555">${esc(eventConfig.subtitle)}</p><h3>Resumo das arrecadações</h3><ul>${summary}</ul><h3>Lista completa</h3><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#18181b;color:white"><th>Nº</th><th>Nome</th><th>Categoria</th><th>Item</th><th>Quantidade</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;text-align:center;font-size:10px;color:#777">Powered by thIAguinho Soluções Digitais</p></div>`;
+      container.setAttribute('aria-hidden', 'true');
+      Object.assign(container.style, {
+        position: 'absolute',
+        left: '-10000px',
+        top: '0',
+        width: '1120px',
+        background: '#ffffff',
+        color: '#18181b',
+        zIndex: '-9999',
+        pointerEvents: 'none'
+      });
+      container.innerHTML = `<div style="font-family:Arial,sans-serif;padding:22px;color:#18181b;background:#fff"><h1 style="color:#000;margin-bottom:4px">${esc(eventConfig.title)}</h1><p style="margin-top:0;color:#555">${esc(eventConfig.subtitle)}</p><h3>Resumo das arrecadações</h3><ul>${summary}</ul><h3>Lista completa</h3><table style="width:100%;border-collapse:collapse;font-size:11px;background:#fff"><thead><tr style="background:#18181b;color:white"><th>Nº</th><th>Nome</th><th>Categoria</th><th>Item</th><th>Quantidade</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;text-align:center;font-size:10px;color:#777">Powered by thIAguinho Soluções Digitais</p></div>`;
       container.querySelectorAll('th,td').forEach(el => { el.style.padding='7px'; el.style.border='1px solid #ddd'; el.style.textAlign='left'; });
-      html2pdf().set({ margin:8, filename:'Pesquisa_Atletas_LeRunners_3_Treinao_AMICC.pdf', image:{type:'jpeg',quality:.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'landscape'} }).from(container).save();
+      document.body.appendChild(container);
+      try {
+        if (document.fonts?.ready) await document.fonts.ready;
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await html2pdf().set({
+          margin: 8,
+          filename: 'Pesquisa_Atletas_LeRunners_3_Treinao_AMICC.pdf',
+          image: { type: 'jpeg', quality: .98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 1120 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        }).from(container).save();
+      } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        toast('Não foi possível gerar o PDF. Tente novamente.', true);
+      } finally {
+        container.remove();
+      }
     };
 
     document.getElementById('userName').value = localStorage.getItem('amicc_nome') || '';
