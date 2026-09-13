@@ -62,9 +62,9 @@
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 00-.1-7.8z"/></svg>
             </div>
             <div>
-              <h2 class="text-xl font-black leading-tight">Atleta LeRunners, sua participação vai além da corrida.</h2>
-              <p class="mt-2 text-sm font-medium leading-relaxed text-zinc-600">Vamos unir a equipe em uma ação de solidariedade para o projeto AMICC. Escolha o que você pode doar, informe a quantidade e ajude a organização a preparar essa corrente do bem.</p>
-              <p class="mt-3 text-sm font-extrabold text-black">Cada contribuição soma. Participe com o que estiver ao seu alcance.</p>
+              <h2 class="text-xl font-black leading-tight">Equipe LERUNNERS: juntos pelo 3º Treinão em Prol da AMICC.</h2>
+              <p class="mt-2 text-sm font-medium leading-relaxed text-zinc-600">Este formulário é exclusivo para os atletas da LERUNNERS informarem antecipadamente o que pretendem levar para a arrecadação do projeto.</p>
+              <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-relaxed text-amber-950">🥛 A arrecadação oficial do Treinão é de <strong>2 litros de leite em caixinha</strong> OU <strong>2 kg de alimentos não perecíveis</strong>. Quem puder contribuir com mais, pode registrar uma quantidade maior.</div>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@
         <p id="displayQuestion" class="text-sm font-bold text-zinc-900">Veja a força da equipe: acompanhe abaixo as doações que os atletas já confirmaram.</p>
         <div class="mt-4 grid grid-cols-3 gap-2">
           <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorPessoas" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">atletas</span></div>
-          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorItens" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">itens</span></div>
+          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorItens" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">compromissos</span></div>
           <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorTipos" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">tipos</span></div>
         </div>
       </section>
@@ -87,19 +87,19 @@
       <section class="bg-white px-5 py-6 sm:px-8">
         <div class="mb-5">
           <span class="text-xs font-black uppercase tracking-widest text-zinc-400">Quero participar</span>
-          <h2 class="mt-1 text-2xl font-black">Qual será a sua doação?</h2>
-          <p class="mt-1 text-sm text-zinc-500">Informe um item por vez. Se quiser doar mais produtos, faça um novo registro.</p>
+          <h2 class="mt-1 text-2xl font-black">O que você vai levar para a AMICC?</h2>
+          <p class="mt-1 text-sm text-zinc-500">Escolha entre leite em caixinha ou alimento não perecível e informe a quantidade total. Para mais de um item, faça um novo registro.</p>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="text-sm font-extrabold">Nome do atleta LeRunners *<input id="userName" type="text" autocomplete="name" maxlength="80" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black focus:ring-2 focus:ring-zinc-200" placeholder="Digite seu nome completo"></label>
-          <label class="text-sm font-extrabold">Tipo de doação *<select id="category" onchange="updateItemOptions()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black"><option value="">Selecione...</option><option>Leite</option><option>Alimento não perecível</option><option>Higiene pessoal</option><option>Produto de limpeza</option><option>Outro</option></select></label>
+          <label class="text-sm font-extrabold">Tipo de arrecadação *<select id="category" onchange="updateItemOptions()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black"><option value="">Selecione...</option><option value="Leite em caixinha">🥛 Leite em caixinha</option><option value="Alimento não perecível">🥫 Alimento não perecível</option></select></label>
           <label class="text-sm font-extrabold">Item *<select id="itemSelect" onchange="toggleCustomItem()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" disabled><option value="">Escolha a categoria primeiro</option></select><input id="customItem" type="text" maxlength="80" class="mt-2 hidden w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="Digite qual item"></label>
           <div class="grid grid-cols-[1fr_1.35fr] gap-2">
-            <label class="text-sm font-extrabold">Quantidade *<input id="quantity" type="number" min="0.1" step="0.1" inputmode="decimal" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="1"></label>
-            <label class="text-sm font-extrabold">Unidade *<select id="unit" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-3 outline-none focus:border-black"><option value="unidade(s)">unidade(s)</option><option value="litro(s)">litro(s)</option><option value="caixa(s)">caixa(s)</option><option value="pacote(s)">pacote(s)</option><option value="kg">kg</option><option value="fardo(s)">fardo(s)</option></select></label>
+            <label class="text-sm font-extrabold">Quantidade total *<input id="quantity" type="number" min="0.1" step="0.1" inputmode="decimal" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="2"></label>
+            <label class="text-sm font-extrabold">Unidade *<select id="unit" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-100 px-3 py-3 outline-none" disabled><option value="">Escolha o tipo primeiro</option></select></label>
           </div>
         </div>
-        <label class="mt-4 block text-sm font-extrabold">Observação <span class="font-medium text-zinc-400">(opcional)</span><input id="note" type="text" maxlength="120" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="Ex.: leite integral, entregarei no dia"></label>
+        <label class="mt-4 block text-sm font-extrabold">Observação <span class="font-medium text-zinc-400">(opcional)</span><input id="note" type="text" maxlength="120" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="Ex.: vou levar no dia do Treinão"></label>
         <button id="btnAdd" onclick="addToList()" class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-4 font-black text-white shadow-lg shadow-black/20 transition hover:bg-zinc-800 active:scale-[.98]">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>EU VOU DOAR
         </button>
@@ -151,18 +151,15 @@
     const configRef = ref(db, configPath);
     let currentList = [];
     let eventConfig = {
-      title: "Juntos pela AMICC",
-      subtitle: "Mobilização dos atletas LeRunners para o 3º Treinão em Prol da AMICC",
-      question: "Veja a força da equipe: acompanhe abaixo as doações que os atletas já confirmaram.",
-      campaignVersion: 5
+      title: "LERUNNERS pela AMICC",
+      subtitle: "Mobilização da equipe LERUNNERS para o 3º Treinão em Prol da AMICC",
+      question: "Acompanhe o compromisso da equipe: leite em caixinha e alimentos não perecíveis já confirmados pelos atletas.",
+      campaignVersion: 6
     };
 
     const itemMap = {
-      "Leite": ["Leite integral", "Leite semidesnatado", "Leite desnatado", "Leite em pó", "Outro leite"],
-      "Alimento não perecível": ["Arroz", "Feijão", "Macarrão", "Óleo", "Açúcar", "Café", "Farinha", "Molho de tomate", "Biscoito", "Achocolatado", "Enlatado", "Outro alimento"],
-      "Higiene pessoal": ["Papel higiênico", "Sabonete", "Creme dental", "Escova dental", "Shampoo", "Outro item de higiene"],
-      "Produto de limpeza": ["Detergente", "Água sanitária", "Desinfetante", "Sabão em pó", "Outro produto de limpeza"],
-      "Outro": ["Outro item"]
+      "Leite em caixinha": ["Leite em caixinha 1L"],
+      "Alimento não perecível": ["Arroz", "Feijão", "Macarrão", "Açúcar", "Farinha", "Café", "Biscoito", "Molho de tomate", "Achocolatado", "Enlatado", "Outro alimento não perecível"]
     };
 
     const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -187,7 +184,18 @@
       const select = document.getElementById('itemSelect');
       const options = itemMap[category] || [];
       select.disabled = !options.length;
-      select.innerHTML = options.length ? '<option value="">Selecione o item...</option>' + options.map(x => `<option>${esc(x)}</option>`).join('') : '<option value="">Escolha a categoria primeiro</option>';
+      select.innerHTML = options.length ? '<option value="">Selecione o item...</option>' + options.map(x => `<option>${esc(x)}</option>`).join('') : '<option value="">Escolha o tipo de arrecadação primeiro</option>';
+      const unit = document.getElementById('unit');
+      if (category === 'Leite em caixinha') {
+        unit.innerHTML = '<option value="litro(s)">litro(s)</option>';
+        unit.value = 'litro(s)';
+      } else if (category === 'Alimento não perecível') {
+        unit.innerHTML = '<option value="kg">kg</option>';
+        unit.value = 'kg';
+      } else {
+        unit.innerHTML = '<option value="">Escolha o tipo primeiro</option>';
+      }
+      document.getElementById('quantity').placeholder = category ? '2' : '';
       document.getElementById('customItem').classList.add('hidden');
       document.getElementById('customItem').value = '';
     };
@@ -195,7 +203,7 @@
     window.toggleCustomItem = function() {
       const value = document.getElementById('itemSelect').value;
       const custom = document.getElementById('customItem');
-      const show = value.startsWith('Outro');
+      const show = value === 'Outro alimento não perecível';
       custom.classList.toggle('hidden', !show);
       if (show) custom.focus();
     };
@@ -222,7 +230,7 @@
 
     function renderSummary() {
       const totals = getTotals();
-      document.getElementById('contadorItens').textContent = formatQty(currentList.reduce((s,e) => s + (Number(e.quantity) || 0), 0));
+      document.getElementById('contadorItens').textContent = currentList.length;
       document.getElementById('contadorTipos').textContent = totals.length;
       document.getElementById('contadorPessoas').textContent = new Set(currentList.map(e => normalize(e.nome))).size;
       document.getElementById('summary').innerHTML = totals.length ? totals.map(t => `<div class="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-3"><span class="text-sm font-bold">${esc(t.item)}</span><strong class="whitespace-nowrap text-sm text-black">${formatQty(t.quantity)} ${esc(t.unit)}</strong></div>`).join('') : '';
@@ -253,7 +261,9 @@
       const quantity = Number(String(document.getElementById('quantity').value).replace(',', '.'));
       const unit = document.getElementById('unit').value;
       const note = document.getElementById('note').value.trim();
-      if (!nome || !category || !item || !quantity || quantity <= 0 || !unit) { toast('Preencha nome, categoria, item, quantidade e unidade.', true); return; }
+      if (!nome || !category || !item || !quantity || quantity <= 0 || !unit) { toast('Preencha nome, tipo de arrecadação, item e quantidade.', true); return; }
+      if (!['Leite em caixinha', 'Alimento não perecível'].includes(category)) { toast('Selecione um tipo de arrecadação válido para o projeto AMICC.', true); return; }
+      if ((category === 'Leite em caixinha' && unit !== 'litro(s)') || (category === 'Alimento não perecível' && unit !== 'kg')) { toast('A unidade informada não corresponde ao tipo de arrecadação.', true); return; }
       const btn = document.getElementById('btnAdd');
       const original = btn.innerHTML;
       btn.disabled = true; btn.innerHTML = '<div class="loader"></div> Salvando...';
@@ -264,7 +274,7 @@
         document.getElementById('quantity').value = '';
         document.getElementById('note').value = '';
         updateItemOptions();
-        toast('Resposta registrada! Obrigado por colaborar com a organização do treino.');
+        toast('Compromisso registrado! Obrigado por fortalecer a arrecadação da LERUNNERS para a AMICC.');
       } catch (error) { toast('Não foi possível salvar. Confira a conexão e tente novamente.', true); }
       finally { btn.disabled = false; btn.innerHTML = original; }
     };
@@ -286,7 +296,7 @@
       const subtitle = document.getElementById('configSubtitle').value.trim();
       const question = document.getElementById('configQuestion').value.trim();
       if (!title) return alert('Informe o título do evento.');
-      try { await set(configRef, { title, subtitle, question, campaignVersion: 5 }); document.getElementById('adminPanel').classList.add('hidden'); toast('Informações atualizadas.'); }
+      try { await set(configRef, { title, subtitle, question, campaignVersion: 6 }); document.getElementById('adminPanel').classList.add('hidden'); toast('Informações atualizadas.'); }
       catch { toast('Erro ao salvar as informações.', true); }
     };
 
@@ -301,7 +311,7 @@
       let text = `🏃‍♂️ *LERUNNERS: JUNTOS PELA AMICC* 🏃‍♀️\n`;
       text += `❤️ *3º Treinão em Prol da AMICC*\n`;
       if (eventConfig.subtitle) text += `📍 ${eventConfig.subtitle}\n`;
-      text += `\nAtleta LeRunners, sua participação vai além da corrida! Escolha o que você pode doar e informe a quantidade. Cada contribuição soma.\n`;
+      text += `\nAtleta LERUNNERS, marque o que você vai levar para a arrecadação da AMICC: *2 litros de leite em caixinha* ou *2 kg de alimentos não perecíveis*. Se puder contribuir com mais, informe a quantidade no formulário.\n`;
       const totals = getTotals();
       if (totals.length) {
         text += `\n*Já confirmado pelos atletas:*\n`;
@@ -330,7 +340,7 @@
         const savedConfig = snapshot.exists() ? snapshot.val() : null;
         // A configuração antiga pertencia ao questionário anterior. Na primeira
         // abertura desta versão, atualiza somente o cabeçalho para a campanha AMICC.
-        if (!savedConfig || savedConfig.campaignVersion !== 5) set(configRef, eventConfig);
+        if (!savedConfig || savedConfig.campaignVersion !== 6) set(configRef, eventConfig);
         else eventConfig = {...eventConfig, ...savedConfig};
         updateUIWithConfig();
       });
