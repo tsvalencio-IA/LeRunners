@@ -269,7 +269,7 @@ function shareWhatsApp(){
     message+=groups.map((e,i)=>{
       const confirmedGuests=e.guests.filter(g=>g.status==='sim');
       const primary=`${i+1}. ${e.nome}${e.status==='sim'?'':' (responsável pelo grupo)'}`;
-      return primary+(confirmedGuests.length?'\n'+confirmedGuests.map(g=>`   ↳ ${g.name} ✓`).join('\n'):'')+(e.guestsUncertain?'\n   ↳ Convidados: a definir':'');
+      return primary+(confirmedGuests.length?` + ${confirmedGuests.length} convidado${confirmedGuests.length===1?'':'s'}`:'');
     }).join('\n\n');
   }else message+='Ainda aguardando confirmações.';
   message+=`\n\n🔗 *Confirme ou atualize sua presença:*\n${cleanUrl()}`;
