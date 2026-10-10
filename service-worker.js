@@ -1,4 +1,4 @@
-const CACHE = 'lerunners-halloween-2026-v3';
+const CACHE = 'lerunners-halloween-2026-v4-nov01';
 const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './assets/icones/favicon.svg', './assets/icones/icone-192.png', './assets/icones/icone-512.png', './assets/fotos/302971.jpg', './assets/fotos/76107.jpg', './assets/fotos/143240.jpg', './assets/fotos/convite-og.jpg', './assets/fotos/convite-whatsapp.jpg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => Promise.allSettled(SHELL.map(url => cache.add(url)))).then(() => self.skipWaiting()));
