@@ -1,4 +1,4 @@
-# LeRunners — Halloween 31/10/2026
+# LeRunners — Halloween 01/11/2026
 
 Site responsivo de confirmação de presença, com fotografias originais, dados sincronizados em tempo real, lista de confirmados e convite por WhatsApp.
 
@@ -17,7 +17,7 @@ Site responsivo de confirmação de presença, com fotografias originais, dados 
 
 **Configurações:** o botão superior abre a solicitação de senha; após informar a senha definida pela organização, mostra contagens do planejamento, itens que levarão, observações, PDF, edição de horário/local e remoção de registros; há também o botão **Enviar convite com imagem**. Em celulares com compartilhamento de arquivos Web Share, ele envia a imagem junto ao texto e ao link; em outros navegadores abre o WhatsApp com o link e o cartão de prévia OG (o WhatsApp pode atualizar a prévia após cache). Há opções de baixar imagem ou copiar link.
 
-**Fotografias:** fotos da confraternização anterior aparecem como lembranças do evento passado. As fotografias dos hambúrgueres ilustram o cardápio que será preparado em 31/10 — não são apresentadas como sendo da última festa. As pessoas das fotografias não foram recriadas por IA.
+**Fotografias:** fotos da confraternização anterior aparecem como lembranças do evento passado. As fotografias dos hambúrgueres ilustram o cardápio que será preparado em 01/11 — não são apresentadas como sendo da última festa. As pessoas das fotografias não foram recriadas por IA.
 
 ## Dados preservados
 
@@ -53,3 +53,7 @@ Atualizar horário e local verdadeiro em Configurações antes de compartilhar. 
 8. Verificar as regras RTDB e a separação de acesso antes de divulgar a toda a equipe.
 
 Powered by thIAguinho Soluções Digitais.
+
+## Atualização 01/11/2026
+
+Data única: **domingo, 1º de novembro de 2026, véspera do feriado de Finados**. Revisados banner, metadados, mensagens WhatsApp, PDF, imagens do convite e cache PWA. Para confirmar é obrigatório informar nome e sobrenome, selecionar a presença e, se comparecer, a preferência de hambúrguer. Nomes dos convidados tornam-se obrigatórios ao adicionar acompanhantes. Fantasia, contribuição e recados permanecem opcionais. Nenhuma alteração foi feita nos caminhos Firebase ou no histórico existente.
