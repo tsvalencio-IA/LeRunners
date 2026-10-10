@@ -195,7 +195,7 @@ async function saveResponse(ev){
   }catch(error){console.error('Falha no envio:',error);toast('Não foi possível salvar agora. Tente novamente em instantes.',true);$('submitBtn').textContent=originalLabel;}
   finally{runningSave=false;$('submitBtn').disabled=false;}
 }
-function cleanUrl(){return location.origin+location.pathname;}
+function cleanUrl(){return location.origin+location.pathname+'?v=20261101';}
 function whatsapp(message){
   window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
 }
@@ -215,7 +215,7 @@ function inviteMessage(){
 }
 async function shareInvitation(){
   if(!organizerOpen)return;
-  const fileUrl=new URL('assets/fotos/convite-whatsapp.jpg',cleanUrl()).href;
+  const fileUrl=new URL('assets/fotos/convite-whatsapp.jpg?v=20261101',cleanUrl()).href;
   try{
     if(navigator.share && navigator.canShare){
       const response=await fetch(fileUrl);
