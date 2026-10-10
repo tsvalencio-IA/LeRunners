@@ -69,144 +69,199 @@ function updateConfigUI(){
   $('configMessage').value=config.message;
   document.title=`${config.title} • 01/11/2026`;
 }
-function sanitizeRecord(key, data){
-  if(!data || typeof data !== 'object' || !['sim','nao','talvez'].includes(data.status)) return null;
+function validStatus(value, fallback='talvez'){
+  return ['sim','talvez','nao'].includes(value)?value:fallback;
+}
+function normalizeGuests(source,parentStatus,legacyPeople=1,statuses=[]){
+  const raw=Array.isArray(source)?source:[];
+  const guests=raw.slice(0,9).map((item,index)=>{
+    const obj=item && typeof item==='object' && !Array.isArray(item)?item:null;
+    return {
+      name:String(obj?(obj.name??obj.nome??''):item??'').trim().slice(0,80),
+      status:validStatus(obj?.status??statuses[index],parentStatus),
+      missing:false
+    };
+  }).filter(person=>person.name);
+  // Cadastros antigos podem ter informado quantidade sem nomes. Não eliminar essas pessoas da contagem.
+  const missing=Math.min(9-guests.length,Math.max(0,Number(legacyPeople||1)-1-guests.length));
+  for(let i=0;i<missing;i++)guests.push({name:'Nome não informado (cadastro anterior)',status:parentStatus,missing:true});
+  return guests;
+}
+function tally(record){
+  const stats={sim:0,talvez:0,nao:0};
+  stats[validStatus(record.status)]++;
+  for(const guest of record.guests||[])stats[validStatus(guest.status,record.status)]++;
+  return stats;
+}
+function sanitizeRecord(key,data){
+  if(!data || typeof data!=='object'||!['sim','nao','talvez'].includes(data.status))return null;
+  const guests=normalizeGuests(data.guests,data.status,data.people,data.guestStatuses);
   return {
-    id:key, uid:String(data.uid||''), nome:String(data.nome||'').slice(0,80),
-    status:data.status, people:data.status==='nao'?0:Math.max(1,Math.min(10,Number(data.people)||1)),
-    burger:String(data.burger||'').slice(0,30), guests:Array.isArray(data.guests)?data.guests.map(g=>String(g).trim().slice(0,80)).filter(Boolean).slice(0,9):[],
-    costume:String(data.costume||''), bring:String(data.bring||'').slice(0,50),
-    note:String(data.note||'').slice(0,260), timestamp:Number(data.timestamp)||0,
-    updatedAt:Number(data.updatedAt)||0
+    id:key,uid:String(data.uid||''),nome:String(data.nome||'').slice(0,80),
+    status:data.status,people:Math.max(0,Math.min(10,Number(data.people)||0)),guests,
+    burger:String(data.burger||'').slice(0,30),costume:String(data.costume||''),
+    bring:String(data.bring||'').slice(0,50),note:String(data.note||'').slice(0,260),
+    timestamp:Number(data.timestamp)||0,updatedAt:Number(data.updatedAt)||0
   };
 }
 function fillOwnResponse(){
-  const own = currentList.find(item=>item.id===myId() && item.uid===auth.currentUser?.uid);
+  const own=currentList.find(item=>item.id===myId() && item.uid===auth.currentUser?.uid);
   if(!own){$('savedMessage').classList.remove('visible');$('submitBtn').textContent='📩 ENVIAR MINHA RESPOSTA';return;}
-  // Preserva digitação em andamento caso os outros atletas atualizem a lista.
-  if(document.activeElement && $('rsvpForm').contains(document.activeElement) && document.activeElement!==$('submitBtn')) return;
+  if(document.activeElement && $('rsvpForm').contains(document.activeElement) && document.activeElement!==$('submitBtn'))return;
   $('userName').value=own.nome;
   document.querySelectorAll('[name="status"]').forEach(r=>{r.checked=r.value===own.status;});
-  const guestNames=own.guests||[];
-  $('guestCount').value=String(Math.min(9,Math.max(0,own.people-1)));
-  $('guestNames').value=guestNames.join('\n');
-  toggleGuestNames();
+  $('guestCount').value=String(Math.min(9,own.guests.length));
+  showGuestInputs(own.guests);
   $('burger').value=['tradicional','vegetariano','ambos','nao-vou-comer'].includes(own.burger)?own.burger:'';
   $('costume').value=['sim','nao','talvez'].includes(own.costume)?own.costume:'talvez';
   $('bring').value=['Bebida','Sobremesa','Doces','Gelo','Decoração','Descartáveis','Outro'].includes(own.bring)?own.bring:'';
   $('note').value=own.note;
   toggleAttending();
-  $('savedMessage').textContent='✅ Sua resposta já foi registrada. Você pode alterá-la e clicar em SALVAR ATUALIZAÇÃO.';
+  $('savedMessage').textContent='✅ Inscrição encontrada. Altere a presença ou os convidados e salve a atualização.';
   $('savedMessage').classList.add('visible');
   $('submitBtn').textContent='✓ SALVAR MINHA ATUALIZAÇÃO';
 }
+function createGuestInput(guest,index){
+  const el=document.createElement('div');
+  el.className='guest-editor-row';
+  el.innerHTML=`<label for="guestName${index}">Convidado ${index+1}</label><div class="guest-editor-controls"><input class="control guest-name" id="guestName${index}" type="text" autocomplete="off" maxlength="80" placeholder="Nome e sobrenome" value="${escapeHtml(guest?.missing?'':guest?.name||'')}" aria-label="Nome do convidado ${index+1}" required><select class="control guest-status" aria-label="Presença do convidado ${index+1}"><option value="sim">✓ Confirmado</option><option value="talvez">? Talvez</option><option value="nao">× Não vai</option></select><button class="guest-remove" type="button" title="Remover convidado ${index+1}" aria-label="Excluir convidado ${index+1}">Remover</button></div>`;
+  el.querySelector('.guest-status').value=validStatus(guest?.status,document.querySelector('input[name="status"]:checked')?.value||'sim');
+  return el;
+}
+function showGuestInputs(guests){
+  const box=$('guestRows');box.replaceChildren();
+  guests.forEach((g,i)=>box.appendChild(createGuestInput(g,i)));
+  updateGuestVisibility();
+}
+function readGuestInputs(){
+  return [...$('guestRows').querySelectorAll('.guest-editor-row')].map(row=>({
+    name:row.querySelector('.guest-name').value.trim().replace(/\s+/g,' '),
+    status:row.querySelector('.guest-status').value
+  }));
+}
+function updateGuestVisibility(){
+  const guestCount=Number($('guestCount').value)||0;
+  $('guestNamesBlock').hidden=guestCount===0 || document.querySelector('input[name="status"]:checked')?.value==='nao';
+}
 function toggleGuestNames(){
-  const guests=Number($('guestCount').value)||0;
-  $('guestNamesBlock').hidden=guests===0;
-  $('guestNames').required=guests>0 && document.querySelector('input[name="status"]:checked')?.value!=='nao';
+  const count=Number($('guestCount').value)||0;
+  const rows=readGuestInputs();
+  while(rows.length<count)rows.push({name:'',status:document.querySelector('input[name="status"]:checked')?.value==='talvez'?'talvez':'sim'});
+  showGuestInputs(rows.slice(0,count));
+}
+function removeGuestInput(button){
+  const rows=readGuestInputs();
+  const index=[...$('guestRows').children].indexOf(button.closest('.guest-editor-row'));
+  if(index<0)return;
+  rows.splice(index,1);
+  $('guestCount').value=String(rows.length);
+  showGuestInputs(rows);
+  toast('Convidado retirado do formulário. Salve para atualizar a lista.');
 }
 function toggleAttending(){
   const status=document.querySelector('input[name="status"]:checked')?.value;
   $('attendingFields').hidden=status==='nao';
   $('burger').required=status!=='nao';
-  toggleGuestNames();
+  updateGuestVisibility();
 }
 function renderSummary(){
-  const confirmed=currentList.filter(e=>e.status==='sim');
-  const totalPersons=confirmed.reduce((total,e)=>total+e.people,0);
-  const countStatus=status=>currentList.filter(e=>e.status===status).length;
-  $('countPeople').textContent=num(totalPersons);
-  $('countYes').textContent=num(countStatus('sim'));
-  $('countMaybe').textContent=num(countStatus('talvez'));
-  $('countNo').textContent=num(countStatus('nao'));
-  $('countBurger').textContent=num(confirmed.filter(e=>['tradicional','ambos'].includes(e.burger)).length)+' respostas';
-  $('countVeggie').textContent=num(confirmed.filter(e=>e.burger==='vegetariano').length)+' respostas';
-  $('countCostume').textContent=num(confirmed.filter(e=>e.costume==='sim').length);
-  $('countBringing').textContent=num(confirmed.filter(e=>Boolean(e.bring)).length);
+  const confirmed=currentList.filter(e=>tally(e).sim>0);
+  const sum=key=>currentList.reduce((n,e)=>n+tally(e)[key],0);
+  const yes=sum('sim'),maybe=sum('talvez'),no=sum('nao');
+  $('countPeople').textContent=num(yes+maybe);
+  $('countYes').textContent=num(yes);
+  $('countMaybe').textContent=num(maybe);
+  $('countNo').textContent=num(no);
+  $('countBurger').textContent=num(currentList.filter(e=>e.status==='sim'&&['tradicional','ambos'].includes(e.burger)).length)+' respostas';
+  $('countVeggie').textContent=num(currentList.filter(e=>e.status==='sim'&&e.burger==='vegetariano').length)+' respostas';
+  $('countCostume').textContent=num(currentList.filter(e=>e.status==='sim'&&e.costume==='sim').length);
+  $('countBringing').textContent=num(currentList.filter(e=>e.status==='sim'&&Boolean(e.bring)).length);
   const brings={};
-  confirmed.filter(e=>e.bring).forEach(e=>{brings[e.bring]=(brings[e.bring]||0)+1;});
+  currentList.filter(e=>e.status==='sim'&&e.bring).forEach(e=>{brings[e.bring]=(brings[e.bring]||0)+1;});
   $('bringSummary').innerHTML=Object.entries(brings).sort((a,b)=>b[1]-a[1]).map(([label,n])=>`<span class="pill">${escapeHtml(label)} · ${num(n)}</span>`).join('');
   renderAdminList();
-  return {totalPersons,confirmed};
+  return {totalPersons:yes,confirmed};
 }
 function renderAdminList(){
   if(!organizerOpen)return;
   const container=$('adminGuestList');
   if(!currentList.length){container.innerHTML='<div class="empty">Nenhuma resposta registrada.</div>';return;}
   container.innerHTML=currentList.map(e=>{
-    const guestList=(e.guests||[]).join(', ');
-    const guestInfo=e.people>1?`${e.people-1} convidado(s) • ${escapeHtml(guestList||'Nomes não informados no cadastro anterior')}`:'Sem convidados';
-    return `<div class="admin-person"><div class="admin-row-head"><strong>${escapeHtml(e.nome)} • ${statusLabel[e.status]}</strong><button type="button" class="delete" data-delete-id="${escapeHtml(e.id)}">Remover</button></div><small>${guestInfo}</small><small>Hambúrguer: ${escapeHtml(e.burger||'—')} • Fantasia: ${escapeHtml(e.costume||'—')} • Levará: ${escapeHtml(e.bring||'Não informado')}</small>${e.note?`<small>Observação: ${escapeHtml(e.note)}</small>`:''}</div>`;
+    const stats=tally(e);
+    const guests=(e.guests||[]).map(g=>`<small>↳ ${escapeHtml(g.name)} — ${statusLabel[g.status]}</small>`).join('');
+    return `<div class="admin-person"><div class="admin-row-head"><strong>${escapeHtml(e.nome)} • ${statusLabel[e.status]}</strong><button type="button" class="delete" data-delete-id="${escapeHtml(e.id)}">Remover</button></div><small>${stats.sim} confirmado(s) · ${stats.talvez} talvez · ${stats.nao} não vai(vão)</small>${guests}<small>Hambúrguer: ${escapeHtml(e.burger||'—')} • Fantasia: ${escapeHtml(e.costume||'—')} • Levará: ${escapeHtml(e.bring||'Não informado')}</small>${e.note?`<small>Observação: ${escapeHtml(e.note)}</small>`:''}</div>`;
   }).join('');
 }
 function renderList(){
   renderSummary();
   const query=normalized($('searchInput').value.trim());
   const filter=$('statusFilter').value;
-  const filtered=currentList.filter(e=>(filter==='todos'||filter===e.status)&&normalized(e.nome+' '+(e.guests||[]).join(' ')).includes(query));
+  const filtered=currentList.filter(e=>{
+    const stats=tally(e);
+    return (filter==='todos'||stats[filter]>0) && normalized(e.nome+' '+(e.guests||[]).map(g=>g.name).join(' ')).includes(query);
+  });
   if(!currentList.length){$('guestList').innerHTML='<div class="empty">Ainda não há respostas registradas. Confirme sua presença!</div>';return;}
   if(!filtered.length){$('guestList').innerHTML='<div class="empty">Nenhum participante encontrado para este filtro.</div>';return;}
   $('guestList').innerHTML=filtered.map(e=>{
     const initials=e.nome.trim().split(/\s+/).slice(0,2).map(v=>v[0]||'').join('').toLocaleUpperCase('pt-BR');
-    const people=e.status!=='nao'?` • ${e.people} pessoa${e.people>1?'s':''}`:'';
-    const guests=e.guests?.length ? `<small>Convidados: ${escapeHtml(e.guests.join(', '))}</small>`:'';
-    return `<article class="guest"><div class="avatar">${escapeHtml(initials)}</div><div><h3>${escapeHtml(e.nome)}</h3><small>${statusEmoji[e.status]} ${statusLabel[e.status]}${people}</small>${guests}</div><span class="tag ${e.status}">${statusLabel[e.status]}</span></article>`;
+    const stats=tally(e);
+    const statsText=[stats.sim?`${stats.sim} confirmado${stats.sim!==1?'s':''}`:'',stats.talvez?`${stats.talvez} talvez`:'',stats.nao?`${stats.nao} não vai${stats.nao!==1?'vão':''}`:''].filter(Boolean).join(' · ');
+    const guests=e.guests.map(g=>`<div class="guest-child"><span class="guest-child-name">↳ ${escapeHtml(g.name)}</span><span class="guest-child-status ${g.status}">${statusLabel[g.status]}</span></div>`).join('');
+    const mine=e.id===myId()&&e.uid===auth.currentUser?.uid;
+    return `<article class="guest group-guest"><div class="avatar">${escapeHtml(initials)}</div><div class="group-guest-main"><h3>${escapeHtml(e.nome)}</h3><small class="group-guest-meta">${statsText}</small>${guests?`<div class="guest-children">${guests}</div>`:''}${mine?`<button type="button" class="guest-edit" data-edit-own="${escapeHtml(e.id)}">Editar minha inscrição / convidados</button>`:''}</div><span class="tag ${e.status}">${statusLabel[e.status]}</span></article>`;
   }).join('');
 }
 async function saveResponse(ev){
   ev.preventDefault();
   if(runningSave)return;
-  if(!connected || !auth.currentUser){toast('A lista está temporariamente indisponível. Tente novamente.',true);return;}
+  if(!connected||!auth.currentUser){toast('A lista está temporariamente indisponível. Tente novamente.',true);return;}
   const nome=$('userName').value.trim().replace(/\s+/g,' ');
   const status=document.querySelector('[name="status"]:checked')?.value;
-  if(nome.length<3 || nome.length>80 || nome.split(' ').length<2){toast('Preencha seu nome e sobrenome antes de enviar a confirmação.',true);$('userName').focus();return;}
+  if(nome.length<3||nome.length>80||nome.split(' ').length<2){toast('Preencha seu nome e sobrenome antes de enviar a confirmação.',true);$('userName').focus();return;}
   if(!['sim','nao','talvez'].includes(status)){toast('Escolha Sim, Não ou Talvez.',true);return;}
   const guestsCount=status==='nao'?0:Number($('guestCount').value);
   if(!Number.isInteger(guestsCount)||guestsCount<0||guestsCount>9){toast('Quantidade de convidados inválida.',true);return;}
-  const guests=status==='nao'?[]:$('guestNames').value.split(/\n|,/).map(s=>s.trim().replace(/\s+/g,' ')).filter(Boolean);
-  if(status!=='nao'&&guests.length!==guestsCount){toast(`Informe os nomes dos ${guestsCount} convidados, um por linha.`,true);$('guestNames').focus();return;}
-  if(guests.some(g=>g.length<2||g.length>80)){toast('Confira os nomes dos convidados.',true);$('guestNames').focus();return;}
+  const guests=status==='nao'?[]:readGuestInputs();
+  if(guests.length!==guestsCount){toast('Confira a quantidade de convidados.',true);return;}
+  const invalid=guests.find(g=>g.name.length<2||g.name.length>80||!['sim','talvez','nao'].includes(g.status));
+  if(invalid){toast('Preencha o nome e a confirmação de cada convidado.',true);$('guestRows').querySelector('.guest-name:placeholder-shown')?.focus();return;}
   if(status!=='nao'&&!['tradicional','vegetariano','ambos','nao-vou-comer'].includes($('burger').value)){toast('Selecione sua preferência de hambúrguer antes de confirmar.',true);$('burger').focus();return;}
-  const people=status==='nao'?0:guestsCount+1;
-  const payload={
-    nome,status,people,guests,uid:auth.currentUser.uid,
-    burger:status==='nao'?'':$('burger').value,
-    costume:status==='nao'?'':$('costume').value,
-    bring:status==='nao'?'':$('bring').value,
-    note:$('note').value.trim(),
-    updatedAt:Date.now()
-  };
+  const people=(status!=='nao'?1:0)+guests.filter(g=>g.status!=='nao').length;
+  const payload={nome,status,people,guests:guests.map(g=>g.name),guestStatuses:guests.map(g=>g.status),uid:auth.currentUser.uid,burger:status==='nao'?'':$('burger').value,
+    costume:status==='nao'?'':$('costume').value,bring:status==='nao'?'':$('bring').value,
+    note:$('note').value.trim(),updatedAt:Date.now()};
   const already=currentList.find(e=>e.id===myId());
-  if(already && already.uid!==payload.uid){toast('Este registro pertence a outra sessão. Não será alterado.',true);return;}
-  if(already && already.uid===payload.uid)payload.timestamp=already.timestamp||Date.now();
-  else payload.timestamp=Date.now();
+  if(already&&already.uid!==payload.uid){toast('Este registro pertence a outra sessão. Não será alterado.',true);return;}
+  payload.timestamp=already?.timestamp||Date.now();
   runningSave=true;$('submitBtn').disabled=true;
   const originalLabel=$('submitBtn').textContent;$('submitBtn').textContent='Salvando sua resposta...';
   try{
-    const id=already ? already.id : push(listaRef).key;
+    const id=already?already.id:push(listaRef).key;
     if(!id)throw new Error('Falha ao criar identificador');
     await set(ref(db,`${DATA_PATH}/${id}`),payload);
-    localStorage.setItem(STORAGE_KEY,id);
-    localStorage.setItem(NAME_KEY,nome);
-    $('savedMessage').textContent='✅ Resposta registrada. Você pode atualizá-la aqui quando quiser.';
-    $('savedMessage').classList.add('visible');
-    $('submitBtn').textContent='✓ SALVAR MINHA ATUALIZAÇÃO';
-    toast('Sua resposta foi salva e aparecerá na lista ao vivo!');
+    localStorage.setItem(STORAGE_KEY,id);localStorage.setItem(NAME_KEY,nome);
+    $('savedMessage').textContent='✅ Resposta registrada. Você pode atualizar os convidados e a presença quando quiser.';
+    $('savedMessage').classList.add('visible');$('submitBtn').textContent='✓ SALVAR MINHA ATUALIZAÇÃO';
+    toast('Confirmações salvas. Lista atualizada para todos!');
   }catch(error){console.error('Falha no envio:',error);toast('Não foi possível salvar agora. Tente novamente em instantes.',true);$('submitBtn').textContent=originalLabel;}
   finally{runningSave=false;$('submitBtn').disabled=false;}
 }
-function cleanUrl(){return location.origin+location.pathname+'?v=20261101';}
+function cleanUrl(){return location.origin+location.pathname+'?v=20261101c';}
 function whatsapp(message){
   window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
 }
 function shareWhatsApp(){
-  const confirmed=currentList.filter(e=>e.status==='sim').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
-  const people=confirmed.reduce((n,e)=>n+e.people,0);
+  const groups=currentList.filter(e=>tally(e).sim>0).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const people=groups.reduce((n,e)=>n+tally(e).sim,0);
   let message=`🎃 *HALLOWEEN LERUNNERS 2026*\n📅 *Domingo, 1º de novembro • véspera de feriado*\n📍 ${config.place}\n🕒 ${config.time}\n\n`;
-  message+=`✅ *LISTA DE CONFIRMADOS* (${people} pessoas)\n\n`;
-  if(confirmed.length){
-    message+=confirmed.map((e,i)=>`${i+1}. ${e.nome}${e.guests?.length?` (+${e.guests.length}: ${e.guests.join(', ')})`:e.people>1?` (+${e.people-1} convidado(s))`:''}`).join('\n');
-  } else message+='Ainda aguardando confirmações.';
+  message+=`✅ *PESSOAS CONFIRMADAS* (${people})\n\n`;
+  if(groups.length){
+    message+=groups.map((e,i)=>{
+      const confirmedGuests=e.guests.filter(g=>g.status==='sim');
+      const primary=`${i+1}. ${e.nome}${e.status==='sim'?'':' (responsável pelo grupo)'}`;
+      return primary+(confirmedGuests.length?'\n'+confirmedGuests.map(g=>`   ↳ ${g.name} ✓`).join('\n'):'');
+    }).join('\n\n');
+  }else message+='Ainda aguardando confirmações.';
   message+=`\n\n🔗 *Confirme ou atualize sua presença:*\n${cleanUrl()}`;
   whatsapp(message);
 }
@@ -291,10 +346,13 @@ async function clearHalloween(){
   catch(e){console.error(e);toast('Falha ao limpar a lista.',true);}
 }
 function htmlForPDF(){
-  const confirmed=currentList.filter(e=>e.status==='sim');
-  const persons=confirmed.reduce((n,e)=>n+e.people,0);
-  const rows=currentList.map((e,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(e.nome)}</td><td>${statusLabel[e.status]}</td><td>${e.people||'—'}</td><td>${escapeHtml((e.guests||[]).join(', ')||(e.people>1?'Não informados':'—'))}</td><td>${escapeHtml(e.burger||'—')}</td><td>${escapeHtml(e.costume||'—')}</td><td>${escapeHtml(e.bring||'—')}</td><td>${escapeHtml(e.note||'—')}</td></tr>`).join('');
-  return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${persons} pessoas confirmadas</b> • ${confirmed.length} respostas Sim • ${currentList.filter(e=>e.status==='talvez').length} Talvez • ${currentList.filter(e=>e.status==='nao').length} Não • ${currentList.length} respostas totais</div><h2>Lista de confirmações</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Nome</th><th>Resposta</th><th>Pessoas</th><th>Convidados</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
+  const totals=currentList.reduce((acc,e)=>{const s=tally(e);for(const k of ['sim','talvez','nao'])acc[k]+=s[k];return acc;},{sim:0,talvez:0,nao:0});
+  const rows=currentList.map((e,i)=>{
+    const s=tally(e);
+    const guests=e.guests.map(g=>`${escapeHtml(g.name)} — ${statusLabel[g.status]}`).join('<br>')||'—';
+    return `<tr><td>${i+1}</td><td>${escapeHtml(e.nome)}</td><td>${statusLabel[e.status]}</td><td>${s.sim} confirmados / ${s.talvez} talvez / ${s.nao} não</td><td>${guests}</td><td>${escapeHtml(e.burger||'—')}</td><td>${escapeHtml(e.costume||'—')}</td><td>${escapeHtml(e.bring||'—')}</td><td>${escapeHtml(e.note||'—')}</td></tr>`;
+  }).join('');
+  return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${totals.sim} pessoas confirmadas</b> • ${totals.talvez} aguardando confirmação • ${totals.nao} não vão • ${currentList.length} inscrições</div><h2>Lista de confirmações por grupo</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Responsável</th><th>Resposta</th><th>Grupo</th><th>Convidados e situação</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
 }
 async function downloadPDF(){
   if(!organizerOpen)return;
@@ -345,6 +403,8 @@ function wireEvents(){
   $('cancelLogin').addEventListener('click',closeLogin);
   $('loginOverlay').addEventListener('click',e=>{if(e.target===$('loginOverlay'))closeLogin();});
   $('guestCount').addEventListener('change',toggleGuestNames);
+  $('guestRows').addEventListener('click',e=>{const b=e.target.closest('.guest-remove');if(b)removeGuestInput(b);});
+  $('guestList').addEventListener('click',e=>{if(e.target.closest('[data-edit-own]')){document.querySelector('#confirmar').scrollIntoView({behavior:'smooth',block:'start'});$('userName').focus({preventScroll:true});}});
   $('pdfBtn').addEventListener('click',downloadPDF);
   $('adminBtn').addEventListener('click',openOrganizer);
   $('closeAdminBtn').addEventListener('click',()=>adminVisibility(false));
