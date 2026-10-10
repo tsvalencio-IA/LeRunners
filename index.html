@@ -33,6 +33,21 @@
     .admin-header{display:flex;align-items:start;justify-content:space-between;gap:16px}.admin-header h2{margin:5px 0 15px}.admin-dashboard{background:#231c26;border:1px solid #644452;border-radius:16px;padding:17px;margin-bottom:23px}.admin-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:17px}.admin-metrics div{padding:14px 10px;background:#37252e;border-radius:12px}.admin-metrics strong{display:block;font:900 21px/1.1 Outfit,sans-serif;color:#ffb368}.admin-metrics span{font-size:11px;color:#eddddf;display:block;margin-top:7px}.admin h3{font-size:16px}.admin-guest-list{display:grid;gap:8px;margin:16px 0}.admin-person{border:1px solid #624655;background:#30242d;border-radius:12px;padding:13px;font-size:13px;display:grid;gap:6px}.admin-person small{color:#e8c7c6;overflow-wrap:anywhere}.admin-person .admin-row-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.admin-person .delete{border:1px solid #864351;border-radius:8px;padding:6px 10px;background:#552333;color:#ffdee2;font-size:11px;font-weight:800}.invite-preview{width:min(260px,100%);height:auto;display:block;border-radius:10px;border:1px solid #654253;margin-top:16px}.login-overlay{position:fixed;z-index:500;inset:0;background:#0b080ce8;display:flex;justify-content:center;align-items:center;padding:20px}.login-overlay[hidden]{display:none}.login-card{width:min(420px,100%);background:#251a24;padding:28px;border:1px solid #9b653c;border-radius:24px;box-shadow:0 20px 80px #0009}.login-card h2{font-size:30px;margin:12px 0 8px}.login-card p{font-size:13px;color:#d8c6cf}.login-card label{display:block;font-size:13px;font-weight:800;margin:18px 0 7px}.login-icon{font-size:35px}.login-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.login-error{display:block;color:#ff8e9b;margin-top:11px;font-size:13px}.login-error[hidden]{display:none}
     @media(max-width:710px){.admin-metrics{grid-template-columns:1fr 1fr}.admin-header h2{font-size:25px}.admin-dashboard{padding:12px}.list-buttons{width:100%}.list-buttons button{width:100%}.guest{grid-template-columns:auto 1fr auto}.guest .tag{font-size:10px}.invite-preview{margin-inline:auto}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+    /* Presença por pessoa: cada acompanhante permanece vinculado ao responsável. */
+    .guest-editor-row{padding:12px 0;border-bottom:1px solid #513847}.guest-editor-row:last-child{border-bottom:0}
+    .guest-editor-row>label{font-size:12px;font-weight:800;color:#fce5d8;display:block;margin-bottom:7px}
+    .guest-editor-controls{display:grid;grid-template-columns:minmax(0,1fr) 125px auto;gap:7px;align-items:center}
+    .guest-editor-controls .control{min-width:0;padding:9px 10px;font-size:12px}
+    .guest-remove{background:#42242c;color:#ffe2e2;border:1px solid #97535b;border-radius:10px;padding:9px 8px;font-size:11px;font-weight:800;min-height:45px}
+    .guest-children{display:grid;gap:5px;border-left:2px solid #b16b38;margin-top:9px;padding-left:10px}
+    .guest-child{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:12px;line-height:1.5}
+    .guest-child-name{color:#e6cbd3;overflow-wrap:anywhere}
+    .guest-child-status{font-size:10px;white-space:nowrap;font-weight:800}
+    .guest-child-status.sim{color:#7cdda8}.guest-child-status.talvez{color:#eac78d}.guest-child-status.nao{color:#e9a1a8}
+    .group-guest-main{min-width:0}.group-guest-meta{color:#f7ca98!important;font-weight:700}
+    .guest-edit{font-size:11px;font-weight:800;margin-top:10px;padding:7px 10px;background:#453127;color:#ffdda6;border:1px solid #9e633c;border-radius:9px}
+    @media(max-width:520px){.guest-editor-controls{grid-template-columns:minmax(0,1fr) 112px}.guest-editor-controls .guest-remove{grid-column:2;justify-self:end;min-height:31px;padding:4px 10px}.guest .tag{font-size:10px}.guest-child{font-size:11px}}
   </style>
 </head>
 <body>
@@ -112,7 +127,7 @@
         </div></fieldset>
         <div id="attendingFields">
           <div class="field"><label for="guestCount">Deseja levar convidados?</label><select id="guestCount" class="control"><option value="0">Não, somente eu</option><option value="1">1 convidado</option><option value="2">2 convidados</option><option value="3">3 convidados</option><option value="4">4 convidados</option><option value="5">5 convidados</option><option value="6">6 convidados</option><option value="7">7 convidados</option><option value="8">8 convidados</option><option value="9">9 convidados</option></select></div>
-          <div class="field" id="guestNamesBlock" hidden><label for="guestNames">Nome dos convidados *</label><textarea id="guestNames" class="control" rows="3" maxlength="800" placeholder="Um nome por linha"></textarea><span class="hint">Informe um nome por linha para cada convidado.</span></div>
+          <div class="field" id="guestNamesBlock" hidden><div class="label">Convidados e confirmações individuais *</div><div id="guestRows"></div><span class="hint">Cada convidado fica no seu grupo. Você poderá alterar a presença ou remover convidados depois.</span></div>
           <div class="columns-2"><div class="field"><label for="burger">Preferência de hambúrguer</label><select id="burger" class="control" required><option value="" selected disabled>Selecione uma opção</option><option value="tradicional">Tradicional</option><option value="vegetariano">Vegetariano</option><option value="ambos">Tanto faz</option><option value="nao-vou-comer">Não vou comer</option></select></div>
             <div class="field"><label for="costume">Fantasia (opcional)</label><select id="costume" class="control"><option value="talvez">Ainda não decidi</option><option value="sim">Sim</option><option value="nao">Não</option></select></div></div>
           <div class="field"><label for="bring">Pretende levar algo? <span class="hint">(opcional)</span></label><select id="bring" class="control"><option value="">Ainda não definido</option><option value="Bebida">🥤 Bebida</option><option value="Sobremesa">🍰 Sobremesa</option><option value="Doces">🍬 Doces</option><option value="Gelo">🧊 Gelo</option><option value="Decoração">🎃 Decoração</option><option value="Descartáveis">🍽️ Descartáveis</option><option value="Outro">Outro (explicar no recado)</option></select></div>
@@ -123,7 +138,7 @@
       </form>
     </div>
     <aside class="side" aria-label="Resumo do evento">
-      <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>Pessoas confirmadas</span></div><div class="metric"><strong id="countYes">0</strong><span>Confirmaram presença</span></div><div class="metric"><strong id="countMaybe">0</strong><span>Aguardando confirmação</span></div><div class="metric"><strong id="countNo">0</strong><span>Não poderão comparecer</span></div></div>
+      <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>Pessoas previstas (Sim + Talvez)</span></div><div class="metric"><strong id="countYes">0</strong><span>Pessoas confirmadas</span></div><div class="metric"><strong id="countMaybe">0</strong><span>Aguardando confirmação</span></div><div class="metric"><strong id="countNo">0</strong><span>Não vão</span></div></div>
       <div class="side-card"><span class="eyebrow">Participação</span><h3 class="heading" style="margin-top:8px">Acompanhe as confirmações</h3><p>A lista de participantes é atualizada automaticamente.</p><a class="secondary-btn" style="width:100%" href="#lista">Ver lista de presença ↓</a></div>
       <div class="side-card"><span class="eyebrow">1º de novembro</span><h3 class="heading" style="margin-top:8px">Halloween LeRunners</h3><p>Hambúrgueres artesanais, piscina e confraternização.</p><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres previstos para o evento" loading="lazy"></div>
     </aside>
