@@ -1,5 +1,8 @@
 # LeRunners — Confraternização de Halloween 2026
 
+> **Correção 10/10/2026:** a publicação atual inclui `assets/fotos/`, `assets/icones/`, `assets/videos/` e a capa fotográfica real `assets/fotos/convite-og.jpg`. As sete fotografias são os arquivos originais enviados pelo organizador, sem substituição de pessoas por IA. O vídeo da chácara foi comprimido para carregamento móvel.
+
+
 Formulário mobile-first para **sábado, 31 de outubro de 2026**, feito a partir de `LeRunners-main (1).zip`.
 
 ## Publicar no GitHub Pages (pelo celular)
@@ -55,7 +58,7 @@ A fotografia da criança (`1751.jpg`) e o vídeo esportivo (`60592.mp4`) não fo
 
 ## Metadados do WhatsApp
 
-O `index.html` contém título e descrição Open Graph. **Para garantir que o WhatsApp exiba uma foto no cartão de prévia**, a propriedade `og:image` precisa conter uma URL **HTTPS absoluta** e pública, conforme a URL final do seu GitHub Pages/domínio; o pacote usa um caminho relativo como referência até essa URL ser confirmada. O arquivo de imagem já está incluído em `assets/fotos/302971.jpg`. No WhatsApp, o compartilhamento por texto + link funciona independentemente da prévia.
+O `index.html` contém título, descrição e `og:image` absoluto para `https://tsvalencio-ia.github.io/LeRunners/assets/fotos/convite-og.jpg`, composto somente com fotos reais do grupo e dos hambúrgueres. A imagem de prévia só aparece no WhatsApp quando GitHub Pages estiver habilitado e acessível por HTTPS, com cache da própria plataforma podendo demorar a atualizar.
 
 ## O que foi alterado
 
@@ -79,3 +82,12 @@ O `index.html` contém título e descrição Open Graph. **Para garantir que o W
 8. Testar regras de exclusão; confirmar que os registros antigos da AMICC continuam na nuvem.
 
 **Powered by thIAguinho Soluções Digitais**
+
+## Ajustes publicados em 10/10/2026
+- Inclusão no GitHub de 7 fotos originais de hambúrgueres, equipe e piscina, sem recriar os rostos.
+- Novo destaque fotográfico na capa com a equipe e hambúrguer reais e uma seção de cardápio com fotos ampliáveis.
+- Capa de compartilhamento Open Graph de 1200×630 feita a partir das fotos originais.
+- Ícones do PWA e vídeo real da chácara em versão compacta para Android.
+- Service worker v2 cacheia apenas mídia do repositório e tolera falha de um recurso isolado.
+- Não foram alterados caminhos do Firebase, campos do formulário, dados gravados ou histórico anterior.
+- A sincronização de produção precisa de autenticação anônima e regras adequadas de Firebase em produção; sem leitura do console, não pode ser garantida nem testada externamente.

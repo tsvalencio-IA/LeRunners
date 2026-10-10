@@ -280,6 +280,7 @@ function wireEvents(){
   $('closeMedia').addEventListener('click',closeMedia);
   $('mediaModal').addEventListener('click',e=>{if(e.target===$('mediaModal'))closeMedia();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('mediaModal').hidden)closeMedia();});
+  window.addEventListener('pagehide',()=>{document.body.style.overflow='';});
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;$('installBtn').hidden=false;});
   $('installBtn').addEventListener('click',async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$('installBtn').hidden=true;});
   window.addEventListener('appinstalled',()=>{$('installBtn').hidden=true;deferredInstall=null;});

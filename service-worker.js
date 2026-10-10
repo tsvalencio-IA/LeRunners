@@ -1,7 +1,7 @@
-const CACHE = 'lerunners-halloween-2026-v1';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './assets/icones/favicon.svg', './assets/icones/icone-192.png', './assets/fotos/302971.jpg', './assets/fotos/76107.jpg', './assets/fotos/143240.jpg'];
+const CACHE = 'lerunners-halloween-2026-v2';
+const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './assets/icones/favicon.svg', './assets/icones/icone-192.png', './assets/icones/icone-512.png', './assets/fotos/302971.jpg', './assets/fotos/76107.jpg', './assets/fotos/143240.jpg', './assets/fotos/convite-og.jpg'];
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE).then(cache => Promise.allSettled(SHELL.map(url => cache.add(url)))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('lerunners-halloween-') && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
