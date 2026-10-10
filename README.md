@@ -67,3 +67,11 @@ Data única: **domingo, 1º de novembro de 2026, véspera do feriado de Finados*
 - Retrocompatibilidade: o campo `guests` continua sendo uma lista de nomes; a lista opcional `guestStatuses` guarda os estados de cada convidado. Inscrições anteriores sem `guestStatuses` herdam a situação do titular.
 - WhatsApp, painel de presença, organização e PDF usam os totais individuais.
 - Dados da AMICC, fotos e funcionalidades existentes não foram removidos.
+
+## Correção 10/10/2026 — convidados indefinidos e múltiplas contribuições
+
+- `Não sei ainda` em convidados: registra `guestsUncertain: true`, mantém apenas o participante conhecido nas contagens e permite atualização posterior.
+- O que vai levar permite múltiplas escolhas (ex.: bebida e sobremesa). As opções são gravadas em `brings: []`; o campo legado `bring` permanece como texto com os itens separados por vírgula.
+- Registros anteriores com apenas `bring` continuam legíveis e são preservados na edição.
+- Organização e PDF mostram todos os itens selecionados, e o resumo conta cada categoria separadamente, sem contar a pessoa duas vezes em `Contribuições informadas`.
+- Fotos, inscrição individual, lista de WhatsApp, painel administrativo e histórico permanec preservados.
