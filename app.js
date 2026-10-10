@@ -248,9 +248,13 @@ function adminVisibility(state){
   $('adminPanel').setAttribute('aria-hidden',String(!state));
   if(state){renderSummary();renderAdminList();$('adminPanel').scrollIntoView({behavior:'smooth',block:'start'});}
 }
-function submitLogin(event){
+async function submitLogin(event){
   event.preventDefault();
-  if($('adminPassword').value.trim().toLocaleLowerCase('pt-BR')!=='leandro'){
+  const value=$('adminPassword').value.trim().toLocaleLowerCase('pt-BR');
+  const data=new TextEncoder().encode('lerunners-halloween-2026-admin-v3:'+value);
+  const digest=await crypto.subtle.digest('SHA-256',data);
+  const hex=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+  if(hex!=='823c489b191e9db4d75c2068784637848684a8ec60255080ad09ff330c05df12'){
     $('loginError').hidden=false;$('adminPassword').select();return;
   }
   closeLogin();adminVisibility(true);
