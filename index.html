@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#160f19">
-  <meta name="description" content="Halloween LeRunners • 31 de outubro de 2026. Confirme sua presença e acompanhe a confraternização em tempo real.">
+  <meta name="description" content="Halloween LeRunners • 1º de novembro de 2026. Confirme sua presença e acompanhe a confraternização em tempo real.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Halloween LeRunners • 31 de outubro de 2026">
-  <meta property="og:description" content="Confraternização de Halloween. Dia 31 de outubro, na chácara. Confirme sua presença.">
+  <meta property="og:title" content="Halloween LeRunners • 1º de novembro de 2026">
+  <meta property="og:description" content="Confraternização de Halloween. Domingo, 1º de novembro, véspera do feriado de Finados, na chácara. Confirme sua presença.">
   <meta property="og:url" content="https://tsvalencio-ia.github.io/LeRunners/">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -75,7 +75,7 @@
       <h1>HALLOWEEN<span>LeRunners</span></h1>
       <p class="hero-blurb" id="heroMessage">Confraternização da equipe com hambúrgueres artesanais, piscina e atrações de Halloween.</p>
       <div class="detail-row">
-        <span class="detail-chip"><span class="detail-icon">📅</span><span><b>31 OUT • SÁBADO</b><small>2026</small></span></span>
+        <span class="detail-chip"><span class="detail-icon">📅</span><span><b>01 NOV • DOMINGO</b><small>2026 • Véspera de feriado</small></span></span>
         <span class="detail-chip"><span class="detail-icon">📍</span><span><b id="heroPlace">Nossa chácara</b><small id="heroTime">Horário a confirmar</small></span></span>
       </div>
       <div class="hero-buttons"><a class="primary-btn" href="#confirmar">🎟 Confirmar presença</a><a class="secondary-btn" href="#memorias">Ver galeria ↗</a></div>
@@ -101,10 +101,10 @@
   </section>
   <section class="layout" id="confirmar">
     <div class="panel">
-      <div class="form-top"><span class="eyebrow">Lista oficial em tempo real</span><h2 class="heading">Confirme sua presença</h2><p>Preencha sua confirmação e informe se levará convidados.</p></div>
+      <div class="form-top"><span class="eyebrow">Lista oficial em tempo real</span><h2 class="heading">Confirme sua presença</h2><p>Informe seu nome completo, sua resposta e os nomes dos convidados, se houver.</p></div>
       <form class="form-body" id="rsvpForm" novalidate>
         <div id="savedMessage" class="saved-chip" role="status"></div>
-        <div class="field"><label for="userName">Seu nome <span aria-hidden="true">*</span></label><input class="control" id="userName" maxlength="80" type="text" autocomplete="name" placeholder="Nome completo" required></div>
+        <div class="field"><label for="userName">Seu nome <span aria-hidden="true">*</span></label><input class="control" id="userName" maxlength="80" minlength="3" type="text" autocomplete="name" placeholder="Nome e sobrenome" required></div>
         <fieldset class="field" style="border:0;padding:0;min-width:0"><legend class="label">Você vai participar? *</legend><div class="option-grid">
           <label class="choice good"><input type="radio" name="status" value="sim" required><span><em>🎉</em>Sim, eu vou!</span></label>
           <label class="choice bad"><input type="radio" name="status" value="nao"><span><em>😢</em>Não poderei</span></label>
@@ -113,7 +113,7 @@
         <div id="attendingFields">
           <div class="field"><label for="guestCount">Deseja levar convidados?</label><select id="guestCount" class="control"><option value="0">Não, somente eu</option><option value="1">1 convidado</option><option value="2">2 convidados</option><option value="3">3 convidados</option><option value="4">4 convidados</option><option value="5">5 convidados</option><option value="6">6 convidados</option><option value="7">7 convidados</option><option value="8">8 convidados</option><option value="9">9 convidados</option></select></div>
           <div class="field" id="guestNamesBlock" hidden><label for="guestNames">Nome dos convidados *</label><textarea id="guestNames" class="control" rows="3" maxlength="800" placeholder="Um nome por linha"></textarea><span class="hint">Informe um nome por linha para cada convidado.</span></div>
-          <div class="columns-2"><div class="field"><label for="burger">Preferência de hambúrguer</label><select id="burger" class="control"><option value="tradicional">Tradicional</option><option value="vegetariano">Vegetariano</option><option value="ambos">Tanto faz</option><option value="nao-vou-comer">Não vou comer</option></select></div>
+          <div class="columns-2"><div class="field"><label for="burger">Preferência de hambúrguer</label><select id="burger" class="control" required><option value="" selected disabled>Selecione uma opção</option><option value="tradicional">Tradicional</option><option value="vegetariano">Vegetariano</option><option value="ambos">Tanto faz</option><option value="nao-vou-comer">Não vou comer</option></select></div>
             <div class="field"><label for="costume">Fantasia (opcional)</label><select id="costume" class="control"><option value="talvez">Ainda não decidi</option><option value="sim">Sim</option><option value="nao">Não</option></select></div></div>
           <div class="field"><label for="bring">Pretende levar algo? <span class="hint">(opcional)</span></label><select id="bring" class="control"><option value="">Ainda não definido</option><option value="Bebida">🥤 Bebida</option><option value="Sobremesa">🍰 Sobremesa</option><option value="Doces">🍬 Doces</option><option value="Gelo">🧊 Gelo</option><option value="Decoração">🎃 Decoração</option><option value="Descartáveis">🍽️ Descartáveis</option><option value="Outro">Outro (explicar no recado)</option></select></div>
         </div>
@@ -125,7 +125,7 @@
     <aside class="side" aria-label="Resumo do evento">
       <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>Pessoas confirmadas</span></div><div class="metric"><strong id="countYes">0</strong><span>Confirmaram presença</span></div><div class="metric"><strong id="countMaybe">0</strong><span>Aguardando confirmação</span></div><div class="metric"><strong id="countNo">0</strong><span>Não poderão comparecer</span></div></div>
       <div class="side-card"><span class="eyebrow">Participação</span><h3 class="heading" style="margin-top:8px">Acompanhe as confirmações</h3><p>A lista de participantes é atualizada automaticamente.</p><a class="secondary-btn" style="width:100%" href="#lista">Ver lista de presença ↓</a></div>
-      <div class="side-card"><span class="eyebrow">31 de outubro</span><h3 class="heading" style="margin-top:8px">Halloween LeRunners</h3><p>Hambúrgueres artesanais, piscina e confraternização.</p><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres previstos para o evento" loading="lazy"></div>
+      <div class="side-card"><span class="eyebrow">1º de novembro</span><h3 class="heading" style="margin-top:8px">Halloween LeRunners</h3><p>Hambúrgueres artesanais, piscina e confraternização.</p><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres previstos para o evento" loading="lazy"></div>
     </aside>
   </section>
   <section class="list-panel" id="lista">
@@ -133,7 +133,7 @@
     <div class="list-tools"><label class="sr-only" for="searchInput">Buscar participante</label><input class="control" type="search" id="searchInput" placeholder="Buscar participante..."><label class="sr-only" for="statusFilter">Filtrar por resposta</label><select class="control" id="statusFilter"><option value="sim" selected>Confirmados</option><option value="todos">Todas respostas</option><option value="talvez">Talvez</option><option value="nao">Não vão</option></select></div>
     <div id="guestList" class="guest-list" aria-live="polite"><div class="empty">Carregando lista de participantes...</div></div>
   </section>
-  <footer class="section-foot">Confraternização LeRunners • 31/10/2026 <br>Powered by <b>thIAguinho Soluções Digitais</b></footer>
+  <footer class="section-foot">Confraternização LeRunners • 01/11/2026 <br>Powered by <b>thIAguinho Soluções Digitais</b></footer>
 </div>
 <div id="loginOverlay" class="login-overlay" hidden>
   <form id="loginForm" class="login-card" autocomplete="off">
