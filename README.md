@@ -57,3 +57,13 @@ Powered by thIAguinho Soluções Digitais.
 ## Atualização 01/11/2026
 
 Data única: **domingo, 1º de novembro de 2026, véspera do feriado de Finados**. Revisados banner, metadados, mensagens WhatsApp, PDF, imagens do convite e cache PWA. Para confirmar é obrigatório informar nome e sobrenome, selecionar a presença e, se comparecer, a preferência de hambúrguer. Nomes dos convidados tornam-se obrigatórios ao adicionar acompanhantes. Fantasia, contribuição e recados permanecem opcionais. Nenhuma alteração foi feita nos caminhos Firebase ou no histórico existente.
+
+## Presença individual dos acompanhantes (10/10/2026)
+
+- Pessoa confirmada: titular ou acompanhante com estado Sim; Aguardando: estado Talvez; Não vai: estado Não.
+- Os acompanhantes são exibidos sob o responsável, com confirmação individual.
+- Novos convidados herdam a confirmação principal por padrão; cada um pode ser marcado como Sim, Talvez ou Não.
+- O responsável pode editar nomes, presenças ou remover acompanhantes no mesmo dispositivo, sem criar outra inscrição.
+- Retrocompatibilidade: o campo `guests` continua sendo uma lista de nomes; a lista opcional `guestStatuses` guarda os estados de cada convidado. Inscrições anteriores sem `guestStatuses` herdam a situação do titular.
+- WhatsApp, painel de presença, organização e PDF usam os totais individuais.
+- Dados da AMICC, fotos e funcionalidades existentes não foram removidos.
