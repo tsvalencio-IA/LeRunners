@@ -45,6 +45,12 @@ const normalized = input => String(input ?? '').normalize('NFD').replace(/[\u030
 const num = n => Number(n || 0).toLocaleString('pt-BR');
 const statusLabel = {sim:'Confirmado',talvez:'Talvez',nao:'Não vai'};
 const statusEmoji = {sim:'✅',talvez:'🤔',nao:'❌'};
+const BRING_OPTIONS = ['Bebida','Sobremesa','Doces','Gelo','Decoração','Descartáveis','Outro'];
+function normalizeBrings(source,legacy=''){
+  const raw=Array.isArray(source)?source:String(legacy||'').split(/[,;+]/);
+  return [...new Set(raw.map(x=>String(x||'').trim()).filter(x=>BRING_OPTIONS.includes(x)))];
+}
+function checkedBrings(){return [...document.querySelectorAll('input[name="bring"]:checked')].map(input=>input.value).filter(value=>BRING_OPTIONS.includes(value));}
 const att = record => record.status !== 'nao';
 const myId = () => localStorage.getItem(STORAGE_KEY) || '';
 
@@ -96,11 +102,12 @@ function tally(record){
 function sanitizeRecord(key,data){
   if(!data || typeof data!=='object'||!['sim','nao','talvez'].includes(data.status))return null;
   const guests=normalizeGuests(data.guests,data.status,data.people,data.guestStatuses);
+  const brings=normalizeBrings(data.brings,data.bring);
   return {
     id:key,uid:String(data.uid||''),nome:String(data.nome||'').slice(0,80),
-    status:data.status,people:Math.max(0,Math.min(10,Number(data.people)||0)),guests,
+    status:data.status,people:Math.max(0,Math.min(10,Number(data.people)||0)),guests,guestsUncertain:Boolean(data.guestsUncertain),
     burger:String(data.burger||'').slice(0,30),costume:String(data.costume||''),
-    bring:String(data.bring||'').slice(0,50),note:String(data.note||'').slice(0,260),
+    bring:brings.join(', '),brings,note:String(data.note||'').slice(0,260),
     timestamp:Number(data.timestamp)||0,updatedAt:Number(data.updatedAt)||0
   };
 }
@@ -110,11 +117,11 @@ function fillOwnResponse(){
   if(document.activeElement && $('rsvpForm').contains(document.activeElement) && document.activeElement!==$('submitBtn'))return;
   $('userName').value=own.nome;
   document.querySelectorAll('[name="status"]').forEach(r=>{r.checked=r.value===own.status;});
-  $('guestCount').value=String(Math.min(9,own.guests.length));
+  $('guestCount').value=own.guestsUncertain?'unknown':String(Math.min(9,own.guests.length));
   showGuestInputs(own.guests);
   $('burger').value=['tradicional','vegetariano','ambos','nao-vou-comer'].includes(own.burger)?own.burger:'';
   $('costume').value=['sim','nao','talvez'].includes(own.costume)?own.costume:'talvez';
-  $('bring').value=['Bebida','Sobremesa','Doces','Gelo','Decoração','Descartáveis','Outro'].includes(own.bring)?own.bring:'';
+  document.querySelectorAll('input[name="bring"]').forEach(input=>{input.checked=own.brings.includes(input.value);});
   $('note').value=own.note;
   toggleAttending();
   $('savedMessage').textContent='✅ Inscrição encontrada. Altere a presença ou os convidados e salve a atualização.';
@@ -140,10 +147,11 @@ function readGuestInputs(){
   }));
 }
 function updateGuestVisibility(){
-  const guestCount=Number($('guestCount').value)||0;
-  $('guestNamesBlock').hidden=guestCount===0 || document.querySelector('input[name="status"]:checked')?.value==='nao';
+  const countValue=$('guestCount').value;
+  $('guestNamesBlock').hidden=countValue==='unknown'||countValue==='0'||document.querySelector('input[name="status"]:checked')?.value==='nao';
 }
 function toggleGuestNames(){
+  if($('guestCount').value==='unknown'){showGuestInputs([]);return;}
   const count=Number($('guestCount').value)||0;
   const rows=readGuestInputs();
   while(rows.length<count)rows.push({name:'',status:document.querySelector('input[name="status"]:checked')?.value==='talvez'?'talvez':'sim'});
@@ -175,9 +183,9 @@ function renderSummary(){
   $('countBurger').textContent=num(currentList.filter(e=>e.status==='sim'&&['tradicional','ambos'].includes(e.burger)).length)+' respostas';
   $('countVeggie').textContent=num(currentList.filter(e=>e.status==='sim'&&e.burger==='vegetariano').length)+' respostas';
   $('countCostume').textContent=num(currentList.filter(e=>e.status==='sim'&&e.costume==='sim').length);
-  $('countBringing').textContent=num(currentList.filter(e=>e.status==='sim'&&Boolean(e.bring)).length);
+  $('countBringing').textContent=num(currentList.filter(e=>e.status==='sim'&&e.brings.length>0).length);
   const brings={};
-  currentList.filter(e=>e.status==='sim'&&e.bring).forEach(e=>{brings[e.bring]=(brings[e.bring]||0)+1;});
+  currentList.filter(e=>e.status==='sim').forEach(e=>e.brings.forEach(item=>{brings[item]=(brings[item]||0)+1;}));
   $('bringSummary').innerHTML=Object.entries(brings).sort((a,b)=>b[1]-a[1]).map(([label,n])=>`<span class="pill">${escapeHtml(label)} · ${num(n)}</span>`).join('');
   renderAdminList();
   return {totalPersons:yes,confirmed};
@@ -188,7 +196,7 @@ function renderAdminList(){
   if(!currentList.length){container.innerHTML='<div class="empty">Nenhuma resposta registrada.</div>';return;}
   container.innerHTML=currentList.map(e=>{
     const stats=tally(e);
-    const guests=(e.guests||[]).map(g=>`<small>↳ ${escapeHtml(g.name)} — ${statusLabel[g.status]}</small>`).join('');
+    const guests=(e.guests||[]).map(g=>`<small>↳ ${escapeHtml(g.name)} — ${statusLabel[g.status]}</small>`).join('')+(e.guestsUncertain?'<small>Convidados: ainda não sabe</small>':'');
     return `<div class="admin-person"><div class="admin-row-head"><strong>${escapeHtml(e.nome)} • ${statusLabel[e.status]}</strong><button type="button" class="delete" data-delete-id="${escapeHtml(e.id)}">Remover</button></div><small>${stats.sim} confirmado(s) · ${stats.talvez} talvez · ${stats.nao} não vai(vão)</small>${guests}<small>Hambúrguer: ${escapeHtml(e.burger||'—')} • Fantasia: ${escapeHtml(e.costume||'—')} • Levará: ${escapeHtml(e.bring||'Não informado')}</small>${e.note?`<small>Observação: ${escapeHtml(e.note)}</small>`:''}</div>`;
   }).join('');
 }
@@ -206,7 +214,7 @@ function renderList(){
     const initials=e.nome.trim().split(/\s+/).slice(0,2).map(v=>v[0]||'').join('').toLocaleUpperCase('pt-BR');
     const stats=tally(e);
     const statsText=[stats.sim?`${stats.sim} confirmado${stats.sim!==1?'s':''}`:'',stats.talvez?`${stats.talvez} talvez`:'',stats.nao?`${stats.nao} não vai${stats.nao!==1?'vão':''}`:''].filter(Boolean).join(' · ');
-    const guests=e.guests.map(g=>`<div class="guest-child"><span class="guest-child-name">↳ ${escapeHtml(g.name)}</span><span class="guest-child-status ${g.status}">${statusLabel[g.status]}</span></div>`).join('');
+    const guests=e.guests.map(g=>`<div class="guest-child"><span class="guest-child-name">↳ ${escapeHtml(g.name)}</span><span class="guest-child-status ${g.status}">${statusLabel[g.status]}</span></div>`).join('')+(e.guestsUncertain?'<div class="guest-child"><span class="guest-child-name">↳ Convidados: a definir</span></div>':'');
     const mine=e.id===myId()&&e.uid===auth.currentUser?.uid;
     return `<article class="guest group-guest"><div class="avatar">${escapeHtml(initials)}</div><div class="group-guest-main"><h3>${escapeHtml(e.nome)}</h3><small class="group-guest-meta">${statsText}</small>${guests?`<div class="guest-children">${guests}</div>`:''}${mine?`<button type="button" class="guest-edit" data-edit-own="${escapeHtml(e.id)}">Editar minha inscrição / convidados</button>`:''}</div><span class="tag ${e.status}">${statusLabel[e.status]}</span></article>`;
   }).join('');
@@ -219,16 +227,18 @@ async function saveResponse(ev){
   const status=document.querySelector('[name="status"]:checked')?.value;
   if(nome.length<3||nome.length>80||nome.split(' ').length<2){toast('Preencha seu nome e sobrenome antes de enviar a confirmação.',true);$('userName').focus();return;}
   if(!['sim','nao','talvez'].includes(status)){toast('Escolha Sim, Não ou Talvez.',true);return;}
-  const guestsCount=status==='nao'?0:Number($('guestCount').value);
+  const guestsUncertain=status!=='nao'&&$('guestCount').value==='unknown';
+  const guestsCount=status==='nao'||guestsUncertain?0:Number($('guestCount').value);
   if(!Number.isInteger(guestsCount)||guestsCount<0||guestsCount>9){toast('Quantidade de convidados inválida.',true);return;}
-  const guests=status==='nao'?[]:readGuestInputs();
+  const guests=status==='nao'||guestsUncertain?[]:readGuestInputs();
   if(guests.length!==guestsCount){toast('Confira a quantidade de convidados.',true);return;}
   const invalid=guests.find(g=>g.name.length<2||g.name.length>80||!['sim','talvez','nao'].includes(g.status));
   if(invalid){toast('Preencha o nome e a confirmação de cada convidado.',true);$('guestRows').querySelector('.guest-name:placeholder-shown')?.focus();return;}
   if(status!=='nao'&&!['tradicional','vegetariano','ambos','nao-vou-comer'].includes($('burger').value)){toast('Selecione sua preferência de hambúrguer antes de confirmar.',true);$('burger').focus();return;}
   const people=(status!=='nao'?1:0)+guests.filter(g=>g.status!=='nao').length;
-  const payload={nome,status,people,guests:guests.map(g=>g.name),guestStatuses:guests.map(g=>g.status),uid:auth.currentUser.uid,burger:status==='nao'?'':$('burger').value,
-    costume:status==='nao'?'':$('costume').value,bring:status==='nao'?'':$('bring').value,
+  const brings=status==='nao'?[]:checkedBrings();
+  const payload={nome,status,people,guests:guests.map(g=>g.name),guestStatuses:guests.map(g=>g.status),guestsUncertain,uid:auth.currentUser.uid,burger:status==='nao'?'':$('burger').value,
+    costume:status==='nao'?'':$('costume').value,bring:brings.join(', '),brings,
     note:$('note').value.trim(),updatedAt:Date.now()};
   const already=currentList.find(e=>e.id===myId());
   if(already&&already.uid!==payload.uid){toast('Este registro pertence a outra sessão. Não será alterado.',true);return;}
@@ -246,7 +256,7 @@ async function saveResponse(ev){
   }catch(error){console.error('Falha no envio:',error);toast('Não foi possível salvar agora. Tente novamente em instantes.',true);$('submitBtn').textContent=originalLabel;}
   finally{runningSave=false;$('submitBtn').disabled=false;}
 }
-function cleanUrl(){return location.origin+location.pathname+'?v=20261101c';}
+function cleanUrl(){return location.origin+location.pathname+'?v=20261101d';}
 function whatsapp(message){
   window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
 }
@@ -259,7 +269,7 @@ function shareWhatsApp(){
     message+=groups.map((e,i)=>{
       const confirmedGuests=e.guests.filter(g=>g.status==='sim');
       const primary=`${i+1}. ${e.nome}${e.status==='sim'?'':' (responsável pelo grupo)'}`;
-      return primary+(confirmedGuests.length?'\n'+confirmedGuests.map(g=>`   ↳ ${g.name} ✓`).join('\n'):'');
+      return primary+(confirmedGuests.length?'\n'+confirmedGuests.map(g=>`   ↳ ${g.name} ✓`).join('\n'):'')+(e.guestsUncertain?'\n   ↳ Convidados: a definir':'');
     }).join('\n\n');
   }else message+='Ainda aguardando confirmações.';
   message+=`\n\n🔗 *Confirme ou atualize sua presença:*\n${cleanUrl()}`;
@@ -349,7 +359,7 @@ function htmlForPDF(){
   const totals=currentList.reduce((acc,e)=>{const s=tally(e);for(const k of ['sim','talvez','nao'])acc[k]+=s[k];return acc;},{sim:0,talvez:0,nao:0});
   const rows=currentList.map((e,i)=>{
     const s=tally(e);
-    const guests=e.guests.map(g=>`${escapeHtml(g.name)} — ${statusLabel[g.status]}`).join('<br>')||'—';
+    const guests=e.guests.map(g=>`${escapeHtml(g.name)} — ${statusLabel[g.status]}`).join('<br>')||(e.guestsUncertain?'A definir':'—');
     return `<tr><td>${i+1}</td><td>${escapeHtml(e.nome)}</td><td>${statusLabel[e.status]}</td><td>${s.sim} confirmados / ${s.talvez} talvez / ${s.nao} não</td><td>${guests}</td><td>${escapeHtml(e.burger||'—')}</td><td>${escapeHtml(e.costume||'—')}</td><td>${escapeHtml(e.bring||'—')}</td><td>${escapeHtml(e.note||'—')}</td></tr>`;
   }).join('');
   return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${totals.sim} pessoas confirmadas</b> • ${totals.talvez} aguardando confirmação • ${totals.nao} não vão • ${currentList.length} inscrições</div><h2>Lista de confirmações por grupo</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Responsável</th><th>Resposta</th><th>Grupo</th><th>Convidados e situação</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
