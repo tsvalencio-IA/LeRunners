@@ -1,400 +1,120 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#18181b">
-  <title>Pesquisa dos Atletas LeRunners | 3º Treinão em Prol da AMICC</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#160f19">
+  <meta name="description" content="Halloween LeRunners • 31 de outubro de 2026. Confirme sua presença e acompanhe a confraternização em tempo real.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Halloween LeRunners • 31.10.2026">
+  <meta property="og:description" content="Hambúrguer artesanal, piscina e a nossa equipe reunida! Confirme a sua presença.">
+  <meta property="og:image" content="assets/fotos/302971.jpg">
+  <title>Halloween LeRunners • Confraternização 2026</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icones/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    :root { color-scheme: light; }
-    * { box-sizing: border-box; }
-    body { font-family: Inter, sans-serif; background: linear-gradient(135deg, #27272a 0%, #09090b 100%); min-height: 100vh; }
-    .glass { background: rgba(255,255,255,.98); box-shadow: 0 24px 70px rgba(0,0,0,.4); }
-    .fade-in { animation: fadeIn .35s ease both; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
-    .loader { width:22px; height:22px; border:3px solid #e5e7eb; border-top-color:#18181b; border-radius:50%; animation:spin .8s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg) } }
-    .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
-    input, select, textarea, button { font: inherit; }
+    :root{--bg:#110f13;--card:#1d1820;--card2:#261e29;--line:#403141;--muted:#c9bdc9;--orange:#ff922d;--orange2:#ffb14d;--white:#fff8f1;--green:#46cc88;--red:#ff747b;--focus:#ffd69a}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--bg);color:var(--white);font:500 15px/1.55 'DM Sans',sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.58}a{color:inherit;text-decoration:none}img{display:block;max-width:100%}h1,h2,h3,p{margin-top:0}.wrap{width:min(1160px,calc(100% - 32px));margin-inline:auto}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.heading{font-family:Outfit,sans-serif;line-height:1.05;font-weight:900;letter-spacing:-.03em}.eyebrow{font:800 11px/1.4 Outfit,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--orange2)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0}.brand{display:flex;align-items:center;gap:11px;font-family:Outfit,sans-serif;font-size:23px;font-weight:900;letter-spacing:-.07em}.brand img{width:43px;height:43px;flex:none}.brand strong{color:var(--orange)}.top-actions{display:flex;align-items:center;gap:8px}.tiny-btn{border:1px solid #594358;background:#241925;color:#fff3e8;padding:9px 12px;border-radius:11px;font-size:12px;font-weight:800}.tiny-btn:hover{border-color:var(--orange)}.live{display:flex;align-items:center;gap:7px;background:#2b232b;border:1px solid #4a384a;border-radius:100px;padding:8px 12px;font-size:11px;font-weight:800;white-space:nowrap}.dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 12px #ff922d88}.dot.online{background:var(--green);box-shadow:0 0 12px #46cc8877}.dot.offline{background:var(--red)}
+    .hero{position:relative;display:grid;grid-template-columns:1fr 45%;min-height:480px;border:1px solid #533346;border-radius:28px;overflow:hidden;background:radial-gradient(circle at 40% 0,#642b22 0,transparent 42%),linear-gradient(130deg,#31202a 0%,#180f18 74%);box-shadow:0 25px 80px #0008}.hero::before{content:'✦';position:absolute;top:-40px;right:49%;color:#f39b3b33;font-size:170px;pointer-events:none}.hero-text{z-index:1;padding:54px 25px 45px 49px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid #91522f;background:#ff932d1c;padding:7px 13px;border-radius:100px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#ffcf8b}.hero h1{margin:20px 0 7px;font:900 clamp(50px,7vw,88px)/.88 Outfit,sans-serif;letter-spacing:-.075em;color:#ffab43;text-shadow:0 8px 30px #0007}.hero h1 span{display:block;color:#fffbf2;font-size:.56em;letter-spacing:-.045em;line-height:1.3}.hero-blurb{max-width:460px;color:#efdae3;font-size:16px;font-weight:600;margin:18px 0}.detail-row{display:flex;flex-wrap:wrap;gap:11px;margin:10px 0 25px}.detail-chip{display:flex;gap:10px;align-items:center;border:1px solid #755142;background:#ffffff09;border-radius:13px;padding:10px 12px;font-size:12px;line-height:1.25}.detail-chip b{display:block;color:white;font-size:14px}.detail-chip small{display:block;color:#e6c6b1;font-size:11px}.detail-icon{font-size:23px}.hero-buttons{display:flex;flex-wrap:wrap;gap:10px}.primary-btn,.secondary-btn,.green-btn{border:0;border-radius:13px;padding:14px 20px;font-weight:900;display:inline-flex;justify-content:center;align-items:center;gap:9px;transition:transform .18s,filter .18s}.primary-btn{background:linear-gradient(130deg,#ffab38,#fa6a15);color:#190e0b;box-shadow:0 10px 22px #fa661d33}.primary-btn:hover,.green-btn:hover{filter:brightness(1.06);transform:translateY(-1px)}.secondary-btn{background:#2c242c;border:1px solid #665260;color:var(--white)}.green-btn{background:#17a769;color:white}.hero-media{position:relative;min-height:400px}.hero-media img{width:100%;height:100%;object-fit:cover;object-position:50% 47%;filter:contrast(1.06) saturate(1.12)}.hero-media::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#231521 0%,transparent 32%),linear-gradient(0deg,#190f1b88,transparent 45%);z-index:1}.hero-photo-tag{position:absolute;z-index:2;bottom:20px;right:20px;background:#150d18d9;border:1px solid #fff4;padding:10px 14px;border-radius:13px;text-align:right;font-size:12px;font-weight:800}.hero-photo-tag small{display:block;font-size:10px;color:#eac7a9;font-weight:500}
+    .highlights{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 42px}.highlight{display:flex;align-items:center;gap:11px;padding:14px 15px;border:1px solid #42313d;border-radius:16px;background:#231b24;font-size:13px;font-weight:800}.highlight .symbol{font-size:27px}.section-top{margin:0 0 20px;display:flex;align-items:end;justify-content:space-between;gap:14px}.section-top h2{font-size:clamp(27px,3vw,39px);margin:7px 0}.section-top p{max-width:620px;color:#cbb7c8;margin:0}.gallery{display:grid;grid-template-columns:1.1fr .9fr 1fr;grid-template-rows:205px 205px;gap:12px}.gallery-tile{position:relative;overflow:hidden;border-radius:17px;border:1px solid #57404c;background:#2d242e;padding:0;width:100%;text-align:left}.gallery-tile img{width:100%;height:100%;object-fit:cover;transition:transform .25s,filter .25s}.gallery-tile:hover img{transform:scale(1.035);filter:brightness(1.1)}.gallery-tile.large{grid-row:span 2}.gallery-tile img.pool{object-position:50% 50%}.gallery-tile .caption{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:27px 14px 12px;color:white;font-size:13px;font-weight:900;background:linear-gradient(0deg,#110d10df,transparent)}.gallery .video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-shadow:0 2px 9px black;font-size:46px}.remember{color:#bca9b9;font-size:12px;margin:12px 0 0}.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:start;margin:44px 0}.panel{background:#211923;border:1px solid #4e3846;border-radius:24px;overflow:hidden}.form-top{padding:27px 29px 20px;background:radial-gradient(circle at 95% -50%,#6e3a21aa,transparent 60%),#2c1f2c;border-bottom:1px solid #553d4d}.form-top h2{margin:8px 0;font-size:30px}.form-top p{margin:0;color:#d9c6d0}.form-body{padding:25px 28px 29px}.field{margin:0 0 20px}.field label,.label{display:block;margin:0 0 7px;font-size:13px;font-weight:900;color:#fff3f4}.hint{font-size:11px;color:#c4b0be;font-weight:500}.control{width:100%;border:1px solid #735567;border-radius:11px;background:#160f19;color:white;outline:0;padding:13px 14px;min-height:48px}.control:focus{border-color:var(--orange2);box-shadow:0 0 0 3px #ffae4833}.control::placeholder{color:#a89aa8}textarea.control{resize:vertical;min-height:76px}.columns-2{display:grid;grid-template-columns:1fr 1fr;gap:13px}.option-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.options-2{grid-template-columns:repeat(2,minmax(0,1fr))}.choice{position:relative;display:block;cursor:pointer}.choice input{position:absolute;opacity:0;width:1px;height:1px}.choice span{display:flex;min-height:70px;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 3px;text-align:center;border:1px solid #67515f;border-radius:12px;background:#18131c;color:#f2e5e9;font-weight:900;font-size:13px;transition:.18s}.choice span em{font-style:normal;font-size:21px}.choice input:checked+span{background:#56321f;border-color:var(--orange2);box-shadow:inset 0 0 0 1px #f99b40;color:white}.choice input:focus-visible+span{outline:3px solid var(--focus);outline-offset:2px}.choice.good input:checked+span{border-color:#40d28b;background:#174831}.choice.bad input:checked+span{border-color:#ff6f78;background:#501c2c}.save-btn{width:100%;font-size:15px;min-height:55px;margin-top:1px}.notice{color:#cbb5c4;font-size:11px;line-height:1.6;margin:11px 0 0}.saved-chip{display:none;border:1px solid #386d4d;background:#133c2b;border-radius:12px;color:#c9f8db;padding:10px 12px;font-size:12px;font-weight:800;margin:0 0 16px}.saved-chip.visible{display:block}.side{display:grid;gap:16px}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#292029;padding:18px;border:1px solid #4b3845;border-radius:18px}.metric strong{display:block;font:900 38px/1 Outfit,sans-serif;color:#ffb14a}.metric span{display:block;font-size:12px;color:#dbc3d1;font-weight:800;margin-top:6px}.metric.wide{grid-column:span 2;background:linear-gradient(120deg,#583120,#251b24)}.metric.wide strong{font-size:49px}.side-card{padding:21px;border-radius:20px;background:#201b22;border:1px solid #493743}.side-card h3{font-size:18px;margin:0 0 8px}.side-card p{font-size:13px;color:#c5b2c2;margin-bottom:12px}.side-stats{list-style:none;margin:0;padding:0}.side-stats li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #4a3846;font-size:13px}.side-stats li:last-child{border-bottom:0}.side-stats b{color:#ffaf52}.share-btn{width:100%;margin-top:12px}.side-image{border-radius:15px;width:100%;max-height:205px;object-fit:cover;margin-top:12px}.summary{display:flex;flex-wrap:wrap;gap:8px}.summary:empty{display:none}.pill{background:#563620;border:1px solid #a86839;color:#ffe5c2;padding:7px 9px;border-radius:100px;font-size:11px;font-weight:800}
+    .list-panel{margin:0 0 30px;background:#201922;border:1px solid #4b3445;border-radius:24px;padding:26px}.list-header{display:flex;justify-content:space-between;align-items:start;gap:12px}.list-header h2{font-size:29px;margin:7px 0}.list-buttons{display:flex;flex-wrap:wrap;gap:8px}.list-buttons button{white-space:nowrap}.list-tools{display:flex;gap:10px;margin:18px 0}.list-tools .control{flex:1;min-width:0}.list-tools select{max-width:170px}.guest-list{display:grid;gap:10px}.guest{display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:center;border:1px solid #513c4b;background:#291f2a;border-radius:14px;padding:14px}.avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#714227;font-size:16px;font-weight:900;color:#ffe2b2}.guest h3{font-size:14px;margin:0;overflow-wrap:anywhere}.guest small{display:block;color:#c9b8c9;font-size:11px;margin-top:3px}.tag{font-size:11px;font-weight:900;padding:6px 9px;border-radius:30px;white-space:nowrap}.tag.sim{color:#bff9d8;background:#214c37}.tag.talvez{color:#ffe1a2;background:#604521}.tag.nao{color:#ffc5cc;background:#592837}.guest .delete{border:1px solid #864351;border-radius:10px;padding:7px 10px;background:#552333;color:#ffdee2;font-size:11px;font-weight:800;margin-left:7px}.empty{padding:35px 12px;text-align:center;border:1px dashed #594458;border-radius:15px;color:#dac4d2;font-size:13px}.section-foot{padding:18px 12px 42px;text-align:center;font-size:12px;color:#b7a1b0}.section-foot b{color:white}
+    .admin{display:none;margin:0 0 20px;padding:21px;border:1px solid #965436;background:#37272d;border-radius:20px}.admin.open{display:block}.admin h2{margin-bottom:8px}.admin .control{background:#20151c}.admin-actions{display:flex;gap:9px;margin-top:10px;flex-wrap:wrap}.danger{color:white;border:1px solid #ac4b55;background:#732f3a;padding:11px 15px;border-radius:10px;font-weight:900}.warning{font-size:12px;color:#ffd1b1}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#202020;color:white;border:1px solid #985b35;border-radius:14px;max-width:min(480px,calc(100% - 28px));z-index:1000;padding:13px 18px;box-shadow:0 12px 50px #000a;font-size:13px;font-weight:800;text-align:center}.toast.error{background:#622430;border-color:#d47078}.toast[hidden]{display:none}.modal{position:fixed;inset:0;background:#0a070be9;z-index:100;display:grid;place-items:center;padding:18px}.modal[hidden]{display:none}.modal figure{margin:0;max-width:min(1000px,100%);width:100%;text-align:center}.modal img{margin:auto;max-height:75vh;object-fit:contain;border-radius:13px}.modal figcaption{padding:13px;color:#fff}.modal-close{position:fixed;top:20px;right:20px;border-radius:100%;background:#291825;color:white;border:1px solid #8e6779;width:46px;height:46px;font-size:22px}.media-modal-video{width:min(420px,95vw);max-height:76vh}
+    @media(max-width:960px){.hero{grid-template-columns:1fr 40%}.hero-text{padding:39px 27px}.hero h1{font-size:clamp(53px,6.5vw,75px)}.layout{grid-template-columns:minmax(0,1fr) 300px;gap:14px}.gallery{grid-template-rows:170px 170px}.highlights{gap:7px}.highlight{font-size:11px;padding:11px}}
+    @media(max-width:710px){.wrap{width:calc(100% - 24px)}.topbar{padding:12px 0}.brand{font-size:19px;gap:7px}.brand img{width:36px;height:36px}.top-actions{gap:5px}.tiny-btn{padding:7px 8px;font-size:11px}.live{font-size:0;padding:10px}.live .dot{width:9px;height:9px}.hero{grid-template-columns:1fr}.hero-text{padding:31px 23px 20px;order:2}.hero-media{order:1;height:275px;min-height:0}.hero-media::before{background:linear-gradient(0deg,#251521 0%,transparent 55%)}.hero h1{font-size:60px;margin-top:12px}.hero-blurb{font-size:14px;margin:13px 0}.hero-buttons{width:100%}.hero-buttons a{flex:1;padding:13px 10px;font-size:13px}.detail-row{margin:8px 0 16px}.detail-chip{padding:7px 10px}.highlights{grid-template-columns:1fr 1fr;margin:13px 0 35px}.highlight{padding:10px 12px}.gallery{grid-template-columns:1fr 1fr;grid-template-rows:180px 135px 135px;gap:8px}.gallery-tile.large{grid-column:span 2;grid-row:span 1}.gallery-tile .caption{font-size:11px}.section-top h2{font-size:29px}.layout{grid-template-columns:1fr;margin:35px 0}.side{grid-row:1}.numbers{grid-template-columns:repeat(4,1fr)}.metric{padding:12px 9px}.metric strong{font-size:26px}.metric span{font-size:9px}.metric.wide{grid-column:span 2}.metric.wide strong{font-size:34px}.side{gap:10px}.side-card{padding:16px}.side-card .side-image{display:none}.form-top{padding:24px 20px 19px}.form-body{padding:20px}.form-top h2{font-size:29px}.list-panel{padding:17px}.list-header{flex-direction:column}.list-header h2{font-size:25px}.guest{grid-template-columns:auto 1fr;gap:10px;padding:12px}.guest>.tag{grid-column:2;justify-self:start}.list-tools select{max-width:130px}.modal-close{top:10px;right:10px}}
+    @media(max-width:390px){.brand{font-size:17px}.hero h1{font-size:53px}.detail-row{gap:6px}.detail-chip{font-size:10px}.detail-chip b{font-size:12px}.option-grid{gap:6px}.choice span{font-size:11px;min-height:65px}.columns-2{grid-template-columns:1fr}.gallery{grid-template-rows:155px 120px 120px}.numbers{grid-template-columns:1fr 1fr}.metric.wide{grid-column:span 2}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
   </style>
 </head>
-<body class="text-zinc-900 antialiased p-3 sm:p-6">
-  <main class="mx-auto w-full max-w-3xl">
-    <section class="glass overflow-hidden rounded-[28px] fade-in">
-      <header class="relative overflow-hidden bg-gradient-to-br from-zinc-800 via-zinc-950 to-black px-5 pb-7 pt-6 text-white sm:px-8">
-        <div class="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-white/5"></div>
-        <div class="absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-white/5"></div>
-        <div class="relative z-10 flex items-start justify-between gap-3">
-          <div>
-            <span class="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest">LeRunners solidária</span>
-            <h1 id="displayTitle" class="mt-4 text-3xl font-black leading-[1.08] sm:text-5xl">Juntos pela AMICC</h1>
-            <p id="displaySubtitle" class="mt-3 max-w-xl text-sm font-semibold leading-relaxed text-zinc-300 sm:text-base">Mobilização dos atletas LeRunners para o 3º Treinão em Prol da AMICC</p>
-          </div>
-          <button onclick="toggleAdminPanel()" class="rounded-full bg-black/30 p-2 text-white/70 transition hover:text-white" aria-label="Abrir painel do organizador" title="Painel do organizador">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.3 4.3c.4-1.7 3-1.7 3.4 0a1.7 1.7 0 002.6 1.1c1.5-.9 3.3.8 2.3 2.3a1.7 1.7 0 001.1 2.6c1.7.4 1.7 3 0 3.4a1.7 1.7 0 00-1.1 2.6c1 1.5-.8 3.3-2.3 2.3a1.7 1.7 0 00-2.6 1.1c-.4 1.7-3 1.7-3.4 0a1.7 1.7 0 00-2.6-1.1c-1.5 1-3.3-.8 2.3-2.3a1.7 1.7 0 00-1.1-2.6c-1.7-.4-1.7-3 0-3.4a1.7 1.7 0 001.1-2.6c-1-1.5.8-3.2 2.3-2.3a1.7 1.7 0 002.6-1.1z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          </button>
-        </div>
-        <div id="cloudStatus" class="relative z-10 mt-5 inline-flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5 text-xs font-bold">
-          <span id="statusDot" class="h-2.5 w-2.5 rounded-full bg-amber-400"></span><span id="statusText">Conectando...</span>
-        </div>
-      </header>
-
-      <div id="adminPanel" class="hidden border-b-4 border-zinc-900 bg-zinc-100 p-5 sm:p-7">
-        <h2 class="mb-4 text-lg font-black">Configuração do organizador</h2>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <label class="text-sm font-bold">Título<input id="configTitle" class="mt-1 w-full rounded-xl border p-3 font-medium outline-none focus:border-black" type="text"></label>
-          <label class="text-sm font-bold">Data, horário ou local<input id="configSubtitle" class="mt-1 w-full rounded-xl border p-3 font-medium outline-none focus:border-black" type="text"></label>
-        </div>
-        <label class="mt-3 block text-sm font-bold">Mensagem de orientação<input id="configQuestion" class="mt-1 w-full rounded-xl border p-3 font-medium outline-none focus:border-black" type="text"></label>
-        <div class="mt-4 flex flex-col gap-2 sm:flex-row">
-          <button onclick="saveEventConfig()" class="flex-1 rounded-xl bg-zinc-950 px-4 py-3 font-extrabold text-white">Salvar informações</button>
-          <button onclick="clearList()" class="rounded-xl bg-red-700 px-4 py-3 font-extrabold text-white">Apagar toda a lista</button>
-        </div>
+<body>
+<div class="wrap">
+  <nav class="topbar" aria-label="Menu principal">
+    <a class="brand" href="#inicio"><img src="assets/icones/favicon.svg" alt="Ícone LeRunners"><span>Le<strong>Runners</strong></span></a>
+    <div class="top-actions"><span class="live" title="Estado da sincronização"><i id="statusDot" class="dot"></i><span id="statusText">Conectando...</span></span><button id="installBtn" class="tiny-btn" type="button" hidden>Instalar</button><button id="adminBtn" class="tiny-btn" type="button" aria-label="Painel do organizador">⚙ Organizador</button></div>
+  </nav>
+  <div class="admin" id="adminPanel">
+    <h2 class="heading">Organização do evento</h2>
+    <p class="warning">As alterações deste painel dependem das permissões do Firebase. A senha do navegador não substitui regras de segurança do banco.</p>
+    <div class="columns-2">
+      <div class="field"><label for="configTitle">Título</label><input class="control" id="configTitle" maxlength="90"></div>
+      <div class="field"><label for="configTime">Horário</label><input class="control" id="configTime" maxlength="100" placeholder="A confirmar"></div>
+      <div class="field"><label for="configPlace">Local / orientação</label><input class="control" id="configPlace" maxlength="160"></div>
+      <div class="field"><label for="configMessage">Mensagem do evento</label><input class="control" id="configMessage" maxlength="230"></div>
+    </div>
+    <div class="admin-actions"><button type="button" class="primary-btn" id="saveConfigBtn">Salvar informações ao vivo</button><button type="button" class="danger" id="clearBtn">Apagar SOMENTE a lista do Halloween</button><button type="button" class="secondary-btn" id="closeAdminBtn">Fechar painel</button></div>
+  </div>
+  <header class="hero" id="inicio">
+    <div class="hero-text">
+      <span class="hero-eyebrow" id="heroEventTitle">🎃 Festa da nossa equipe • 2026</span>
+      <h1>HALLOWEEN<span>LeRunners</span></h1>
+      <p class="hero-blurb" id="heroMessage">A nossa turma vai se reunir de novo! Hambúrgueres artesanais, piscina e aquela energia que só a LeRunners tem.</p>
+      <div class="detail-row">
+        <span class="detail-chip"><span class="detail-icon">📅</span><span><b>31 OUT • SÁBADO</b><small>2026</small></span></span>
+        <span class="detail-chip"><span class="detail-icon">📍</span><span><b id="heroPlace">Nossa chácara</b><small id="heroTime">Horário a confirmar</small></span></span>
       </div>
-
-      <section class="border-b bg-white px-5 py-6 sm:px-8 sm:py-8">
-        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
-          <div class="flex items-start gap-4">
-            <div class="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-black text-white">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 00-.1-7.8z"/></svg>
-            </div>
-            <div>
-              <h2 class="text-xl font-black leading-tight">Equipe LERUNNERS: juntos pelo 3º Treinão em Prol da AMICC.</h2>
-              <p class="mt-2 text-sm font-medium leading-relaxed text-zinc-600">Este formulário é exclusivo para os atletas da LERUNNERS informarem antecipadamente o que pretendem levar para a arrecadação do projeto.</p>
-              <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-relaxed text-amber-950">🥛 A arrecadação oficial do Treinão é de <strong>2 litros de leite em caixinha</strong> OU <strong>2 kg de alimentos não perecíveis</strong>. A doação será entregue <strong>na retirada do kit</strong>, não no dia do evento. Quem puder contribuir com mais, pode registrar uma quantidade maior.</div>
-            </div>
-          </div>
+      <div class="hero-buttons"><a class="primary-btn" href="#confirmar">🎟 Confirmar presença</a><a class="secondary-btn" href="#memorias">Ver fotos da turma ↗</a></div>
+    </div>
+    <div class="hero-media"><img src="assets/fotos/302971.jpg" alt="Hambúrguer artesanal real feito pela equipe, com queijo e alface" fetchpriority="high"><div class="hero-photo-tag">🍔 Hambúrguer de verdade<small>Fotos do nosso preparo</small></div></div>
+  </header>
+  <section class="highlights" aria-label="Atrações do encontro">
+    <div class="highlight"><span class="symbol">🍔</span><span>Hambúrguer artesanal</span></div>
+    <div class="highlight"><span class="symbol">🏊</span><span>Piscina liberada</span></div>
+    <div class="highlight"><span class="symbol">🎃</span><span>Clima de Halloween</span></div>
+    <div class="highlight"><span class="symbol">🤝</span><span>Confraternização da equipe</span></div>
+  </section>
+  <section id="memorias" aria-label="Fotos das confraternizações e hambúrgueres">
+    <div class="section-top"><div><span class="eyebrow">Nossa história, nossa turma</span><h2 class="heading">Boas lembranças.<br>Mais uma pra viver.</h2><p>Fotos reais dos nossos encontros, da chácara e dos hambúrgueres que vamos preparar.</p></div></div>
+    <div class="gallery">
+      <button class="gallery-tile large" data-photo="assets/fotos/76107.jpg" data-caption="A nossa equipe reunida na confraternização" type="button" aria-label="Ampliar foto da equipe"><img loading="lazy" src="assets/fotos/76107.jpg" alt="Fotografia da equipe reunida na área da churrasqueira"><span class="caption">📸 A turma reunida</span></button>
+      <button class="gallery-tile" data-photo="assets/fotos/143240.jpg" data-caption="Piscina da chácara em dia de confraternização" type="button" aria-label="Ampliar foto da piscina"><img loading="lazy" class="pool" src="assets/fotos/143240.jpg" alt="Integrantes do grupo na piscina da chácara"><span class="caption">🏊 A nossa piscina</span></button>
+      <button class="gallery-tile" data-photo="assets/fotos/302970.jpg" data-caption="Bastidores da preparação dos hambúrgueres e espetinhos" type="button" aria-label="Ampliar fotos do preparo"><img loading="lazy" src="assets/fotos/302970.jpg" alt="Colagem real de preparo de hambúrgueres, queijos e espetinhos"><span class="caption">🔥 Preparados por nós</span></button>
+      <button class="gallery-tile" data-photo="assets/fotos/75086.jpg" data-caption="Amigos reunidos no espaço da churrasqueira" type="button" aria-label="Ampliar foto de amigos"><img loading="lazy" src="assets/fotos/75086.jpg" alt="Amigos reunidos em frente ao balcão da churrasqueira"><span class="caption">🤝 Memórias do encontro</span></button>
+      <button class="gallery-tile" data-video="assets/videos/chacara-confraternizacao.mp4" type="button" aria-label="Assistir vídeo da chácara"><img loading="lazy" src="assets/fotos/46938.jpg" alt="Piscina da chácara vista em foto vertical"><span class="video-overlay" aria-hidden="true">▶</span><span class="caption">▶ Vídeo da chácara</span></button>
+    </div>
+    <p class="remember">Toque nas fotos para ampliar. O vídeo da chácara só carrega quando você abre.</p>
+  </section>
+  <section class="layout" id="confirmar">
+    <div class="panel">
+      <div class="form-top"><span class="eyebrow">Lista oficial em tempo real</span><h2 class="heading">Sua presença faz a festa. 🎟</h2><p>Responda rapidinho para organizarmos os hambúrgueres, o espaço e a turma.</p></div>
+      <form class="form-body" id="rsvpForm" novalidate>
+        <div id="savedMessage" class="saved-chip" role="status"></div>
+        <div class="field"><label for="userName">Seu nome <span aria-hidden="true">*</span></label><input class="control" id="userName" maxlength="80" type="text" autocomplete="name" placeholder="Como a equipe te conhece?" required></div>
+        <fieldset class="field" style="border:0;padding:0;min-width:0"><legend class="label">Você vai participar? *</legend><div class="option-grid">
+          <label class="choice good"><input type="radio" name="status" value="sim" required><span><em>🎉</em>Sim, eu vou!</span></label>
+          <label class="choice bad"><input type="radio" name="status" value="nao"><span><em>😢</em>Não poderei</span></label>
+          <label class="choice"><input type="radio" name="status" value="talvez"><span><em>🤔</em>Talvez</span></label>
+        </div></fieldset>
+        <div id="attendingFields">
+          <div class="columns-2"><div class="field"><label for="people">Quantas pessoas no total? *</label><select id="people" class="control"><option value="1">1 pessoa (eu)</option><option value="2">2 pessoas</option><option value="3">3 pessoas</option><option value="4">4 pessoas</option><option value="5">5 pessoas</option><option value="6">6 pessoas</option><option value="7">7 pessoas</option><option value="8">8 pessoas</option><option value="9">9 pessoas</option><option value="10">10 pessoas</option></select><span class="hint">Inclua você nesse número.</span></div>
+            <div class="field"><label for="burger">Preferência de hambúrguer</label><select id="burger" class="control"><option value="tradicional">🍔 Tradicional</option><option value="vegetariano">🥬 Vegetariano</option><option value="ambos">😋 Tanto faz</option><option value="nao-vou-comer">Não vou comer</option></select><span class="hint">Para ajudar no planejamento.</span></div></div>
+          <div class="columns-2"><div class="field"><label for="pool">Pretende usar a piscina?</label><select id="pool" class="control"><option value="sim">🏊 Sim</option><option value="nao">Não</option><option value="talvez">Ainda não sei</option></select></div>
+            <div class="field"><label for="costume">Vai usar fantasia?</label><select id="costume" class="control"><option value="talvez">🎃 Talvez</option><option value="sim">Sim</option><option value="nao">Não</option></select><span class="hint">Pergunta de organização, não é obrigação.</span></div></div>
+          <div class="field"><label for="bring">Pretende levar algo? <span class="hint">(opcional)</span></label><select id="bring" class="control"><option value="">Ainda não definido</option><option value="Bebida">🥤 Bebida</option><option value="Sobremesa">🍰 Sobremesa</option><option value="Doces">🍬 Doces</option><option value="Gelo">🧊 Gelo</option><option value="Decoração">🎃 Decoração</option><option value="Descartáveis">🍽️ Descartáveis</option><option value="Outro">Outro (explicar no recado)</option></select></div>
         </div>
-        <div class="mt-4 grid gap-2 sm:grid-cols-3">
-          <div class="rounded-xl border border-zinc-200 p-3"><span class="text-xs font-black text-zinc-400">01</span><p class="mt-1 text-sm font-bold">Escolha a doação</p></div>
-          <div class="rounded-xl border border-zinc-200 p-3"><span class="text-xs font-black text-zinc-400">02</span><p class="mt-1 text-sm font-bold">Informe a quantidade</p></div>
-          <div class="rounded-xl border border-zinc-200 p-3"><span class="text-xs font-black text-zinc-400">03</span><p class="mt-1 text-sm font-bold">Confirme seu compromisso</p></div>
-        </div>
-      </section>
-
-      <section class="border-b bg-zinc-100 px-5 py-5 sm:px-8">
-        <p id="displayQuestion" class="text-sm font-bold text-zinc-900">Veja a força da equipe: acompanhe abaixo as doações que os atletas já confirmaram.</p>
-        <div class="mt-4 grid grid-cols-3 gap-2">
-          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorPessoas" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">atletas</span></div>
-          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorItens" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">compromissos</span></div>
-          <div class="rounded-2xl bg-white p-3 text-center shadow-sm"><strong id="contadorTipos" class="block text-2xl font-black text-black">0</strong><span class="text-[11px] font-bold text-zinc-500">tipos</span></div>
-        </div>
-      </section>
-
-      <section class="bg-white px-5 py-6 sm:px-8">
-        <div class="mb-5">
-          <span class="text-xs font-black uppercase tracking-widest text-zinc-400">Quero participar</span>
-          <h2 class="mt-1 text-2xl font-black">O que você vai levar para a AMICC?</h2>
-          <p class="mt-1 text-sm text-zinc-500">Escolha entre leite em caixinha ou alimento não perecível, informe a quantidade total e leve a doação na retirada do kit. Para mais de um item, faça um novo registro.</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <label class="text-sm font-extrabold">Nome do atleta LeRunners *<input id="userName" type="text" autocomplete="name" maxlength="80" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black focus:ring-2 focus:ring-zinc-200" placeholder="Digite seu nome completo"></label>
-          <label class="text-sm font-extrabold">Tipo de arrecadação *<select id="category" onchange="updateItemOptions()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black"><option value="">Selecione...</option><option value="Leite em caixinha">🥛 Leite em caixinha</option><option value="Alimento não perecível">🥫 Alimento não perecível</option></select></label>
-          <label class="text-sm font-extrabold">Item *<select id="itemSelect" onchange="toggleCustomItem()" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" disabled><option value="">Escolha a categoria primeiro</option></select><input id="customItem" type="text" maxlength="80" class="mt-2 hidden w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="Digite qual item"></label>
-          <div class="grid grid-cols-[1fr_1.35fr] gap-2">
-            <label class="text-sm font-extrabold">Quantidade total *<input id="quantity" type="number" min="0.1" step="0.1" inputmode="decimal" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="2"></label>
-            <label class="text-sm font-extrabold">Unidade *<select id="unit" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-100 px-3 py-3 outline-none" disabled><option value="">Escolha o tipo primeiro</option></select></label>
-          </div>
-        </div>
-        <label class="mt-4 block text-sm font-extrabold">Observação <span class="font-medium text-zinc-400">(opcional)</span><input id="note" type="text" maxlength="120" class="mt-1.5 w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-black" placeholder="Ex.: vou entregar na retirada do kit"></label>
-        <button id="btnAdd" onclick="addToList()" class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-4 font-black text-white shadow-lg shadow-black/20 transition hover:bg-zinc-800 active:scale-[.98]">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>EU VOU DOAR
-        </button>
-      </section>
-
-      <section class="border-t bg-zinc-50 px-5 py-6 sm:px-8">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 class="text-xl font-black">Doações confirmadas</h2><p class="text-xs font-semibold text-zinc-500">A corrente solidária dos atletas LeRunners.</p></div>
-          <button onclick="downloadPDF()" class="rounded-xl bg-zinc-200 px-3 py-2 text-xs font-extrabold text-zinc-800">Baixar PDF</button>
-        </div>
-        <div id="summary" class="mt-5 grid gap-2 sm:grid-cols-2"></div>
-        <div class="mt-5 flex gap-2">
-          <input id="searchInput" oninput="renderList()" type="search" class="w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-black" placeholder="Buscar atleta ou item...">
-        </div>
-        <div id="listaConfirmados" class="mt-5 space-y-3"><div class="flex justify-center py-8"><div class="loader"></div></div></div>
-      </section>
-
-      <section class="safe-bottom border-t bg-zinc-100 px-5 py-6 sm:px-8">
-        <button onclick="shareToWhatsApp()" class="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 font-black text-white shadow-lg shadow-green-600/20">
-          <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-1.74-.87-2.88-1.55-4.03-3.53-.3-.52.3-.48.87-1.61.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.91-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49 1.89.81 2.63.88 3.58.74.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 01-1.51-5.26C2.17 6.44 6.6 2.01 12.05 2.01c2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 012.89 7c0 5.45-4.43 9.88-9.88 9.88M20.47 3.49A11.82 11.82 0 0012.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 005.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.9 0-3.18-1.23-6.16-3.47-8.41z"/></svg>Compartilhar a lista no WhatsApp
-        </button>
-      </section>
-    </section>
-    <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-50 hidden w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white shadow-2xl"></div>
-    <footer class="py-7 text-center text-xs font-semibold text-zinc-400">Powered by <span class="font-black text-white">thIAguinho Soluções Digitais</span></footer>
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCo4nKN6xtKT_qlAcVXB_h1voYt10NwBwA",
-      authDomain: "lerunners-evento.firebaseapp.com",
-      databaseURL: "https://lerunners-evento-default-rtdb.firebaseio.com",
-      projectId: "lerunners-evento",
-      storageBucket: "lerunners-evento.firebasestorage.app",
-      messagingSenderId: "437924326674",
-      appId: "1:437924326674:web:051968a5466ee6518117cb"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    // Mantém os caminhos já autorizados pelas regras atuais do Firebase.
-    const dbPath = 'lerunners_lista';
-    const configPath = 'lerunners_config';
-    const listaRef = ref(db, dbPath);
-    const configRef = ref(db, configPath);
-    let currentList = [];
-    let eventConfig = {
-      title: "LERUNNERS pela AMICC",
-      subtitle: "Mobilização da equipe LERUNNERS para o 3º Treinão em Prol da AMICC",
-      question: "Acompanhe o compromisso da equipe: leite em caixinha e alimentos não perecíveis já confirmados pelos atletas.",
-      campaignVersion: 6
-    };
-
-    const itemMap = {
-      "Leite em caixinha": ["Leite em caixinha 1L"],
-      "Alimento não perecível": ["Arroz", "Feijão", "Macarrão", "Açúcar", "Farinha", "Café", "Biscoito", "Molho de tomate", "Achocolatado", "Enlatado", "Outro alimento não perecível"]
-    };
-
-    const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const formatQty = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
-
-    function toast(message, error = false) {
-      const el = document.getElementById('toast');
-      el.textContent = message;
-      el.className = `fixed bottom-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white shadow-2xl ${error ? 'bg-red-700' : 'bg-zinc-950'}`;
-      clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => el.classList.add('hidden'), 4500);
-    }
-
-    function setStatus(ok, text) {
-      document.getElementById('statusDot').className = `h-2.5 w-2.5 rounded-full ${ok ? 'bg-green-400' : 'bg-red-400'}`;
-      document.getElementById('statusText').textContent = text;
-    }
-
-    window.updateItemOptions = function() {
-      const category = document.getElementById('category').value;
-      const select = document.getElementById('itemSelect');
-      const options = itemMap[category] || [];
-      select.disabled = !options.length;
-      select.innerHTML = options.length ? '<option value="">Selecione o item...</option>' + options.map(x => `<option>${esc(x)}</option>`).join('') : '<option value="">Escolha o tipo de arrecadação primeiro</option>';
-      const unit = document.getElementById('unit');
-      if (category === 'Leite em caixinha') {
-        unit.innerHTML = '<option value="litro(s)">litro(s)</option>';
-        unit.value = 'litro(s)';
-      } else if (category === 'Alimento não perecível') {
-        unit.innerHTML = '<option value="kg">kg</option>';
-        unit.value = 'kg';
-      } else {
-        unit.innerHTML = '<option value="">Escolha o tipo primeiro</option>';
-      }
-      document.getElementById('quantity').placeholder = category ? '2' : '';
-      document.getElementById('customItem').classList.add('hidden');
-      document.getElementById('customItem').value = '';
-    };
-
-    window.toggleCustomItem = function() {
-      const value = document.getElementById('itemSelect').value;
-      const custom = document.getElementById('customItem');
-      const show = value === 'Outro alimento não perecível';
-      custom.classList.toggle('hidden', !show);
-      if (show) custom.focus();
-    };
-
-    function updateUIWithConfig() {
-      document.getElementById('displayTitle').textContent = eventConfig.title;
-      document.getElementById('displaySubtitle').textContent = eventConfig.subtitle || '';
-      document.getElementById('displayQuestion').textContent = eventConfig.question || '';
-      document.getElementById('configTitle').value = eventConfig.title || '';
-      document.getElementById('configSubtitle').value = eventConfig.subtitle || '';
-      document.getElementById('configQuestion').value = eventConfig.question || '';
-      document.title = `${eventConfig.title} | 3º Treinão em Prol da AMICC`;
-    }
-
-    function getTotals() {
-      const totals = {};
-      currentList.forEach(e => {
-        const key = `${e.item}|${e.unit}`;
-        if (!totals[key]) totals[key] = { item: e.item, unit: e.unit, quantity: 0 };
-        totals[key].quantity += Number(e.quantity) || 0;
-      });
-      return Object.values(totals).sort((a,b) => a.item.localeCompare(b.item, 'pt-BR'));
-    }
-
-    function renderSummary() {
-      const totals = getTotals();
-      document.getElementById('contadorItens').textContent = currentList.length;
-      document.getElementById('contadorTipos').textContent = totals.length;
-      document.getElementById('contadorPessoas').textContent = new Set(currentList.map(e => normalize(e.nome))).size;
-      document.getElementById('summary').innerHTML = totals.length ? totals.map(t => `<div class="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-3"><span class="text-sm font-bold">${esc(t.item)}</span><strong class="whitespace-nowrap text-sm text-black">${formatQty(t.quantity)} ${esc(t.unit)}</strong></div>`).join('') : '';
-    }
-
-    window.renderList = function() {
-      renderSummary();
-      const query = normalize(document.getElementById('searchInput').value);
-      const list = currentList.filter(e => normalize(`${e.nome} ${e.item} ${e.category} ${e.note}`).includes(query));
-      const box = document.getElementById('listaConfirmados');
-      if (!currentList.length) { box.innerHTML = '<div class="rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-10 text-center text-sm font-semibold text-zinc-400">Nenhum atleta respondeu ainda.<br>Seja o primeiro atleta LeRunners a marcar!</div>'; return; }
-      if (!list.length) { box.innerHTML = '<div class="py-8 text-center text-sm font-semibold text-zinc-400">Nenhum resultado encontrado.</div>'; return; }
-      const groups = {};
-      list.forEach(e => (groups[e.category || 'Outros'] ||= []).push(e));
-      box.innerHTML = Object.entries(groups).map(([category, entries]) => `
-        <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-          <div class="flex items-center justify-between bg-zinc-100 px-4 py-3"><h3 class="text-sm font-black text-zinc-800">${esc(category)}</h3><span class="rounded-full bg-white px-2 py-1 text-[10px] font-extrabold text-zinc-500">${entries.length} registro${entries.length === 1 ? '' : 's'}</span></div>
-          <div class="divide-y divide-zinc-100">${entries.map(e => `<article class="flex items-start justify-between gap-3 p-4"><div class="min-w-0"><div class="font-black text-zinc-950">${esc(e.nome)}</div><div class="mt-1 text-sm"><strong class="text-black">${formatQty(e.quantity)} ${esc(e.unit)}</strong> de ${esc(e.item)}</div>${e.note ? `<div class="mt-1 text-xs font-medium text-zinc-500">${esc(e.note)}</div>` : ''}</div><button onclick="deleteItem('${esc(e.id)}')" class="rounded-lg p-2 text-red-300 transition hover:bg-red-50 hover:text-red-700" title="Remover este registro" aria-label="Remover este registro"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.9 12.1A2 2 0 0116.1 21H7.9a2 2 0 01-2-1.9L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></article>`).join('')}</div>
-        </div>`).join('');
-    };
-
-    window.addToList = async function() {
-      const nome = document.getElementById('userName').value.trim();
-      const category = document.getElementById('category').value;
-      const selected = document.getElementById('itemSelect').value;
-      const custom = document.getElementById('customItem').value.trim();
-      const item = selected.startsWith('Outro') ? custom : selected;
-      const quantity = Number(String(document.getElementById('quantity').value).replace(',', '.'));
-      const unit = document.getElementById('unit').value;
-      const note = document.getElementById('note').value.trim();
-      if (!nome || !category || !item || !quantity || quantity <= 0 || !unit) { toast('Preencha nome, tipo de arrecadação, item e quantidade.', true); return; }
-      if (!['Leite em caixinha', 'Alimento não perecível'].includes(category)) { toast('Selecione um tipo de arrecadação válido para o projeto AMICC.', true); return; }
-      if ((category === 'Leite em caixinha' && unit !== 'litro(s)') || (category === 'Alimento não perecível' && unit !== 'kg')) { toast('A unidade informada não corresponde ao tipo de arrecadação.', true); return; }
-      const btn = document.getElementById('btnAdd');
-      const original = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = '<div class="loader"></div> Salvando...';
-      try {
-        await push(listaRef, { nome, category, item, quantity, unit, note, timestamp: Date.now() });
-        localStorage.setItem('amicc_nome', nome);
-        document.getElementById('category').value = '';
-        document.getElementById('quantity').value = '';
-        document.getElementById('note').value = '';
-        updateItemOptions();
-        toast('Compromisso registrado! Obrigado por fortalecer a arrecadação da LERUNNERS para a AMICC.');
-      } catch (error) { toast('Não foi possível salvar. Confira a conexão e tente novamente.', true); }
-      finally { btn.disabled = false; btn.innerHTML = original; }
-    };
-
-    window.deleteItem = async function(id) {
-      if (!confirm('Deseja remover este item da lista?')) return;
-      try { await remove(ref(db, `${dbPath}/${id}`)); toast('Item removido da lista.'); }
-      catch { toast('Não foi possível remover o item.', true); }
-    };
-
-    window.toggleAdminPanel = function() {
-      const senha = prompt('Área do organizador. Digite a senha:');
-      if (senha === 'leandro') document.getElementById('adminPanel').classList.toggle('hidden');
-      else if (senha !== null) alert('Senha incorreta.');
-    };
-
-    window.saveEventConfig = async function() {
-      const title = document.getElementById('configTitle').value.trim();
-      const subtitle = document.getElementById('configSubtitle').value.trim();
-      const question = document.getElementById('configQuestion').value.trim();
-      if (!title) return alert('Informe o título do evento.');
-      try { await set(configRef, { title, subtitle, question, campaignVersion: 6 }); document.getElementById('adminPanel').classList.add('hidden'); toast('Informações atualizadas.'); }
-      catch { toast('Erro ao salvar as informações.', true); }
-    };
-
-    window.clearList = async function() {
-      if (!confirm('ATENÇÃO: deseja apagar TODA a lista solidária? Essa ação não pode ser desfeita.')) return;
-      try { await remove(listaRef); toast('A lista foi apagada.'); }
-      catch { toast('Não foi possível apagar a lista.', true); }
-    };
-
-    window.shareToWhatsApp = function() {
-      const cleanUrl = location.origin + location.pathname;
-      let text = `🏃‍♂️ *LERUNNERS: JUNTOS PELA AMICC* 🏃‍♀️\n`;
-      text += `❤️ *3º Treinão em Prol da AMICC*\n`;
-      if (eventConfig.subtitle) text += `📍 ${eventConfig.subtitle}\n`;
-      text += `\nAtleta LERUNNERS, marque o que você vai levar *na retirada do kit* para a arrecadação da AMICC: *2 litros de leite em caixinha* ou *2 kg de alimentos não perecíveis*. Se puder contribuir com mais, informe a quantidade no formulário.\n`;
-      const totals = getTotals();
-      if (totals.length) {
-        text += `\n*Já confirmado pelos atletas:*\n`;
-        totals.forEach(t => text += `• ${t.item}: *${formatQty(t.quantity)} ${t.unit}*\n`);
-      }
-      text += `\n👇 Abra a ação solidária e confirme a sua doação:\n${cleanUrl}`;
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-    };
-
-    window.downloadPDF = async function() {
-      if (!currentList.length) return toast('A lista ainda está vazia.', true);
-      const totals = getTotals();
-      const rows = currentList.map((e,i) => `<tr><td>${i+1}</td><td><b>${esc(e.nome)}</b></td><td>${esc(e.category)}</td><td>${esc(e.item)}</td><td>${formatQty(e.quantity)} ${esc(e.unit)}</td><td>${esc(e.note || '—')}</td></tr>`).join('');
-      const summary = totals.map(t => `<li>${esc(t.item)}: <b>${formatQty(t.quantity)} ${esc(t.unit)}</b></li>`).join('');
-      const container = document.createElement('div');
-      container.setAttribute('aria-hidden', 'true');
-      Object.assign(container.style, {
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        width: '1120px',
-        minHeight: '794px',
-        background: '#ffffff',
-        color: '#18181b',
-        zIndex: '2147483647',
-        pointerEvents: 'none',
-        overflow: 'visible'
-      });
-      container.innerHTML = `<div style="font-family:Arial,sans-serif;padding:22px;color:#18181b;background:#fff"><h1 style="color:#000;margin-bottom:4px">${esc(eventConfig.title)}</h1><p style="margin-top:0;color:#555">${esc(eventConfig.subtitle)}</p><h3>Resumo das arrecadações</h3><ul>${summary}</ul><h3>Lista completa</h3><table style="width:100%;border-collapse:collapse;font-size:11px;background:#fff"><thead><tr style="background:#18181b;color:white"><th>Nº</th><th>Nome</th><th>Categoria</th><th>Item</th><th>Quantidade</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:24px;text-align:center;font-size:10px;color:#777">Powered by thIAguinho Soluções Digitais</p></div>`;
-      container.querySelectorAll('th,td').forEach(el => { el.style.padding='7px'; el.style.border='1px solid #ddd'; el.style.textAlign='left'; });
-      document.body.appendChild(container);
-      try {
-        // Mantém o relatório realmente renderizado no viewport durante a captura.
-        // No Chrome/Android, elementos fora da tela podem resultar em PDF em branco.
-        container.getBoundingClientRect();
-        if (document.fonts?.ready) await document.fonts.ready;
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        await html2pdf().set({
-          margin: 8,
-          filename: 'Pesquisa_Atletas_LeRunners_3_Treinao_AMICC.pdf',
-          image: { type: 'jpeg', quality: .98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 1120 },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        }).from(container).save();
-      } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        toast('Não foi possível gerar o PDF. Tente novamente.', true);
-      } finally {
-        container.remove();
-      }
-    };
-
-    document.getElementById('userName').value = localStorage.getItem('amicc_nome') || '';
-    signInAnonymously(auth).catch(() => setStatus(false, 'Falha na conexão'));
-    onAuthStateChanged(auth, user => {
-      if (!user) return;
-      onValue(configRef, snapshot => {
-        const savedConfig = snapshot.exists() ? snapshot.val() : null;
-        // A configuração antiga pertencia ao questionário anterior. Na primeira
-        // abertura desta versão, atualiza somente o cabeçalho para a campanha AMICC.
-        if (!savedConfig || savedConfig.campaignVersion !== 6) set(configRef, eventConfig);
-        else eventConfig = {...eventConfig, ...savedConfig};
-        updateUIWithConfig();
-      });
-      onValue(listaRef, snapshot => {
-        currentList = [];
-        if (snapshot.exists()) snapshot.forEach(child => {
-          const data = child.val() || {};
-          // Compatibilidade com registros do questionário anterior.
-          currentList.push({
-            id: child.key,
-            ...data,
-            category: data.category || 'Contribuições anteriores',
-            item: data.item || 'Item não informado',
-            quantity: Number(data.quantity) > 0 ? Number(data.quantity) : 1,
-            unit: data.unit || 'unidade(s)',
-            note: data.note || ''
-          });
-        });
-        currentList.sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
-        renderList(); setStatus(true, 'Sincronizado ao vivo');
-      }, () => { setStatus(false, 'Erro na conexão'); toast('A lista não pôde ser carregada. Verifique as regras do Firebase.', true); });
-    });
-  </script>
+        <div class="field"><label for="note">Recado para a equipe <span class="hint">(opcional)</span></label><textarea class="control" id="note" maxlength="260" placeholder="Ex.: vou chegar mais tarde, vou levar sobremesa..." rows="3"></textarea><span class="hint">Seu recado ficará visível na lista pública de confirmações.</span></div>
+        <button class="primary-btn save-btn" type="submit" id="submitBtn">📩 ENVIAR MINHA RESPOSTA</button>
+        <p class="notice">Você poderá atualizar sua resposta neste mesmo navegador. Sua confirmação aparecerá na lista do grupo; não informe dados particulares no recado.</p>
+      </form>
+    </div>
+    <aside class="side" aria-label="Painel ao vivo">
+      <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>👥 Pessoas confirmadas</span></div><div class="metric"><strong id="countYes">0</strong><span>✅ Respostas SIM</span></div><div class="metric"><strong id="countMaybe">0</strong><span>🤔 Talvez</span></div><div class="metric"><strong id="countNo">0</strong><span>⏳ Não vão</span></div><div class="metric"><strong id="countPool">0</strong><span>🏊 Vão usar piscina</span></div></div>
+      <div class="side-card"><span class="eyebrow">Planejamento</span><h3 class="heading" style="margin-top:7px">A festa ganha forma ao vivo</h3><p>Estimativas baseadas nas respostas SIM. Para o cardápio, confirme também as preferências dos acompanhantes.</p><ul class="side-stats"><li><span>🍔 Tradicional / tanto faz</span><b id="countBurger">0 respostas</b></li><li><span>🥬 Vegetariano</span><b id="countVeggie">0 respostas</b></li><li><span>🎃 Fantasias confirmadas</span><b id="countCostume">0</b></li><li><span>🎁 Pessoas que informaram contribuição</span><b id="countBringing">0</b></li></ul><div id="bringSummary" class="summary" style="margin-top:14px"></div></div>
+      <div class="side-card"><span class="eyebrow">Convide a turma</span><h3 class="heading" style="margin-top:8px">Compartilhe no WhatsApp</h3><p>Envie o convite e a lista atualizada para o grupo LeRunners.</p><button id="shareBtn" class="green-btn share-btn" type="button">↗ Compartilhar no WhatsApp</button><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres e espetinhos preparados para o encontro" loading="lazy"></div>
+    </aside>
+  </section>
+  <section class="list-panel" id="lista">
+    <div class="list-header"><div><span class="eyebrow">Atualiza automaticamente</span><h2 class="heading">Quem já respondeu?</h2><p style="color:#cfbaca;font-size:13px;margin:0">A lista muda ao vivo quando alguém confirma ou atualiza.</p></div><div class="list-buttons"><button class="secondary-btn" id="pdfBtn" type="button">↓ Baixar PDF</button><button class="secondary-btn" id="shareListBtn" type="button">↗ WhatsApp</button></div></div>
+    <div class="list-tools"><label class="sr-only" for="searchInput">Buscar participante</label><input class="control" type="search" id="searchInput" placeholder="Buscar nome ou recado..."><label class="sr-only" for="statusFilter">Filtrar por resposta</label><select class="control" id="statusFilter"><option value="todos">Todas respostas</option><option value="sim">Confirmados</option><option value="talvez">Talvez</option><option value="nao">Não vão</option></select></div>
+    <div id="guestList" class="guest-list" aria-live="polite"><div class="empty">Conectando ao Firebase para carregar as respostas...</div></div>
+  </section>
+  <footer class="section-foot">Confraternização LeRunners • 31/10/2026 <br>Powered by <b>thIAguinho Soluções Digitais</b></footer>
+</div>
+<div id="toast" class="toast" role="status" hidden></div>
+<div id="mediaModal" class="modal" role="dialog" aria-modal="true" aria-label="Visualizar mídia" hidden><button class="modal-close" id="closeMedia" type="button" aria-label="Fechar">×</button><figure id="mediaFigure"></figure></div>
+<script type="module" src="app.js"></script>
 </body>
 </html>
