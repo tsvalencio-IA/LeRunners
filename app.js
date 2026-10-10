@@ -67,7 +67,7 @@ function updateConfigUI(){
   $('configTime').value=config.time;
   $('configPlace').value=config.place;
   $('configMessage').value=config.message;
-  document.title=`${config.title} • 31/10/2026`;
+  document.title=`${config.title} • 01/11/2026`;
 }
 function sanitizeRecord(key, data){
   if(!data || typeof data !== 'object' || !['sim','nao','talvez'].includes(data.status)) return null;
@@ -91,7 +91,7 @@ function fillOwnResponse(){
   $('guestCount').value=String(Math.min(9,Math.max(0,own.people-1)));
   $('guestNames').value=guestNames.join('\n');
   toggleGuestNames();
-  $('burger').value=['tradicional','vegetariano','ambos','nao-vou-comer'].includes(own.burger)?own.burger:'tradicional';
+  $('burger').value=['tradicional','vegetariano','ambos','nao-vou-comer'].includes(own.burger)?own.burger:'';
   $('costume').value=['sim','nao','talvez'].includes(own.costume)?own.costume:'talvez';
   $('bring').value=['Bebida','Sobremesa','Doces','Gelo','Decoração','Descartáveis','Outro'].includes(own.bring)?own.bring:'';
   $('note').value=own.note;
@@ -103,11 +103,12 @@ function fillOwnResponse(){
 function toggleGuestNames(){
   const guests=Number($('guestCount').value)||0;
   $('guestNamesBlock').hidden=guests===0;
-  $('guestNames').required=guests>0;
+  $('guestNames').required=guests>0 && document.querySelector('input[name="status"]:checked')?.value!=='nao';
 }
 function toggleAttending(){
   const status=document.querySelector('input[name="status"]:checked')?.value;
   $('attendingFields').hidden=status==='nao';
+  $('burger').required=status!=='nao';
   toggleGuestNames();
 }
 function renderSummary(){
@@ -158,13 +159,14 @@ async function saveResponse(ev){
   if(!connected || !auth.currentUser){toast('A lista está temporariamente indisponível. Tente novamente.',true);return;}
   const nome=$('userName').value.trim().replace(/\s+/g,' ');
   const status=document.querySelector('[name="status"]:checked')?.value;
-  if(nome.length<2 || nome.length>80){toast('Informe seu nome com pelo menos duas letras.',true);$('userName').focus();return;}
+  if(nome.length<3 || nome.length>80 || nome.split(' ').length<2){toast('Preencha seu nome e sobrenome antes de enviar a confirmação.',true);$('userName').focus();return;}
   if(!['sim','nao','talvez'].includes(status)){toast('Escolha Sim, Não ou Talvez.',true);return;}
   const guestsCount=status==='nao'?0:Number($('guestCount').value);
   if(!Number.isInteger(guestsCount)||guestsCount<0||guestsCount>9){toast('Quantidade de convidados inválida.',true);return;}
   const guests=status==='nao'?[]:$('guestNames').value.split(/\n|,/).map(s=>s.trim().replace(/\s+/g,' ')).filter(Boolean);
   if(status!=='nao'&&guests.length!==guestsCount){toast(`Informe os nomes dos ${guestsCount} convidados, um por linha.`,true);$('guestNames').focus();return;}
-  if(guests.some(g=>g.length<2||g.length>80)){toast('Confira os nomes dos convidados.',true);return;}
+  if(guests.some(g=>g.length<2||g.length>80)){toast('Confira os nomes dos convidados.',true);$('guestNames').focus();return;}
+  if(status!=='nao'&&!['tradicional','vegetariano','ambos','nao-vou-comer'].includes($('burger').value)){toast('Selecione sua preferência de hambúrguer antes de confirmar.',true);$('burger').focus();return;}
   const people=status==='nao'?0:guestsCount+1;
   const payload={
     nome,status,people,guests,uid:auth.currentUser.uid,
@@ -200,7 +202,7 @@ function whatsapp(message){
 function shareWhatsApp(){
   const confirmed=currentList.filter(e=>e.status==='sim').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   const people=confirmed.reduce((n,e)=>n+e.people,0);
-  let message=`🎃 *HALLOWEEN LERUNNERS 2026*\n📅 *Sábado, 31 de outubro*\n📍 ${config.place}\n🕒 ${config.time}\n\n`;
+  let message=`🎃 *HALLOWEEN LERUNNERS 2026*\n📅 *Domingo, 1º de novembro • véspera de feriado*\n📍 ${config.place}\n🕒 ${config.time}\n\n`;
   message+=`✅ *LISTA DE CONFIRMADOS* (${people} pessoas)\n\n`;
   if(confirmed.length){
     message+=confirmed.map((e,i)=>`${i+1}. ${e.nome}${e.guests?.length?` (+${e.guests.length}: ${e.guests.join(', ')})`:e.people>1?` (+${e.people-1} convidado(s))`:''}`).join('\n');
@@ -209,7 +211,7 @@ function shareWhatsApp(){
   whatsapp(message);
 }
 function inviteMessage(){
-  return `🎃 *HALLOWEEN LERUNNERS 2026*\n\n📅 Sábado, 31 de outubro de 2026\n📍 ${config.place}\n🕒 ${config.time}\n\n🍔 Hambúrgueres artesanais • Piscina • Confraternização\n\n*Confirme sua presença:*\n${cleanUrl()}`;
+  return `🎃 *HALLOWEEN LERUNNERS 2026*\n\n📅 Domingo, 1º de novembro de 2026 • véspera do feriado de Finados\n📍 ${config.place}\n🕒 ${config.time}\n\n🍔 Hambúrgueres artesanais • Piscina • Confraternização\n\n*Confirme sua presença:*\n${cleanUrl()}`;
 }
 async function shareInvitation(){
   if(!organizerOpen)return;
@@ -292,7 +294,7 @@ function htmlForPDF(){
   const confirmed=currentList.filter(e=>e.status==='sim');
   const persons=confirmed.reduce((n,e)=>n+e.people,0);
   const rows=currentList.map((e,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(e.nome)}</td><td>${statusLabel[e.status]}</td><td>${e.people||'—'}</td><td>${escapeHtml((e.guests||[]).join(', ')||(e.people>1?'Não informados':'—'))}</td><td>${escapeHtml(e.burger||'—')}</td><td>${escapeHtml(e.costume||'—')}</td><td>${escapeHtml(e.bring||'—')}</td><td>${escapeHtml(e.note||'—')}</td></tr>`).join('');
-  return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">31/10/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${persons} pessoas confirmadas</b> • ${confirmed.length} respostas Sim • ${currentList.filter(e=>e.status==='talvez').length} Talvez • ${currentList.filter(e=>e.status==='nao').length} Não • ${currentList.length} respostas totais</div><h2>Lista de confirmações</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Nome</th><th>Resposta</th><th>Pessoas</th><th>Convidados</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
+  return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${persons} pessoas confirmadas</b> • ${confirmed.length} respostas Sim • ${currentList.filter(e=>e.status==='talvez').length} Talvez • ${currentList.filter(e=>e.status==='nao').length} Não • ${currentList.length} respostas totais</div><h2>Lista de confirmações</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Nome</th><th>Resposta</th><th>Pessoas</th><th>Convidados</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
 }
 async function downloadPDF(){
   if(!organizerOpen)return;
@@ -307,7 +309,7 @@ async function downloadPDF(){
   try{
     if(document.fonts?.ready)await document.fonts.ready;
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    await window.html2pdf().set({margin:7,filename:'LeRunners_Halloween_31-10-2026_Confirmacoes.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:1.5,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:1120},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','legacy']}}).from(container).save();
+    await window.html2pdf().set({margin:7,filename:'LeRunners_Halloween_01-11-2026_Confirmacoes.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:1.5,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:1120},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','legacy']}}).from(container).save();
     toast('PDF gerado.');
   }catch(e){console.error('Erro PDF',e);toast('Não foi possível gerar o PDF.',true);}
   finally{container.remove();}
