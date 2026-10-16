@@ -364,23 +364,147 @@ function htmlForPDF(){
   }).join('');
   return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${totals.sim} pessoas confirmadas</b> • ${totals.talvez} aguardando confirmação • ${totals.nao} não vão • ${currentList.length} inscrições</div><h2>Lista de confirmações por grupo</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Responsável</th><th>Resposta</th><th>Grupo</th><th>Convidados e situação</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
 }
+function buildReportPDF(){
+  // PDF vetorial: texto e formas diretamente, sem capturas de tela ou canvas.
+  const W=842,H=595, LEFT=38,RIGHT=38,BOTTOM=42;
+  const objects=[null];
+  const object=(body='')=>(objects.push(body),objects.length-1);
+  const catalog=object(),root=object();
+  const regular=object('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  const bold=object('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  const pages=[];
+  let ops=[],top=0;
+  const normalize=value=>String(value==null?'':value).replace(/[\r\n\t]+/g,' ').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().replace(/[^\x20-\x7e\u00a0-\u00ff\u20ac\u2018-\u201d\u2013\u2014]/g,'');
+  const encoding={8364:128,8216:145,8217:146,8220:147,8221:148,8211:150,8212:151};
+  function pdfStr(value){
+    let result='';
+    for(const char of normalize(value)){
+      const n=char.codePointAt(0);
+      const code=n<=255?n:encoding[n];
+      if(code==null){result+='?';continue;}
+      if(code===40||code===41||code===92)result+='\\'+String.fromCharCode(code);
+      else if(code<32||code>126)result+='\\'+code.toString(8).padStart(3,'0');
+      else result+=String.fromCharCode(code);
+    }
+    return result;
+  }
+  const fmt=n=>Number(n.toFixed(2)).toString();
+  function fill(x,y,w,h,color){ops.push(`${color.join(' ')} rg ${fmt(x)} ${fmt(H-y-h)} ${fmt(w)} ${fmt(h)} re f`);}
+  function line(x,y,x2,y2,color=[0.83,0.84,0.85]){ops.push(`${color.join(' ')} RG 0.65 w ${fmt(x)} ${fmt(H-y)} m ${fmt(x2)} ${fmt(H-y2)} l S`);}
+  function label(value,x,y,size=10,isBold=false,color=[0.14,0.16,0.21]){
+    if(!normalize(value))return;
+    ops.push(`BT /F${isBold?2:1} ${fmt(size)} Tf ${color.join(' ')} rg 1 0 0 1 ${fmt(x)} ${fmt(H-y)} Tm (${pdfStr(value)}) Tj ET`);
+  }
+  function textWidth(text,size){
+    return Array.from(normalize(text)).reduce((sum,c)=>sum+size*(/[iIl1 .,;:!|']/u.test(c)?.27:/[MW@%]/u.test(c)?.86:/[ABCDEFGHJKLMNOPQRSTUVWXYZ]/u.test(c)?.68:.55),0);
+  }
+  function wrap(value,width,size=10){
+    const words=normalize(value).split(' ').filter(Boolean),result=[];
+    let row='';
+    for(let word of words){
+      if(row && textWidth(row+' '+word,size)<=width){row+=' '+word;continue;}
+      if(row){result.push(row);row='';}
+      while(word.length>1 && textWidth(word,size)>width){
+        let cut=1;
+        while(cut<word.length&&textWidth(word.slice(0,cut+1),size)<=width)cut++;
+        result.push(word.slice(0,cut));word=word.slice(cut);
+      }
+      row=word;
+    }
+    if(row)result.push(row);
+    return result.length?result:['-'];
+  }
+  function page(){
+    ops=[];pages.push(ops);
+    fill(0,0,W,81,[0.13,0.09,0.16]);
+    fill(0,81,W,3,[0.98,0.48,0.1]);
+    label('HALLOWEEN LERUNNERS 2026',LEFT,30,21,true,[1,0.70,0.35]);
+    label('Relatório de confirmações  |  Domingo, 01/11/2026',LEFT,52,11,false,[1,1,1]);
+    top=106;
+  }
+  function putWrapped(prefix,value){
+    const rows=wrap(`${prefix}${normalize(value)||'-'}`,W-LEFT-RIGHT-22,10);
+    rows.forEach((r,i)=>{label(r,LEFT+11,top+15+i*13,10);});
+    top+=rows.length*13+7;
+  }
+  function section(entry,index){
+    const totals=tally(entry);
+    const guestText=(entry.guests||[]).map(g=>`${g.name} (${statusLabel[g.status]||g.status})`).join('; ')
+      ||(entry.guestsUncertain?'A definir':'Nenhum');
+    const fields=[
+      `Convidados: ${guestText}`,
+      `Grupo: ${totals.sim} confirmados | ${totals.talvez} talvez | ${totals.nao} não vão`,
+      `Hambúrguer: ${entry.burger||'-'}  |  Fantasia: ${entry.costume||'-'}`,
+      `Levará: ${entry.bring||'-'}`,
+      `Recado: ${entry.note||'-'}`
+    ];
+    const content=fields.map(t=>wrap(t,W-LEFT-RIGHT-28,9.6));
+    const heading=wrap(`${index+1}. ${entry.nome}  |  ${statusLabel[entry.status]||entry.status}`,W-LEFT-RIGHT-28,11.2);
+    const height=14+heading.length*15+content.reduce((n,rows)=>n+rows.length*12+3,0)+9;
+    if(top+height>H-BOTTOM)page();
+    fill(LEFT,top,W-LEFT-RIGHT,height,[0.965,0.963,0.970]);
+    fill(LEFT,top,3,height,[0.96,0.46,0.12]);
+    let lineY=top+17;
+    for(const row of heading){label(row,LEFT+11,lineY,11.2,true);lineY+=15;}
+    lineY+=3;
+    for(const rows of content){for(const row of rows){label(row,LEFT+11,lineY,9.6);lineY+=12;}lineY+=3;}
+    top+=height+9;
+  }
+  page();
+  const totals=currentList.reduce((acc,e)=>{const t=tally(e);for(const type of ['sim','talvez','nao'])acc[type]+=t[type];return acc;},{sim:0,talvez:0,nao:0});
+  putWrapped('Local: ',config.place);
+  putWrapped('Horário: ',config.time);
+  fill(LEFT,top,W-LEFT-RIGHT,38,[1,0.942,0.892]);
+  label(`${totals.sim} confirmados   |   ${totals.talvez} talvez   |   ${totals.nao} não vão   |   ${currentList.length} inscrições`,LEFT+11,top+24,12,true,[0.39,0.22,0.12]);
+  top+=62;
+  label('CONFIRMAÇÕES POR GRUPO',LEFT,top,13,true);
+  top+=20;
+  currentList.forEach((entry,i)=>section(entry,i));
+  // Rodapés colocados depois de conhecida a quantidade de páginas.
+  const timeStamp=new Date().toLocaleString('pt-BR');
+  for(let i=0;i<pages.length;i++){
+    const save=ops;ops=pages[i];
+    line(LEFT,H-33,W-RIGHT,H-33);
+    label(`Atualizado em ${timeStamp}  |  thIAguinho Soluções Digitais`,LEFT,H-20,8,false,[0.42,0.42,0.45]);
+    label(`Página ${i+1} / ${pages.length}`,W-RIGHT-72,H-20,8,false,[0.42,0.42,0.45]);
+    ops=save;
+  }
+  const ids=pages.map(cmds=>{
+    const stream=cmds.join('\n')+'\n';
+    const contents=object(`<< /Length ${stream.length} >>\nstream\n${stream}endstream`);
+    return object(`<< /Type /Page /Parent ${root} 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 ${regular} 0 R /F2 ${bold} 0 R >> >> /Contents ${contents} 0 R >>`);
+  });
+  objects[root]=`<< /Type /Pages /Kids [${ids.map(id=>`${id} 0 R`).join(' ')}] /Count ${ids.length} >>`;
+  objects[catalog]=`<< /Type /Catalog /Pages ${root} 0 R >>`;
+  let out='%PDF-1.4\n';const offsets=[0];
+  for(let i=1;i<objects.length;i++){
+    offsets[i]=out.length;
+    out+=`${i} 0 obj\n${objects[i]}\nendobj\n`;
+  }
+  const xref=out.length;
+  out+=`xref\n0 ${objects.length}\n0000000000 65535 f \n`;
+  for(let i=1;i<objects.length;i++)out+=`${String(offsets[i]).padStart(10,'0')} 00000 n \n`;
+  out+=`trailer\n<< /Size ${objects.length} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return out;
+}
 async function downloadPDF(){
   if(!organizerOpen)return;
   if(!currentList.length){toast('Ainda não há respostas para exportar.',true);return;}
-  if(typeof window.html2pdf!=='function'){toast('Biblioteca de PDF indisponível. Verifique a conexão e tente novamente.',true);return;}
-  const container=document.createElement('div');
-  container.setAttribute('aria-hidden','true');
-  Object.assign(container.style,{position:'fixed',top:'0',left:'0',zIndex:'2147483646',width:'1120px',pointerEvents:'none',background:'#fff'});
-  container.innerHTML=htmlForPDF();
-  container.querySelectorAll('th,td').forEach(e=>{e.style.padding='7px';e.style.border='1px solid #ddd';e.style.textAlign='left';e.style.overflowWrap='anywhere';});
-  document.body.appendChild(container);
+  let url;
   try{
-    if(document.fonts?.ready)await document.fonts.ready;
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    await window.html2pdf().set({margin:7,filename:'LeRunners_Halloween_01-11-2026_Confirmacoes.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:1.5,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:1120},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','legacy']}}).from(container).save();
-    toast('PDF gerado.');
-  }catch(e){console.error('Erro PDF',e);toast('Não foi possível gerar o PDF.',true);}
-  finally{container.remove();}
+    const bytes=buildReportPDF();
+    if(!bytes.startsWith('%PDF-')||bytes.length<1500)throw new Error('PDF sem conteúdo');
+    const blob=new Blob([bytes],{type:'application/pdf'});
+    url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download='LeRunners_Halloween_01-11-2026_Confirmacoes.pdf';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast('Relatório PDF gerado.');
+  }catch(error){console.error('Erro PDF',error);toast('Não foi possível gerar o PDF.',true);}
+  finally{if(url)setTimeout(()=>URL.revokeObjectURL(url),60000);}
 }
 function openMedia(button){
   const photo=button.getAttribute('data-photo');
