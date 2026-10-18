@@ -33,7 +33,7 @@ let deferredInstall = null;
 let toastTimer;
 const defaults = Object.freeze({
   title: 'Halloween LeRunners',
-  time: 'Horário a confirmar',
+  time: 'A partir das 12h',
   place: 'Nossa chácara',
   message: 'Confraternização da equipe com hambúrgueres artesanais, piscina e atrações de Halloween.',
   version: 1
@@ -68,7 +68,7 @@ function updateConfigUI(){
   $('heroEventTitle').textContent='🎃 '+config.title+' • 2026';
   $('heroMessage').textContent=config.message;
   $('heroPlace').textContent=config.place;
-  $('heroTime').textContent=config.time;
+  $('heroTime').textContent=/^hor[aá]rio a confirmar$/i.test(String(config.time).trim())?'Encontro a partir das 12h':config.time;
   $('configTitle').value=config.title;
   $('configTime').value=config.time;
   $('configPlace').value=config.place;
@@ -263,7 +263,7 @@ function whatsapp(message){
 function shareWhatsApp(){
   const groups=currentList.filter(e=>tally(e).sim>0).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   const people=groups.reduce((n,e)=>n+tally(e).sim,0);
-  let message=`🎃 *HALLOWEEN LERUNNERS 2026*\n📅 *Domingo, 1º de novembro • véspera de feriado*\n📍 ${config.place}\n🕒 ${config.time}\n\n`;
+  let message=`🎃 *HALLOWEEN LERUNNERS 2026*\n📅 *Domingo, 1º de novembro • véspera de feriado*\n📍 ${config.place}\n🕛 *12h* encontro/churrasco leve • *16h* início do preparo dos hambúrgueres\n🥩 Porção pequena de carne para o almoço • 🥤 bebida própria • 🍰 doces são bem-vindos\n🍔 Previsão: 1,5 lanche por pessoa + extras; custo dividido entre os participantes\n\n`;
   message+=`✅ *PESSOAS CONFIRMADAS* (${people})\n\n`;
   if(groups.length){
     message+=groups.map((e,i)=>{
@@ -276,7 +276,7 @@ function shareWhatsApp(){
   whatsapp(message);
 }
 function inviteMessage(){
-  return `🎃 *HALLOWEEN LERUNNERS 2026*\n\n📅 Domingo, 1º de novembro de 2026 • véspera do feriado de Finados\n📍 ${config.place}\n🕒 ${config.time}\n\n🍔 Hambúrgueres artesanais • Piscina • Confraternização\n\n*Confirme sua presença:*\n${cleanUrl()}`;
+  return `🎃 *HALLOWEEN LERUNNERS 2026*\n\n📅 Domingo, 1º de novembro de 2026 • véspera do feriado de Finados\n📍 ${config.place}\n🕛 12h — encontro, churrasco leve e piscina\n🕓 16h — início do preparo dos hambúrgueres\n\n🥩 Almoço leve: traga uma pequena porção de carne, como 2 bifes, 2 kaftas ou 2 a 3 gomos de linguiça.\n🥤 Cada um leva sua própria bebida; doces e sobremesas são bem-vindos.\n🍔 Estimativa de 1,5 lanche por pessoa, com extras. O custo será dividido entre os participantes.\n\n*Confirme sua presença:*\n${cleanUrl()}`;
 }
 async function shareInvitation(){
   if(!organizerOpen)return;
@@ -453,7 +453,7 @@ function buildReportPDF(){
   page();
   const totals=currentList.reduce((acc,e)=>{const t=tally(e);for(const type of ['sim','talvez','nao'])acc[type]+=t[type];return acc;},{sim:0,talvez:0,nao:0});
   putWrapped('Local: ',config.place);
-  putWrapped('Horário: ',config.time);
+  putWrapped('Programação: ','12h encontro e churrasco leve | 16h início do preparo dos hambúrgueres');
   fill(LEFT,top,W-LEFT-RIGHT,38,[1,0.942,0.892]);
   label(`${totals.sim} confirmados   |   ${totals.talvez} talvez   |   ${totals.nao} não vão   |   ${currentList.length} inscrições`,LEFT+11,top+24,12,true,[0.39,0.22,0.12]);
   top+=62;
