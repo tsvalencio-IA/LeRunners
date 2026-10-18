@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#160f19">
-  <meta name="description" content="Halloween LeRunners • 1º de novembro de 2026. Confirme sua presença e acompanhe a confraternização em tempo real.">
+  <meta name="description" content="Halloween LeRunners: domingo, 1º de novembro, início às 12h com churrasco leve e preparo dos hambúrgueres a partir das 16h.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Halloween LeRunners • 1º de novembro de 2026">
-  <meta property="og:description" content="Confraternização de Halloween. Domingo, 1º de novembro, véspera do feriado de Finados, na chácara. Confirme sua presença.">
+  <meta property="og:description" content="Domingo, 1º de novembro: churrasco leve ao meio-dia e preparo dos hambúrgueres às 16h. Confirme sua presença.">
   <meta property="og:url" content="https://tsvalencio-ia.github.io/LeRunners/">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -57,6 +57,20 @@
     .bring-choice input:checked+span{background:#56321f;border-color:#ffb14d;color:white;box-shadow:inset 0 0 0 1px #ffb14d}
     .bring-choice input:focus-visible+span{outline:3px solid #ffd69a;outline-offset:2px}
     @media(max-width:340px){.bring-grid{grid-template-columns:1fr}}
+
+    /* Programação oficial da confraternização */
+    .event-plan{margin:0 0 43px;border:1px solid #60404b;border-radius:23px;padding:25px;background:linear-gradient(155deg,#2a1d29,#1d1720)}
+    .event-plan .section-top{margin-bottom:19px}
+    .event-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+    .event-step{background:#211a24;border:1px solid #644753;border-radius:15px;padding:17px;min-width:0}
+    .event-step time,.event-step .time{display:block;font:900 25px/1.25 Outfit,sans-serif;color:#ffb25a;margin-bottom:8px}
+    .event-step h3{font:800 17px/1.3 Outfit,sans-serif;margin-bottom:7px}
+    .event-step p,.event-info p{font-size:13px;line-height:1.65;color:#eddce5;margin:0}
+    .event-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:12px}
+    .event-info{background:#35232e;border:1px solid #624851;border-radius:14px;padding:16px;min-width:0}
+    .event-info strong{display:block;color:#ffb566;margin-bottom:6px;font-size:13px}
+    .event-plan-foot{margin:13px 0 0;color:#d8bfcf;font-size:12px}
+    @media(max-width:710px){.event-plan{padding:18px 14px;margin-bottom:34px}.event-steps,.event-info-grid{grid-template-columns:1fr}.event-step,.event-info{padding:14px}.event-plan .section-top h2{font-size:28px}}
   </style>
 </head>
 <body>
@@ -100,7 +114,7 @@
       <p class="hero-blurb" id="heroMessage">Confraternização da equipe com hambúrgueres artesanais, piscina e atrações de Halloween.</p>
       <div class="detail-row">
         <span class="detail-chip"><span class="detail-icon">📅</span><span><b>01 NOV • DOMINGO</b><small>2026 • Véspera de feriado</small></span></span>
-        <span class="detail-chip"><span class="detail-icon">📍</span><span><b id="heroPlace">Nossa chácara</b><small id="heroTime">Horário a confirmar</small></span></span>
+        <span class="detail-chip"><span class="detail-icon">📍</span><span><b id="heroPlace">Nossa chácara</b><small id="heroTime">Encontro a partir das 12h</small></span></span>
       </div>
       <div class="hero-buttons"><a class="primary-btn" href="#confirmar">🎟 Confirmar presença</a><a class="secondary-btn" href="#memorias">Ver galeria ↗</a></div>
     </div>
@@ -111,6 +125,19 @@
     <div class="highlight"><span class="symbol">🏊</span><span>Piscina liberada</span></div>
     <div class="highlight"><span class="symbol">🎃</span><span>Clima de Halloween</span></div>
     <div class="highlight"><span class="symbol">🤝</span><span>Confraternização da equipe</span></div>
+  </section>
+  <section class="event-plan" id="programacao" aria-labelledby="programacaoTitulo">
+    <div class="section-top"><div><span class="eyebrow">Domingo • 01/11/2026</span><h2 class="heading" id="programacaoTitulo">Programação do encontro</h2><p>Almoço leve, piscina e hambúrgueres artesanais.</p></div></div>
+    <div class="event-steps">
+      <article class="event-step"><span class="time">12h • Encontro</span><h3>Almoço com churrasco leve</h3><p>Cada pessoa leva uma pequena porção de carne: por exemplo, <strong>2 bifes, 2 kaftas ou 2 a 3 gomos de linguiça</strong>. A proposta é um almoço simples e leve.</p></article>
+      <article class="event-step"><span class="time">Tarde • Lazer</span><h3>Chácara e piscina</h3><p>O espaço e a piscina ficam disponíveis para quem quiser aproveitar durante a tarde.</p></article>
+      <article class="event-step"><span class="time">16h • Preparação</span><h3>Hambúrgueres artesanais</h3><p>Começaremos a preparar os lanches às <strong>16h</strong>. Esse é o início do preparo, não um horário fixo para servir.</p></article>
+    </div>
+    <div class="event-info-grid">
+      <div class="event-info"><strong>Bebidas e sobremesas</strong><p>Cada participante leva sua própria bebida. Quem puder também pode colaborar com doces ou sobremesas para compartilhar.</p></div>
+      <div class="event-info"><strong>Organização dos hambúrgueres</strong><p>Previsão de cerca de <strong>1,5 lanche por pessoa</strong>, com unidades adicionais para quem quiser repetir. O custo dos hambúrgueres será dividido entre os participantes.</p></div>
+    </div>
+    <p class="event-plan-foot">As quantidades são estimativas para o planejamento das compras.</p>
   </section>
   <section id="memorias" aria-label="Fotos das confraternizações e hambúrgueres">
     <div class="section-top"><div><span class="eyebrow">Galeria da equipe</span><h2 class="heading">Confraternização LeRunners</h2><p>Registros da confraternização anterior e do espaço do evento.</p></div></div>
@@ -140,14 +167,14 @@
           <div class="columns-2"><div class="field"><label for="burger">Preferência de hambúrguer</label><select id="burger" class="control" required><option value="" selected disabled>Selecione uma opção</option><option value="tradicional">Tradicional</option><option value="vegetariano">Vegetariano</option><option value="ambos">Tanto faz</option><option value="nao-vou-comer">Não vou comer</option></select></div>
             <div class="field"><label for="costume">Fantasia (opcional)</label><select id="costume" class="control"><option value="talvez">Ainda não decidi</option><option value="sim">Sim</option><option value="nao">Não</option></select></div></div>
           <fieldset class="field" id="bringFieldset" style="border:0;padding:0;min-width:0"><legend class="label">Pretende levar algo? <span class="hint">(opcional, escolha quantas opções quiser)</span></legend><div id="bringChoices" class="bring-grid">
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Bebida"><span>🥤 Bebida</span></label>
+            <label class="bring-choice"><input type="checkbox" name="bring" value="Bebida"><span>🥤 Bebida para compartilhar</span></label>
             <label class="bring-choice"><input type="checkbox" name="bring" value="Sobremesa"><span>🍰 Sobremesa</span></label>
             <label class="bring-choice"><input type="checkbox" name="bring" value="Doces"><span>🍬 Doces</span></label>
             <label class="bring-choice"><input type="checkbox" name="bring" value="Gelo"><span>🧊 Gelo</span></label>
             <label class="bring-choice"><input type="checkbox" name="bring" value="Decoração"><span>🎃 Decoração</span></label>
             <label class="bring-choice"><input type="checkbox" name="bring" value="Descartáveis"><span>🍽️ Descartáveis</span></label>
             <label class="bring-choice"><input type="checkbox" name="bring" value="Outro"><span>➕ Outro (explique no recado)</span></label>
-          </div><span class="hint">Se ainda não decidiu, deixe todas desmarcadas.</span></fieldset>
+          </div><span class="hint">Cada pessoa leva sua própria bebida. Se quiser contribuir com itens extras, marque acima; caso ainda não tenha decidido, deixe em branco.</span></fieldset>
         </div>
         <div class="field"><label for="note">Observações para a organização <span class="hint">(opcional)</span></label><textarea class="control" id="note" maxlength="260" placeholder="Ex.: vou chegar mais tarde, vou levar sobremesa..." rows="3"></textarea><span class="hint">As observações serão destinadas à organização.</span></div>
         <button class="primary-btn save-btn" type="submit" id="submitBtn">📩 ENVIAR MINHA RESPOSTA</button>
@@ -157,7 +184,7 @@
     <aside class="side" aria-label="Resumo do evento">
       <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>Pessoas previstas (Sim + Talvez)</span></div><div class="metric"><strong id="countYes">0</strong><span>Pessoas confirmadas</span></div><div class="metric"><strong id="countMaybe">0</strong><span>Aguardando confirmação</span></div><div class="metric"><strong id="countNo">0</strong><span>Não vão</span></div></div>
       <div class="side-card"><span class="eyebrow">Participação</span><h3 class="heading" style="margin-top:8px">Acompanhe as confirmações</h3><p>A lista de participantes é atualizada automaticamente.</p><a class="secondary-btn" style="width:100%" href="#lista">Ver lista de presença ↓</a></div>
-      <div class="side-card"><span class="eyebrow">1º de novembro</span><h3 class="heading" style="margin-top:8px">Halloween LeRunners</h3><p>Hambúrgueres artesanais, piscina e confraternização.</p><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres previstos para o evento" loading="lazy"></div>
+      <div class="side-card"><span class="eyebrow">1º de novembro</span><h3 class="heading" style="margin-top:8px">Halloween LeRunners</h3><p>12h: encontro e churrasco leve. 16h: início do preparo dos hambúrgueres. Piscina durante a tarde.</p><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres previstos para o evento" loading="lazy"></div>
     </aside>
   </section>
   <section class="list-panel" id="lista">
