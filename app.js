@@ -1,4 +1,4 @@
-/* LeRunners Halloween 2026 — mantém o Firebase do formulário original.
+/* LeRunners Lanches e Confraternização 2026 — mantém o Firebase do formulário original.
  * Separação de dados: lerunners_lista/halloween_2026/respostas
  * Configuração: lerunners_config/halloween_2026
  * NÃO remove nem migra a lista histórica do Treinão/AMICC.
@@ -32,10 +32,10 @@ let runningSave = false;
 let deferredInstall = null;
 let toastTimer;
 const defaults = Object.freeze({
-  title: 'Halloween LeRunners',
+  title: 'Encontro de Lanches e Confraternização LeRunners',
   time: 'A partir das 12h',
   place: 'Nossa chácara',
-  message: 'Confraternização da equipe com hambúrgueres artesanais, piscina e atrações de Halloween.',
+  message: 'Encontro com churrasco leve, piscina e preparo dos hambúrgueres artesanais a partir das 16h.',
   version: 1
 });
 let config = { ...defaults };
@@ -65,7 +65,7 @@ function setStatus(state,message){
   $('statusDot').parentElement.title=message;
 }
 function updateConfigUI(){
-  $('heroEventTitle').textContent='🎃 '+config.title+' • 2026';
+  $('heroEventTitle').textContent='🍔 '+config.title+' • 2026';
   $('heroMessage').textContent=config.message;
   $('heroPlace').textContent=config.place;
   $('heroTime').textContent=/^hor[aá]rio a confirmar$/i.test(String(config.time).trim())?'Encontro a partir das 12h':config.time;
@@ -120,7 +120,6 @@ function fillOwnResponse(){
   $('guestCount').value=own.guestsUncertain?'unknown':String(Math.min(9,own.guests.length));
   showGuestInputs(own.guests);
   $('burger').value=['tradicional','vegetariano','ambos','nao-vou-comer'].includes(own.burger)?own.burger:'';
-  $('costume').value=['sim','nao','talvez'].includes(own.costume)?own.costume:'talvez';
   document.querySelectorAll('input[name="bring"]').forEach(input=>{input.checked=own.brings.includes(input.value);});
   $('note').value=own.note;
   toggleAttending();
@@ -182,7 +181,7 @@ function renderSummary(){
   $('countNo').textContent=num(no);
   $('countBurger').textContent=num(currentList.filter(e=>e.status==='sim'&&['tradicional','ambos'].includes(e.burger)).length)+' respostas';
   $('countVeggie').textContent=num(currentList.filter(e=>e.status==='sim'&&e.burger==='vegetariano').length)+' respostas';
-  $('countCostume').textContent=num(currentList.filter(e=>e.status==='sim'&&e.costume==='sim').length);
+  $('countRegistrations').textContent=num(currentList.length);
   $('countBringing').textContent=num(currentList.filter(e=>e.status==='sim'&&e.brings.length>0).length);
   const brings={};
   currentList.filter(e=>e.status==='sim').forEach(e=>e.brings.forEach(item=>{brings[item]=(brings[item]||0)+1;}));
@@ -197,7 +196,7 @@ function renderAdminList(){
   container.innerHTML=currentList.map(e=>{
     const stats=tally(e);
     const guests=(e.guests||[]).map(g=>`<small>↳ ${escapeHtml(g.name)} — ${statusLabel[g.status]}</small>`).join('')+(e.guestsUncertain?'<small>Convidados: ainda não sabe</small>':'');
-    return `<div class="admin-person"><div class="admin-row-head"><strong>${escapeHtml(e.nome)} • ${statusLabel[e.status]}</strong><button type="button" class="delete" data-delete-id="${escapeHtml(e.id)}">Remover</button></div><small>${stats.sim} confirmado(s) · ${stats.talvez} talvez · ${stats.nao} não vai(vão)</small>${guests}<small>Hambúrguer: ${escapeHtml(e.burger||'—')} • Fantasia: ${escapeHtml(e.costume||'—')} • Levará: ${escapeHtml(e.bring||'Não informado')}</small>${e.note?`<small>Observação: ${escapeHtml(e.note)}</small>`:''}</div>`;
+    return `<div class="admin-person"><div class="admin-row-head"><strong>${escapeHtml(e.nome)} • ${statusLabel[e.status]}</strong><button type="button" class="delete" data-delete-id="${escapeHtml(e.id)}">Remover</button></div><small>${stats.sim} confirmado(s) · ${stats.talvez} talvez · ${stats.nao} não vai(vão)</small>${guests}<small>Hambúrguer: ${escapeHtml(e.burger||'—')} • Levará: ${escapeHtml(e.bring||'Não informado')}</small>${e.note?`<small>Observação: ${escapeHtml(e.note)}</small>`:''}</div>`;
   }).join('');
 }
 function renderList(){
@@ -238,7 +237,7 @@ async function saveResponse(ev){
   const people=(status!=='nao'?1:0)+guests.filter(g=>g.status!=='nao').length;
   const brings=status==='nao'?[]:checkedBrings();
   const payload={nome,status,people,guests:guests.map(g=>g.name),guestStatuses:guests.map(g=>g.status),guestsUncertain,uid:auth.currentUser.uid,burger:status==='nao'?'':$('burger').value,
-    costume:status==='nao'?'':$('costume').value,bring:brings.join(', '),brings,
+    costume:currentList.find(e=>e.id===myId())?.costume||'',bring:brings.join(', '),brings,
     note:$('note').value.trim(),updatedAt:Date.now()};
   const already=currentList.find(e=>e.id===myId());
   if(already&&already.uid!==payload.uid){toast('Este registro pertence a outra sessão. Não será alterado.',true);return;}
@@ -256,14 +255,14 @@ async function saveResponse(ev){
   }catch(error){console.error('Falha no envio:',error);toast('Não foi possível salvar agora. Tente novamente em instantes.',true);$('submitBtn').textContent=originalLabel;}
   finally{runningSave=false;$('submitBtn').disabled=false;}
 }
-function cleanUrl(){return location.origin+location.pathname+'?v=20261101d';}
+function cleanUrl(){return location.origin+location.pathname+'?v=20261101-lanches';}
 function whatsapp(message){
   window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
 }
 function shareWhatsApp(){
   const groups=currentList.filter(e=>tally(e).sim>0).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   const people=groups.reduce((n,e)=>n+tally(e).sim,0);
-  let message=`🎃 *HALLOWEEN LERUNNERS 2026*\n📅 *Domingo, 1º de novembro • véspera de feriado*\n📍 ${config.place}\n🕛 *12h* encontro/churrasco leve • *16h* início do preparo dos hambúrgueres\n🥩 Porção pequena de carne para o almoço • 🥤 bebida própria • 🍰 doces são bem-vindos\n🍔 Previsão: 1,5 lanche por pessoa + extras; custo dividido entre os participantes\n\n`;
+  let message=`🍔 *ENCONTRO DE LANCHES E CONFRATERNIZAÇÃO LERUNNERS*\n📅 *Domingo, 1º de novembro • véspera de feriado*\n📍 ${config.place}\n🕛 *12h* encontro/churrasco leve • *16h* início do preparo dos hambúrgueres\n🥩 Porção pequena de carne para o almoço • 🥤 bebida própria • 🍰 doces são bem-vindos\n🍔 Previsão: 1,5 lanche por pessoa + extras; custo dividido entre os participantes\n\n`;
   message+=`✅ *PESSOAS CONFIRMADAS* (${people})\n\n`;
   if(groups.length){
     message+=groups.map((e,i)=>{
@@ -276,24 +275,24 @@ function shareWhatsApp(){
   whatsapp(message);
 }
 function inviteMessage(){
-  return `🎃 *HALLOWEEN LERUNNERS 2026*\n\n📅 Domingo, 1º de novembro de 2026 • véspera do feriado de Finados\n📍 ${config.place}\n🕛 12h — encontro, churrasco leve e piscina\n🕓 16h — início do preparo dos hambúrgueres\n\n🥩 Almoço leve: traga uma pequena porção de carne, como 2 bifes, 2 kaftas ou 2 a 3 gomos de linguiça.\n🥤 Cada um leva sua própria bebida; doces e sobremesas são bem-vindos.\n🍔 Estimativa de 1,5 lanche por pessoa, com extras. O custo será dividido entre os participantes.\n\n*Confirme sua presença:*\n${cleanUrl()}`;
+  return `🍔 *ENCONTRO DE LANCHES E CONFRATERNIZAÇÃO LERUNNERS*\n\n📅 Domingo, 1º de novembro de 2026 • véspera do feriado de Finados\n📍 ${config.place}\n🕛 12h — encontro, churrasco leve e piscina\n🕓 16h — início do preparo dos hambúrgueres\n\n🥩 Almoço leve: traga uma pequena porção de carne, como 2 bifes, 2 kaftas ou 2 a 3 gomos de linguiça.\n🥤 Cada um leva sua própria bebida; doces e sobremesas são bem-vindos.\n🍔 Estimativa de 1,5 lanche por pessoa, com extras. O custo será dividido entre os participantes.\n\n*Confirme sua presença:*\n${cleanUrl()}`;
 }
 async function shareInvitation(){
   if(!organizerOpen)return;
-  const fileUrl=new URL('assets/fotos/convite-whatsapp.jpg?v=20261101',cleanUrl()).href;
+  const fileUrl=new URL('assets/fotos/76107.jpg?v=20261101-lanches',cleanUrl()).href;
   try{
     if(navigator.share && navigator.canShare){
       const response=await fetch(fileUrl);
       if(!response.ok)throw new Error('Imagem indisponível');
-      const file=new File([await response.blob()],'Convite-LeRunners-Halloween-2026.jpg',{type:'image/jpeg'});
+      const file=new File([await response.blob()],'Convite-LeRunners-Confraternizacao-2026.jpg',{type:'image/jpeg'});
       if(navigator.canShare({files:[file]})){
-        await navigator.share({title:'Convite Halloween LeRunners',text:inviteMessage(),files:[file]});
+        await navigator.share({title:'Encontro de Lanches e Confraternização LeRunners',text:inviteMessage(),files:[file]});
         return;
       }
     }
   }catch(error){if(error?.name==='AbortError')return;console.warn('Compartilhamento de imagem indisponível:',error);}
   whatsapp(inviteMessage());
-  toast('No WhatsApp, o link exibirá a imagem do convite quando a prévia estiver disponível. Você também pode baixar a arte.');
+  toast('No WhatsApp, o link exibirá a foto do grupo quando a prévia estiver disponível. Você também pode baixar a foto.');
 }
 async function copyInviteLink(){
   if(!organizerOpen)return;
@@ -344,15 +343,15 @@ async function deleteRecord(id){
   if(!organizerOpen)return;
   const entry=currentList.find(e=>e.id===id);
   if(!entry)return;
-  if(!confirm(`Remover APENAS a resposta de ${entry.nome} do Halloween?`))return;
+  if(!confirm(`Remover APENAS a resposta de ${entry.nome} do encontro?`))return;
   try{await remove(ref(db,`${DATA_PATH}/${id}`));toast('Resposta removida.');}
   catch(e){console.error(e);toast('Não foi possível remover a resposta.',true);}
 }
-async function clearHalloween(){
+async function clearEventList(){
   if(!organizerOpen)return;
-  const phrase=prompt('ATENÇÃO: esta ação é irreversível e apaga TODAS as respostas de Halloween 2026. Digite APAGAR HALLOWEEN 2026 para confirmar:');
-  if(phrase!=='APAGAR HALLOWEEN 2026'){if(phrase!==null)toast('Exclusão cancelada.');return;}
-  try{await remove(listaRef);localStorage.removeItem(STORAGE_KEY);$('savedMessage').classList.remove('visible');toast('Lista do Halloween apagada; histórico de outros eventos preservado.');}
+  const phrase=prompt('ATENÇÃO: esta ação é irreversível e apaga TODAS as respostas do encontro de 01/11/2026. Digite APAGAR LISTA 2026 para confirmar:');
+  if(phrase!=='APAGAR LISTA 2026'){if(phrase!==null)toast('Exclusão cancelada.');return;}
+  try{await remove(listaRef);localStorage.removeItem(STORAGE_KEY);$('savedMessage').classList.remove('visible');toast('Lista do encontro apagada; histórico de outros eventos preservado.');}
   catch(e){console.error(e);toast('Falha ao limpar a lista.',true);}
 }
 function htmlForPDF(){
@@ -360,9 +359,9 @@ function htmlForPDF(){
   const rows=currentList.map((e,i)=>{
     const s=tally(e);
     const guests=e.guests.map(g=>`${escapeHtml(g.name)} — ${statusLabel[g.status]}`).join('<br>')||(e.guestsUncertain?'A definir':'—');
-    return `<tr><td>${i+1}</td><td>${escapeHtml(e.nome)}</td><td>${statusLabel[e.status]}</td><td>${s.sim} confirmados / ${s.talvez} talvez / ${s.nao} não</td><td>${guests}</td><td>${escapeHtml(e.burger||'—')}</td><td>${escapeHtml(e.costume||'—')}</td><td>${escapeHtml(e.bring||'—')}</td><td>${escapeHtml(e.note||'—')}</td></tr>`;
+    return `<tr><td>${i+1}</td><td>${escapeHtml(e.nome)}</td><td>${statusLabel[e.status]}</td><td>${s.sim} confirmados / ${s.talvez} talvez / ${s.nao} não</td><td>${guests}</td><td>${escapeHtml(e.burger||'—')}</td><td>${escapeHtml(e.bring||'—')}</td><td>${escapeHtml(e.note||'—')}</td></tr>`;
   }).join('');
-  return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🎃 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${totals.sim} pessoas confirmadas</b> • ${totals.talvez} aguardando confirmação • ${totals.nao} não vão • ${currentList.length} inscrições</div><h2>Lista de confirmações por grupo</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Responsável</th><th>Resposta</th><th>Grupo</th><th>Convidados e situação</th><th>Hambúrguer</th><th>Fantasia</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
+  return `<div style="font:13px/1.45 Arial,sans-serif;color:#211823;background:white;padding:22px;width:1120px"><h1 style="font-size:30px;margin:0;color:#9e461a">🍔 ${escapeHtml(config.title)}</h1><p style="color:#555;margin:7px 0 16px">01/11/2026 • ${escapeHtml(config.time)} • ${escapeHtml(config.place)}</p><div style="background:#fff3e8;padding:14px;margin-bottom:20px"><b>${totals.sim} pessoas confirmadas</b> • ${totals.talvez} aguardando confirmação • ${totals.nao} não vão • ${currentList.length} inscrições</div><h2>Lista de confirmações por grupo</h2><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr style="background:#342030;color:white"><th>#</th><th>Responsável</th><th>Resposta</th><th>Grupo</th><th>Convidados e situação</th><th>Hambúrguer</th><th>Levará</th><th>Recado</th></tr></thead><tbody>${rows}</tbody></table><p style="color:#555;font-size:11px;margin-top:22px">Atualizado em ${new Date().toLocaleString('pt-BR')} • Powered by thIAguinho Soluções Digitais</p></div>`;
 }
 function buildReportPDF(){
   // PDF vetorial: texto e formas diretamente, sem capturas de tela ou canvas.
@@ -418,7 +417,7 @@ function buildReportPDF(){
     ops=[];pages.push(ops);
     fill(0,0,W,81,[0.13,0.09,0.16]);
     fill(0,81,W,3,[0.98,0.48,0.1]);
-    label('HALLOWEEN LERUNNERS 2026',LEFT,30,21,true,[1,0.70,0.35]);
+    label('LERUNNERS - LANCHES E CONFRATERNIZACAO 2026',LEFT,30,18,true,[1,0.70,0.35]);
     label('Relatório de confirmações  |  Domingo, 01/11/2026',LEFT,52,11,false,[1,1,1]);
     top=106;
   }
@@ -434,7 +433,7 @@ function buildReportPDF(){
     const fields=[
       `Convidados: ${guestText}`,
       `Grupo: ${totals.sim} confirmados | ${totals.talvez} talvez | ${totals.nao} não vão`,
-      `Hambúrguer: ${entry.burger||'-'}  |  Fantasia: ${entry.costume||'-'}`,
+      `Hambúrguer: ${entry.burger||'-'}`,
       `Levará: ${entry.bring||'-'}`,
       `Recado: ${entry.note||'-'}`
     ];
@@ -498,7 +497,7 @@ async function downloadPDF(){
     url=URL.createObjectURL(blob);
     const link=document.createElement('a');
     link.href=url;
-    link.download='LeRunners_Halloween_01-11-2026_Confirmacoes.pdf';
+    link.download='LeRunners_Encontro_Lanches_01-11-2026_Confirmacoes.pdf';
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -543,7 +542,7 @@ function wireEvents(){
   $('adminBtn').addEventListener('click',openOrganizer);
   $('closeAdminBtn').addEventListener('click',()=>adminVisibility(false));
   $('saveConfigBtn').addEventListener('click',saveConfig);
-  $('clearBtn').addEventListener('click',clearHalloween);
+  $('clearBtn').addEventListener('click',clearEventList);
   $('adminGuestList').addEventListener('click',e=>{const button=e.target.closest('[data-delete-id]');if(button)deleteRecord(button.dataset.deleteId);});
   document.querySelectorAll('.gallery-tile').forEach(b=>b.addEventListener('click',()=>openMedia(b)));
   $('closeMedia').addEventListener('click',closeMedia);
@@ -561,7 +560,7 @@ async function connectLive(){
     onValue(configRef,snapshot=>{
       const incoming=snapshot.val();
       config=(incoming && typeof incoming==='object'&& incoming.version===1)
-        ? {title:String(incoming.title||defaults.title),time:String(incoming.time||defaults.time),place:String(incoming.place||defaults.place),message:String(incoming.message||defaults.message),version:1}
+        ? {title:/halloween/i.test(String(incoming.title||''))?defaults.title:String(incoming.title||defaults.title),time:String(incoming.time||defaults.time),place:String(incoming.place||defaults.place),message:/halloween/i.test(String(incoming.message||''))?defaults.message:String(incoming.message||defaults.message),version:1}
         : {...defaults};
       updateConfigUI();
     },error=>{console.warn('Configuração inacessível',error);updateConfigUI();});
