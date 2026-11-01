@@ -57,9 +57,10 @@ async function fileOp(mode,key,value){
   const transaction=db.transaction('files',mode==='get'?'readonly':'readwrite');
   const store=transaction.objectStore('files');
   const req=mode==='get'?store.get(key):mode==='put'?store.put(value,key):store.delete(key);
-  req.onsuccess=()=>resolve(req.result);
-  req.onerror=()=>reject(req.error||new Error('Erro no comprovante'));
-  transaction.oncomplete=()=>db.close();
+  let result;
+  req.onsuccess=()=>{result=req.result;};
+  req.onerror=()=>{db.close();reject(req.error||new Error('Erro no comprovante'));};
+  transaction.oncomplete=()=>{db.close();resolve(result);};
   transaction.onerror=()=>{db.close();reject(transaction.error||new Error('Erro no armazenamento'));};
  });
 }
@@ -148,7 +149,7 @@ async function backup(){
  catch(err){alertFinance('Não foi possível incluir os anexos: '+err.message,true);return;}
  const payload={kind:'LeRunners-Financeiro-Backup-v1',savedAt:new Date().toISOString(),ledger,files};
  downloadFile('LeRunners_Backup_Despesas_01-11-2026.json',new Blob([JSON.stringify(payload)],{type:'application/json'}));
- alertFinance('Backup exportado. Guarde este arquivo para restaurar em outro celular ou computador.');
+ alertFinance('Backup exportado. Guarde o arquivo em local seguro para restaurar em outro celular ou computador.');
 }
 async function restore(event){
  const file=event.target.files[0];event.target.value='';if(!file)return;
