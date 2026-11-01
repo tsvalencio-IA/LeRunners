@@ -69,6 +69,41 @@
     .event-info strong{display:block;color:#ffb566;margin-bottom:6px;font-size:13px}
     .event-plan-foot{margin:13px 0 0;color:#d8bfcf;font-size:12px}
     @media(max-width:710px){.event-plan{padding:18px 14px;margin-bottom:34px}.event-steps,.event-info-grid{grid-template-columns:1fr}.event-step,.event-info{padding:14px}.event-plan .section-top h2{font-size:28px}}
+
+    /* Financeiro: painel privado, sem impactar formulário dos convidados. */
+    .finance-panel{margin:23px 0;padding:21px;background:#14261f;border:1px solid #47745a;border-radius:19px}
+    .finance-panel h3{font-size:22px;margin:4px 0 9px}
+    .finance-panel h4{margin:24px 0 12px;color:#f4e1b6}
+    .finance-panel .finance-help{font-size:12px;color:#c1dacf;line-height:1.7;margin:5px 0 16px}
+    .finance-form-grid{display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr;gap:10px}
+    .finance-form-grid .field{min-width:0}
+    .finance-full{grid-column:1/-1}
+    .finance-panel .control{background:#1c3025;border-color:#56735b}
+    .finance-panel input[type="file"]{padding:12px 10px;font-size:12px}
+    .finance-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0}
+    .finance-summary>div{background:#243c2c;border:1px solid #486c50;border-radius:13px;padding:15px;min-width:0}
+    .finance-summary strong{display:block;font:800 21px/1.25 Outfit,sans-serif;color:#ffd18c;overflow-wrap:anywhere}
+    .finance-summary span{display:block;font-size:11px;margin-top:6px;color:#cde5d3}
+    .finance-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;padding:12px;border:1px solid #43634d;border-radius:12px;background:#21372b;margin:8px 0;min-width:0}
+    .finance-item strong,.finance-group strong{display:block;color:#fff4db;overflow-wrap:anywhere}
+    .finance-item small,.finance-group small{display:block;color:#bbd7c7;overflow-wrap:anywhere;margin-top:3px}
+    .finance-item>b{white-space:nowrap;color:#ffd38e;font-size:16px}
+    .finance-item-actions{grid-column:1/-1;display:flex;gap:7px;flex-wrap:wrap}
+    .finance-item-actions button{background:#304c3a;border:1px solid #63836b;color:white;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700}
+    .finance-payer{display:flex;gap:11px;align-items:center;padding:9px 10px;border:1px solid #46654d;border-radius:10px;margin-bottom:7px;cursor:pointer;background:#22372a}
+    .finance-payer input{accent-color:#48bd79;width:19px;height:19px;flex:none}
+    .finance-payer span{overflow-wrap:anywhere}
+    .finance-payer small{display:block;color:#b8d1bd;font-size:11px}
+    .finance-group{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 13px;padding:12px;margin:8px 0;background:#243b2c;border:1px solid #46664d;border-radius:11px}
+    .finance-group span{font-weight:800;color:#ffd595}
+    .finance-group small{flex-basis:100%}
+    .finance-empty{padding:13px;border:1px dashed #69816b;border-radius:9px;font-size:12px;color:#d5e7d9}
+    .finance-toolrow{display:flex;flex-wrap:wrap;gap:9px;margin:13px 0}
+    .finance-toolrow label{cursor:pointer;display:inline-flex;align-items:center}
+    .finance-toolrow .primary-btn,.finance-toolrow .secondary-btn{font-size:12px;padding:11px 13px}
+    #financeFeedback{font-size:12px;margin:10px 0;color:#b6f1cd;min-height:18px}
+    @media(max-width:850px){.finance-form-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:510px){.finance-panel{padding:14px 11px}.finance-form-grid{grid-template-columns:1fr}.finance-summary{grid-template-columns:1fr}.finance-summary strong{font-size:20px}.finance-toolrow>*{flex:1;justify-content:center;text-align:center}}
   </style>
 </head>
 <body>
@@ -96,6 +131,45 @@
       </div>
       <img class="invite-preview" src="assets/fotos/76107.jpg?v=20261101-lanches" alt="Fotografia original do grupo LeRunners na confraternização" loading="lazy">
     </div>
+
+      <section class="finance-panel" id="financePanel" aria-labelledby="financeTitle">
+        <span class="eyebrow">Somente no painel do organizador</span>
+        <h3 id="financeTitle" class="heading">Despesas das compras e rateio</h3>
+        <p class="finance-help"><strong>Armazenamento neste navegador:</strong> valores e notas ficam no dispositivo usado para lançar. Não são enviados para a lista pública nem para o Firebase. Use <b>Exportar backup</b> após lançar as notas para não perder os comprovantes e poder restaurá-los em outro aparelho.</p>
+        <form id="financeForm" autocomplete="off">
+          <input id="financeEditId" type="hidden">
+          <div class="finance-form-grid">
+            <div class="field"><label for="financeDescription">Descrição da compra *</label><input class="control" id="financeDescription" maxlength="110" placeholder="Ex.: carne, pão, queijo, molhos" required></div>
+            <div class="field"><label for="financeStore">Estabelecimento (opcional)</label><input class="control" id="financeStore" maxlength="100" placeholder="Nome do mercado"></div>
+            <div class="field"><label for="financeAmount">Valor total da nota (R$) *</label><input class="control" id="financeAmount" inputmode="decimal" placeholder="Ex.: 245,80" required></div>
+            <div class="field"><label for="financeDate">Data da compra *</label><input class="control" id="financeDate" type="date" required></div>
+            <div class="field finance-full"><label for="financeNote">Observação (opcional)</label><input class="control" id="financeNote" maxlength="280" placeholder="Ex.: compra de ingredientes para os lanches"></div>
+            <div class="field finance-full"><label for="financeFile">Foto ou PDF da nota fiscal (opcional, até 5 MB)</label><input class="control" id="financeFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"><span class="hint" id="financeExistingReceipt"></span></div>
+          </div>
+          <div class="finance-toolrow"><button class="primary-btn" type="submit" id="financeSaveBtn">Salvar despesa</button><button class="secondary-btn" id="financeCancelEdit" type="button" hidden>Cancelar edição</button></div>
+        </form>
+        <p id="financeFeedback" role="status" aria-live="polite"></p>
+        <h4>Notas e despesas lançadas</h4>
+        <div id="financeExpenses"></div>
+        <h4>Quem entra no rateio</h4>
+        <p class="finance-help">São selecionados inicialmente os titulares e convidados com resposta <strong>Sim</strong>. Desmarque quem não deve pagar; isso não muda a lista de presença. Cada pessoa marcada tem uma cota igual.</p>
+        <div id="financePayers"></div>
+        <div class="finance-summary" aria-live="polite">
+          <div><strong id="financeTotal">R$ 0,00</strong><span>Total das despesas</span></div>
+          <div><strong id="financeCount">0</strong><span>Pessoas incluídas no rateio</span></div>
+          <div><strong id="financeEach">R$ 0,00</strong><span>Valor por pessoa (antes dos ajustes de centavos)</span></div>
+        </div>
+        <p class="finance-help"><strong>Conferência:</strong> <span id="financeCheck">R$ 0,00</span></p>
+        <h4>Valor por responsável e seus convidados</h4>
+        <div id="financeGroups"></div>
+        <div class="finance-toolrow">
+          <button id="financePdfBtn" class="primary-btn" type="button" disabled>↓ Gerar PDF das despesas e rateio</button>
+          <button id="financeBackupBtn" class="secondary-btn" type="button">↓ Exportar backup com notas</button>
+          <label class="secondary-btn" for="financeImportFile">↑ Importar backup</label>
+          <input id="financeImportFile" type="file" accept="application/json,.json" hidden>
+        </div>
+        <p class="finance-help">O PDF detalha cada compra, o total por pessoa e a soma por responsável. Fotos de notas são incluídas como anexos no PDF; arquivos PDF originais permanecem disponíveis para download pelo botão “Ver nota”.</p>
+      </section>
     <h3>Informações do evento</h3>
     <div class="columns-2">
       <div class="field"><label for="configTitle">Título</label><input class="control" id="configTitle" maxlength="90"></div>

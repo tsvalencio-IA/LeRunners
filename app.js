@@ -4,6 +4,7 @@
  * NÃO remove nem migra a lista histórica do Treinão/AMICC.
  */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+import { initFinance, refreshFinance } from './finance.js';
 import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 import { getDatabase, ref, push, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js';
 
@@ -187,6 +188,7 @@ function renderSummary(){
   currentList.filter(e=>e.status==='sim').forEach(e=>e.brings.forEach(item=>{brings[item]=(brings[item]||0)+1;}));
   $('bringSummary').innerHTML=Object.entries(brings).sort((a,b)=>b[1]-a[1]).map(([label,n])=>`<span class="pill">${escapeHtml(label)} · ${num(n)}</span>`).join('');
   renderAdminList();
+  refreshFinance();
   return {totalPersons:yes,confirmed};
 }
 function renderAdminList(){
@@ -323,7 +325,7 @@ async function submitLogin(event){
   if(hex!=='823c489b191e9db4d75c2068784637848684a8ec60255080ad09ff330c05df12'){
     $('loginError').hidden=false;$('adminPassword').select();return;
   }
-  closeLogin();adminVisibility(true);
+  closeLogin();adminVisibility(true);initFinance(()=>currentList);
 }
 function openOrganizer(){
   if(organizerOpen){adminVisibility(false);return;}
