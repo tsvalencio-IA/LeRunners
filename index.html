@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111b17">
+  <meta name="theme-color" content="#19382c">
   <meta name="description" content="LeRunners na 7ª Corrida do 17º BPM/I, domingo 8 de novembro de 2026. Confirme presença no churrasco pós-corrida, alcatra na chapa e contribuição para carnes e descartáveis.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="LeRunners • Corrida do 17º BPM/I e churrasco • 08/11/2026">
   <meta property="og:description" content="Domingo 08/11: corrida do 17º BPM/I e confraternização com alcatra na chapa. R$ 30 por adulto; crianças a definir. Confirme sua presença.">
   <meta property="og:url" content="https://tsvalencio-ia.github.io/LeRunners/">
-  <meta property="og:image" content="https://tsvalencio-ia.github.io/LeRunners/assets/fotos/76107.jpg?v=20261108-corrida">
   <title>LeRunners • Corrida 17º BPM/I e Churrasco • 08/11/2026</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="assets/icones/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icones/favicon.svg?v=carne20261108" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icones/icone-192.png?v=carne20261108">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -145,12 +145,95 @@
     #paymentImport[hidden]{display:none!important}
     .rsvp-price{padding:11px 14px;border-radius:10px;border:1px solid #57805c;background:#1b3927;color:#e5f8e7;font-size:13px;margin-bottom:16px}
     @media(max-width:650px){.payment-panels{grid-template-columns:1fr}.payment-panel{padding:14px 12px}.hero h1{font-size:clamp(36px,10vw,58px)}.hero h1 span{font-size:.54em}.payment-tools>*{flex:1}}
+
+/* 17º BPM/I: interface limpa, uma cor de ação, sem galeria, sem cartões extras */
+:root{--bg:#f6f7f5;--card:#fff;--card2:#fff;--line:#d9e1da;--muted:#67776b;--orange:#245f42;--orange2:#245f42;--white:#213729;--green:#246b46;--focus:#338056}
+html,body{max-width:100%;overflow-x:clip}
+body{background:var(--bg);color:var(--white)}
+.wrap{width:min(760px,calc(100% - 24px))}
+.topbar{padding:13px 0}.brand{color:#203d2d}.brand strong{color:#55705e}
+.live{background:white;border-color:var(--line);color:#627467;font-size:11px}.dot{box-shadow:none}.dot.online{box-shadow:none}.dot.offline{box-shadow:none}
+.tiny-btn{background:#fff;color:#345841;border-color:#d9e3db}
+.hero{display:block;min-height:0;background:#fff;box-shadow:none;border:1px solid var(--line);border-radius:16px}
+.hero::before{display:none}
+.hero-text{display:block;padding:26px}
+.hero-eyebrow{background:none;border:0;padding:0;color:#51705a;letter-spacing:.06em;font-size:11px}
+.hero h1{font:800 clamp(29px,5.7vw,42px)/1.16 Outfit,sans-serif;color:#203c2d;letter-spacing:-.04em;text-shadow:none;margin:10px 0}
+.hero h1 span{font-size:.64em;color:#597262;letter-spacing:-.01em;line-height:1.3;margin-top:5px}
+.hero-blurb{font-weight:500;font-size:14px;color:#58695d;margin:0 0 14px}
+.facts{border-top:1px solid var(--line);padding:13px 0 0;font-size:13px;color:#526559}
+.facts p{margin:0 0 8px}.facts b{color:#1d4b33}
+.place{font-size:12px;color:#667c6c;margin:9px 0 15px}
+.primary-btn,.green-btn{background:#256445;color:#fff;box-shadow:none;border:1px solid #256445;border-radius:9px;transform:none}
+.secondary-btn{background:white;color:#2e6446;border:1px solid #c9d8cd;border-radius:9px}
+.primary-btn:hover,.green-btn:hover{transform:none;filter:brightness(1.07)}
+.layout{display:block;margin:14px 0}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:none}
+.form-top{background:white;border:0;padding:22px 25px 0}
+.form-top h2{color:#264733;font-size:25px;margin:5px 0}
+.form-top p{color:#728073;font-size:13px}
+.form-body{padding:20px 25px 25px}
+.field label,.label{color:#2b4634}.hint,.notice{color:#708273}
+.control{background:white;color:#213b2c;border:1px solid #cbd9ce;border-radius:9px}
+.control::placeholder{color:#87978a}.control:focus{border-color:#3a9167;box-shadow:0 0 0 2px #cee9da}
+.choice span{color:#38533d;background:#f9fbf9;border:1px solid #d1dcd4;border-radius:9px;min-height:56px}
+.choice input:checked+span,.choice.good input:checked+span,.choice.bad input:checked+span{background:#e5f1e9;border:1px solid #438965;color:#1d5639;box-shadow:none}
+.guest-editor-row{border-color:#dfe9e1}.guest-editor-row>label{color:#34523b}
+.guest-remove{background:#fff;color:#92544b;border-color:#ddbeba}
+.save-btn{min-height:50px}
+.saved-chip{background:#e8f4ec;color:#2a6044;border-color:#cde3d3}
+.rsvp-share-step{background:#edf7ef;box-shadow:none;border:1px solid #a0cdb2;border-radius:12px}
+.rsvp-share-step h3{color:#215d3d}.rsvp-share-step p{color:#3d684c}
+.whatsapp-cta{background:#2a8555!important;color:white!important;box-shadow:none}
+.list-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 24px;margin:14px 0 25px}
+.list-panel>summary{list-style:none;display:flex;justify-content:space-between;cursor:pointer;align-items:center}
+.list-panel>summary::-webkit-details-marker{display:none}
+.list-panel>summary::after{content:'Mostrar';font-size:12px;color:#67806e}
+.list-panel[open]>summary::after{content:'Ocultar'}
+.list-panel h2{color:#24402e;font-size:20px;margin:0}
+#countYes{color:#59725e;font-size:15px}
+.list-content{padding-top:17px}
+.list-tools{margin-top:13px}
+.share-help{background:#f4f8f4;border:0;color:#56705e;font-size:12px;margin:10px 0}
+.guest{background:#fbfcfb;border-color:#dce7df;color:#294932}
+.avatar{background:#e7efe9;color:#30664a}
+.guest h3{color:#263d2c}.guest small,.group-guest-meta{color:#67806b!important}
+.guest-child-name{color:#55705f}
+.tag.sim{background:#e6f1e9;color:#236e47}.tag.talvez{background:#f3eee3;color:#685c3e}.tag.nao{background:#f4ecea;color:#875c56}
+.guest-edit{background:#fff;color:#356949;border-color:#cbded0}
+.empty{border-color:#dce5df;color:#68796f}
+.section-foot{color:#849689}.section-foot b{color:#46624b}
+.admin{background:#fff;color:#253c2b;border:1px solid var(--line)}
+.admin .heading,.admin h3{color:#244a32}
+.admin-dashboard,.admin-person{background:#f8faf8;border-color:#dae4dc;color:#25422e}
+.admin-metrics div{background:#edf3ed}.admin-metrics strong{color:#225a3b}.admin-metrics span{color:#5b7060}
+.admin-person small{color:#607863}
+.admin .control{background:#fff;color:#203b2a;border:1px solid #cbdccf}
+.payment-panel{background:#f9fcfa;border-color:#dce8dd}
+.payment-panel h3{color:#264934}.payment-panel .payment-help{color:#64776a}
+.payment-panels>div{background:#eaf2ec;border-color:#d9e6dc}.payment-panels strong{color:#276144}.payment-panels span{color:#63796a}
+.payment-person{background:#fff;border-color:#dae6dd}.payment-person-top small,.payment-status{color:#607665}
+.payment-person-top>strong{color:#2c6545}.payment-person-row label{color:#365c41}.payment-person-row .control{background:#fff}
+.login-card{background:#fff;color:#28452f;border-color:#d6e4d8}.login-card h2{color:#244b32}
+.login-card p{color:#6d806d}
+@media(max-width:710px){
+ .hero{display:block}.hero-text{padding:22px 19px}.hero h1{font-size:clamp(28px,7vw,38px)}
+ .layout{display:block;margin:13px 0}
+ .form-top{padding:19px 18px 0}.form-body{padding:18px}
+ .list-panel{padding:17px 16px}
+ .guest-editor-controls{grid-template-columns:minmax(0,1fr) 1fr}
+ .guest-editor-controls .guest-name{grid-column:1/-1}
+ .guest-editor-controls .guest-status{grid-column:1}
+ .guest-editor-controls .guest-type{grid-column:2}
+ .guest-editor-controls .guest-remove{grid-column:1/-1;justify-self:stretch}
+}
+@media(max-width:390px){.hero h1{font-size:28px}.list-panel h2{font-size:19px}.top-actions .tiny-btn{padding:7px}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <nav class="topbar" aria-label="Menu principal">
-    <a class="brand" href="#inicio"><img src="assets/icones/favicon.svg" alt="Ícone LeRunners"><span>Le<strong>Runners</strong></span></a>
+    <a class="brand" href="#inicio"><img src="assets/icones/favicon.svg?v=carne20261108" alt="Ícone LeRunners"><span>Le<strong>Runners</strong></span></a>
     <div class="top-actions"><span class="live" title="Estado da sincronização"><i id="statusDot" class="dot"></i><span id="statusText">Conectando...</span></span><button id="installBtn" class="tiny-btn" type="button" hidden>Instalar</button><button id="adminBtn" class="tiny-btn" type="button" aria-label="Painel do organizador">⚙ Configurações</button></div>
   </nav>
   <section class="admin" id="adminPanel" aria-label="Área de organização" aria-hidden="true">
@@ -165,10 +248,10 @@
       <div id="adminGuestList" class="admin-guest-list" aria-live="polite"></div>
       <div class="admin-actions">
         <button class="secondary-btn" id="pdfBtn" type="button">↓ Exportar relatório PDF</button>
-        <button class="green-btn" id="inviteBtn" type="button">↗ Enviar convite com foto</button><button class="secondary-btn" id="copyInviteBtn" type="button">⧉ Copiar link de confirmação</button>
-        <a class="secondary-btn" href="assets/fotos/76107.jpg?v=20261108-corrida" download="LeRunners_FotoEquipe.jpg">↓ Baixar foto do encontro</a>
+        <button class="green-btn" id="inviteBtn" type="button">Compartilhar convite</button><button class="secondary-btn" id="copyInviteBtn" type="button">⧉ Copiar link de confirmação</button>
+        
       </div>
-      <img class="invite-preview" src="assets/fotos/76107.jpg?v=20261108-corrida" alt="Fotografia original do grupo LeRunners na confraternização" loading="lazy">
+      
     </div>
 
       <section class="payment-panel" id="paymentPanel">
@@ -208,81 +291,41 @@
     </div>
     <div class="admin-actions"><button type="button" class="primary-btn" id="saveConfigBtn">Salvar informações</button><button type="button" class="danger" id="clearBtn">Apagar lista desta corrida</button></div>
   </section>
-  <header class="hero" id="inicio">
-    <div class="hero-text">
-      <span class="hero-eyebrow" id="heroEventTitle">LeRunners • Corrida do 17º BPM/I • 2026</span>
-      <h1>CORRIDA 17º BPM<span>Churrasco LeRunners</span></h1>
-      <p class="hero-blurb" id="heroMessage">Depois da corrida, alcatra em tirinhas na chapa com a equipe. Confirme sua participação no churrasco!</p>
-      <div class="detail-row">
-        <span class="detail-chip"><span class="detail-icon">📅</span><span><b>08 NOV • DOMINGO</b><small>2026 • Corrida do 17º BPM/I</small></span></span>
-        <span class="detail-chip"><span class="detail-icon">🥩</span><span><b id="heroPlace">Confraternização pós-prova</b><small id="heroTime">Local e horário a confirmar pela equipe</small></span></span>
-      </div>
-      <div class="hero-buttons"><a class="primary-btn" href="#confirmar">🎟 Confirmar presença</a><a class="secondary-btn" href="#memorias">Ver galeria ↗</a></div>
-    </div>
-    <div class="hero-media"><img src="assets/fotos/76107.jpg" alt="Equipe LeRunners reunida em confraternização anterior" fetchpriority="high"><div class="hero-photo-tag">🥩 Pós-prova<small>Alcatra em tirinhas na chapa</small></div></div>
-  </header>
-  <section class="highlights" aria-label="Atrações do encontro">
-    <div class="highlight"><span class="symbol">🏃</span><span>Corrida do 17º BPM/I</span></div>
-    <div class="highlight"><span class="symbol">🥩</span><span>Alcatra na chapa</span></div>
-    <div class="highlight"><span class="symbol">💵</span><span>Referência: R$ 30/adulto</span></div>
-    <div class="highlight"><span class="symbol">🤝</span><span>Confraternização da equipe</span></div>
-  </section>
-  <section class="event-plan" id="programacao" aria-labelledby="programacaoTitulo">
-    <div class="section-top"><div><span class="eyebrow">Domingo • 08/11/2026</span><h2 class="heading" id="programacaoTitulo">Corrida + carne na chapa</h2><p>Churrasco de confraternização após a Corrida do 17º Batalhão.</p></div></div>
-    <div class="event-steps">
-      <article class="event-step"><span class="time">06h30</span><h3>Início das largadas</h3><p>Desafio 17 km. As provas de 5 e 10 km largam a partir das 07h05, conforme a organização. <a href="https://corrida17bpmi.com.br/" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">Confira a programação oficial</a>.</p></article>
-      <article class="event-step"><span class="time">Depois da prova</span><h3>Alcatra em tirinhas na chapa</h3><p>Confraternização da equipe LeRunners. Local e horário do churrasco serão informados pelos organizadores do grupo.</p></article>
-      <article class="event-step"><span class="time">R$ 30</span><h3>Contribuição de referência por adulto</h3><p>Para comprar as carnes e os descartáveis. O administrador definirá o valor das crianças e controlará os pagamentos.</p></article>
-    </div>
-    <div class="event-info-grid">
-      <div class="event-info"><strong>🥤 Bebidas</strong><p>Cada um leva sua bebida. Há previsão de chope gratuito no evento da corrida, mas a fila costuma ser grande. Se quiser sua bebida preferida, leve a sua.</p></div>
-      <div class="event-info"><strong>📍 Local da corrida</strong><p>Av. Sabino Cardoso Filho, 2500, Vila Elvira, São José do Rio Preto. O local do churrasco ainda precisa ser confirmado pela equipe.</p></div>
-    </div>
-    <p class="event-plan-foot">Este formulário é para a confraternização da equipe, não substitui a inscrição oficial na corrida.</p>
-  </section>
-  <section id="memorias" aria-label="Fotos anteriores da equipe">
-    <div class="section-top"><div><span class="eyebrow">Memórias LeRunners</span><h2 class="heading">Nossa equipe reunida</h2><p>Fotos originais de encontros anteriores, apenas como lembrança.</p></div></div>
-    <div class="gallery" style="grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:220px">
-      <button class="gallery-tile" data-photo="assets/fotos/76107.jpg" data-caption="Encontro anterior da equipe" type="button" aria-label="Ampliar foto do grupo"><img loading="lazy" src="assets/fotos/76107.jpg" alt="Foto original de confraternização anterior"><span class="caption">Equipe LeRunners</span></button>
-      <button class="gallery-tile" data-photo="assets/fotos/75086.jpg" data-caption="Amigos LeRunners em confraternização anterior" type="button" aria-label="Ampliar foto dos amigos"><img loading="lazy" src="assets/fotos/75086.jpg" alt="Amigos reunidos em encontro anterior"><span class="caption">Amigos e histórias</span></button>
-    </div>
-    <p class="remember">Toque para ampliar as fotos.</p>
-  </section>
-  <section class="layout" id="confirmar">
+<header class="hero" id="inicio"><div class="hero-text">
+<span class="hero-eyebrow" id="heroEventTitle">LeRunners • Domingo 08/11</span>
+<h1>Corrida do 17º BPM/I<span>Carne na chapa com a equipe</span></h1>
+<p id="heroMessage" class="hero-blurb">Depois da corrida, alcatra em tirinhas na chapa.</p>
+<div class="facts"><p><b>R$ 30 por adulto</b> para carne e descartáveis. Crianças: preço definido pelo organizador.</p><p>Cada um leva sua bebida. Haverá chope gratuito no evento, mas a fila pode ser grande.</p></div>
+<p class="place"><b id="heroPlace">Confraternização pós-prova</b> • <span id="heroTime">Local e horário a confirmar</span></p>
+<a class="primary-btn" href="#confirmar">Responder à enquete</a></div></header>  <section class="layout" id="confirmar">
     <div class="panel">
-      <div class="form-top"><span class="eyebrow">Enquete LeRunners • 08/11</span><h2 class="heading">Você vai ao churrasco?</h2><p>Preencha sua resposta e, se necessário, os acompanhantes. Depois, envie a atualização ao grupo LeRunners no WhatsApp.</p></div>
+      <div class="form-top"><span class="eyebrow">Confirmação</span><h2 class="heading">Você vai participar?</h2><p>Responda abaixo. É rápido.</p></div>
       <form class="form-body" id="rsvpForm" novalidate>
         <div id="savedMessage" class="saved-chip" role="status"></div>
-        <p class="rsvp-price">🥩 Contribuição de referência: <strong>R$ 30 por adulto</strong>, para carnes e descartáveis. Crianças: valor definido pela organização. Cada um leva sua bebida.</p>
         <div class="field"><label for="userName">Seu nome <span aria-hidden="true">*</span></label><input class="control" id="userName" maxlength="80" minlength="3" type="text" autocomplete="name" placeholder="Nome e sobrenome" required></div>
-        <fieldset class="field" style="border:0;padding:0;min-width:0"><legend class="label">Você participa do churrasco pós-corrida? *</legend><div class="option-grid">
-          <label class="choice good"><input type="radio" name="status" value="sim" required><span><em>🎉</em>Sim, eu vou!</span></label>
-          <label class="choice bad"><input type="radio" name="status" value="nao"><span><em>😢</em>Não poderei</span></label>
-          <label class="choice"><input type="radio" name="status" value="talvez"><span><em>🤔</em>Talvez</span></label>
+        <fieldset class="field" style="border:0;padding:0;min-width:0"><legend class="label">Você vai ao churrasco? *</legend><div class="option-grid">
+          <label class="choice good"><input type="radio" name="status" value="sim" required><span>Sim, vou</span></label>
+          <label class="choice bad"><input type="radio" name="status" value="nao"><span>Não vou</span></label>
+          <label class="choice"><input type="radio" name="status" value="talvez"><span>Talvez</span></label>
         </div></fieldset>
         <div id="attendingFields">
-          <div class="field"><label for="guestCount">Deseja levar convidados?</label><select id="guestCount" class="control"><option value="0">Não, somente eu</option><option value="unknown">Não sei ainda</option><option value="1">1 convidado</option><option value="2">2 convidados</option><option value="3">3 convidados</option><option value="4">4 convidados</option><option value="5">5 convidados</option><option value="6">6 convidados</option><option value="7">7 convidados</option><option value="8">8 convidados</option><option value="9">9 convidados</option></select></div>
+          <div class="field"><label for="guestCount">Vai levar alguém?</label><select id="guestCount" class="control"><option value="0">Não, somente eu</option><option value="unknown">Não sei ainda</option><option value="1">1 convidado</option><option value="2">2 convidados</option><option value="3">3 convidados</option><option value="4">4 convidados</option><option value="5">5 convidados</option><option value="6">6 convidados</option><option value="7">7 convidados</option><option value="8">8 convidados</option><option value="9">9 convidados</option></select></div>
           <div class="field" id="guestNamesBlock" hidden><div class="label">Convidados e confirmações individuais *</div><div id="guestRows"></div><span class="hint">Cada convidado fica no seu grupo. Você poderá alterar a presença ou remover convidados depois.</span></div>
 
         </div>
-        <div class="field"><label for="note">Observações para a organização <span class="hint">(opcional)</span></label><textarea class="control" id="note" maxlength="260" placeholder="Ex.: vou chegar mais tarde, vou levar sobremesa..." rows="3"></textarea><span class="hint">As observações serão destinadas à organização.</span></div>
-        <button class="primary-btn save-btn" type="submit" id="submitBtn">✅ 1. SALVAR MINHA RESPOSTA</button>
-        <p class="notice">Sua confirmação fica salva no site. Você poderá atualizá-la neste mesmo dispositivo.</p>
-        <div class="rsvp-share-step" id="shareStep" hidden role="status" aria-live="polite"><h3>✅ Pronto! Falta avisar o grupo.</h3><p><strong>Você salvou sua resposta no site.</strong> Agora envie a atualização no WhatsApp para todos saberem:</p><ol><li>Toque no botão verde abaixo.</li><li>No WhatsApp, procure e escolha o <strong>GRUPO LeRunners</strong> (não um contato individual).</li><li>Toque em <strong>ENVIAR</strong> dentro do WhatsApp.</li></ol><button type="button" class="primary-btn whatsapp-cta" id="shareAfterSaveBtn">🟢 2. ENVIAR ATUALIZAÇÃO NO GRUPO LERUNNERS</button><p class="notice">Abrir o WhatsApp não envia sozinho. É necessário escolher o grupo e confirmar o envio.</p></div>
+        <div class="field"><label for="note">Recado (opcional)</label><textarea class="control" id="note" maxlength="260" placeholder="Alguma observação?" rows="2"></textarea></div>
+        <button class="primary-btn save-btn" type="submit" id="submitBtn">1. SALVAR RESPOSTA</button>
+        
+        <div class="rsvp-share-step" id="shareStep" hidden role="status" aria-live="polite"><h3>Resposta salva!</h3><p>Agora avise o grupo LeRunners:</p><button type="button" class="primary-btn whatsapp-cta" id="shareAfterSaveBtn">2. ENVIAR NO WHATSAPP</button><p>No WhatsApp, escolha o <strong>grupo LeRunners</strong> e toque em <strong>Enviar</strong>.</p></div>
       </form>
     </div>
-    <aside class="side" aria-label="Resumo do evento">
-      <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>Pessoas previstas (Sim + Talvez)</span></div><div class="metric"><strong id="countYes">0</strong><span>Pessoas confirmadas</span></div><div class="metric"><strong id="countMaybe">0</strong><span>Aguardando confirmação</span></div><div class="metric"><strong id="countNo">0</strong><span>Não vão</span></div></div>
-      <div class="side-card"><span class="eyebrow">Participação</span><h3 class="heading" style="margin-top:8px">Acompanhe as confirmações</h3><p>A lista de participantes é atualizada automaticamente.</p><a class="secondary-btn" style="width:100%" href="#lista">Ver lista de presença ↓</a></div>
-      <div class="side-card"><span class="eyebrow">Domingo • 08/11</span><h3 class="heading" style="margin-top:8px">Corrida + Churrasco LeRunners</h3><p>Depois da corrida do 17º BPM/I, teremos alcatra em tirinhas na chapa. R$ 30 por adulto é o valor de referência; o valor infantil será definido no painel administrativo.</p><img class="side-image" src="assets/fotos/76107.jpg" alt="Fotografia da equipe em confraternização anterior" loading="lazy"></div>
-    </aside>
   </section>
-  <section class="list-panel" id="lista">
-    <div class="list-header"><div><span class="eyebrow">Lista de presença</span><h2 class="heading">Participantes</h2><p style="color:#cfbaca;font-size:13px;margin:0">Veja as confirmações em tempo real.</p></div><div class="list-buttons"><button class="green-btn" id="shareListBtn" type="button">🟢 ENVIAR LISTA ATUALIZADA NO WHATSAPP</button></div></div>
-    <p class="share-help"><strong>Como avisar o grupo:</strong> toque no botão verde acima → escolha o grupo <strong>LeRunners</strong> no WhatsApp → toque em <strong>Enviar</strong>. Apenas abrir o WhatsApp não publica a mensagem.</p>
+  <details class="list-panel" id="lista">
+    <summary><h2 class="heading">Ver participantes <span id="countYes">0</span></h2></summary><div class="list-content"><button class="secondary-btn" id="shareListBtn" type="button">Compartilhar lista no WhatsApp</button>
+    <p class="share-help">No WhatsApp, escolha o grupo LeRunners e toque em Enviar.</p>
     <div class="list-tools"><label class="sr-only" for="searchInput">Buscar participante</label><input class="control" type="search" id="searchInput" placeholder="Buscar participante..."><label class="sr-only" for="statusFilter">Filtrar por resposta</label><select class="control" id="statusFilter"><option value="sim" selected>Confirmados</option><option value="todos">Todas respostas</option><option value="talvez">Talvez</option><option value="nao">Não vão</option></select></div>
     <div id="guestList" class="guest-list" aria-live="polite"><div class="empty">Carregando lista de participantes...</div></div>
-  </section>
+  </div></details>
   <footer class="section-foot">Corrida do 17º BPM/I • Churrasco LeRunners • 08/11/2026 <br>Powered by <b>thIAguinho Soluções Digitais</b></footer>
 </div>
 <div id="loginOverlay" class="login-overlay" hidden>

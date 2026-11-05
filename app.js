@@ -55,7 +55,7 @@ function setStatus(state,message){
   $('statusDot').parentElement.title=message;
 }
 function updateConfigUI(){
-  $('heroEventTitle').textContent='🏃 '+config.title+' • 2026';
+  $('heroEventTitle').textContent='LeRunners • Domingo 08/11/2026';
   $('heroMessage').textContent=config.message;
   $('heroPlace').textContent=config.place;
   $('heroTime').textContent=config.time;
@@ -102,7 +102,7 @@ function sanitizeRecord(key,data){
 }
 function fillOwnResponse(){
   const own=currentList.find(item=>item.id===myId() && item.uid===auth.currentUser?.uid);
-  if(!own){$('savedMessage').classList.remove('visible');$('submitBtn').textContent='✅ 1. SALVAR MINHA RESPOSTA';return;}
+  if(!own){$('savedMessage').classList.remove('visible');$('submitBtn').textContent='1. SALVAR RESPOSTA';return;}
   if(document.activeElement && $('rsvpForm').contains(document.activeElement) && document.activeElement!==$('submitBtn'))return;
   $('userName').value=own.nome;
   document.querySelectorAll('[name="status"]').forEach(r=>{r.checked=r.value===own.status;});
@@ -163,10 +163,7 @@ function renderSummary(){
   const confirmed=currentList.filter(e=>tally(e).sim>0);
   const sum=key=>currentList.reduce((n,e)=>n+tally(e)[key],0);
   const yes=sum('sim'),maybe=sum('talvez'),no=sum('nao');
-  $('countPeople').textContent=num(yes+maybe);
   $('countYes').textContent=num(yes);
-  $('countMaybe').textContent=num(maybe);
-  $('countNo').textContent=num(no);
   const adults=currentList.filter(e=>e.status==='sim').length+currentList.reduce((n,e)=>n+e.guests.filter(g=>g.status==='sim'&&g.type!=='crianca').length,0);
   const children=currentList.reduce((n,e)=>n+e.guests.filter(g=>g.status==='sim'&&g.type==='crianca').length,0);
   $('countAdults').textContent=num(adults);$('countChildren').textContent=num(children);
@@ -258,20 +255,7 @@ function inviteMessage(){
 }
 async function shareInvitation(){
   if(!organizerOpen)return;
-  const fileUrl=new URL('assets/fotos/76107.jpg?v=20261108-corrida',cleanUrl()).href;
-  try{
-    if(navigator.share && navigator.canShare){
-      const response=await fetch(fileUrl);
-      if(!response.ok)throw new Error('Imagem indisponível');
-      const file=new File([await response.blob()],'LeRunners_FotoEquipe_2026.jpg',{type:'image/jpeg'});
-      if(navigator.canShare({files:[file]})){
-        await navigator.share({title:'Corrida do 17º BPM/I + Churrasco LeRunners',text:inviteMessage(),files:[file]});
-        return;
-      }
-    }
-  }catch(error){if(error?.name==='AbortError')return;console.warn('Compartilhamento de imagem indisponível:',error);}
   whatsapp(inviteMessage());
-  toast('No WhatsApp, o link exibirá a foto do grupo quando a prévia estiver disponível. Você também pode baixar a foto.');
 }
 async function copyInviteLink(){
   if(!organizerOpen)return;
@@ -483,7 +467,7 @@ function openMedia(button){
     const cap=document.createElement('figcaption');cap.textContent=button.getAttribute('data-caption')||'';figure.appendChild(cap);
   }else if(video){
     const vid=document.createElement('video');vid.className='media-modal-video';vid.controls=true;vid.playsInline=true;vid.preload='metadata';vid.src=video;figure.appendChild(vid);
-    const cap=document.createElement('figcaption');cap.textContent='Vídeo real da chácara';figure.appendChild(cap);
+    const cap=document.createElement('figcaption');cap.textContent='Vídeo';figure.appendChild(cap);
   }
   modal.hidden=false;document.body.style.overflow='hidden';$('closeMedia').focus();
 }
