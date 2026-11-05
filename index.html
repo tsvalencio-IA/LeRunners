@@ -7,7 +7,7 @@
   <meta name="description" content="LeRunners na 7ª Corrida do 17º BPM/I, domingo 8 de novembro de 2026. Confirme presença no churrasco pós-corrida, alcatra na chapa e contribuição para carnes e descartáveis.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="LeRunners • Corrida do 17º BPM/I e churrasco • 08/11/2026">
-  <meta property="og:description" content="Domingo 08/11: corrida do 17º BPM/I e confraternização com alcatra na chapa. R$ 30 por adulto; crianças a definir. Confirme sua presença.">
+  <meta property="og:description" content="Domingo 08/11: corrida do 17º BPM/I e confraternização com alcatra na chapa. R$ 30 por adulto; crianças grátis. Confirme sua presença.">
   <meta property="og:url" content="https://tsvalencio-ia.github.io/LeRunners/">
   <title>LeRunners • Corrida 17º BPM/I e Churrasco • 08/11/2026</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -261,11 +261,11 @@ body{background:var(--bg);color:var(--white)}
         <form id="paymentPrices">
           <div class="columns-2">
             <div class="field"><label for="paymentAdults">Valor por adulto (R$)</label><input class="control" id="paymentAdults" inputmode="decimal" value="30,00" required></div>
-            <div class="field"><label for="paymentChildren">Valor por criança (R$) — opcional</label><input class="control" id="paymentChildren" inputmode="decimal" placeholder="A definir / 0,00 se isenta"></div>
+            <div class="field"><label for="paymentChildren">Crianças — grátis (R$)</label><input class="control" id="paymentChildren" value="0,00" readonly aria-label="Crianças grátis: zero reais"></div>
           </div>
           <button class="primary-btn" type="submit">Salvar valores</button>
         </form>
-        <p class="payment-help">Você também pode definir um valor individual diferente para cada criança. Deixe o valor infantil vazio enquanto não estiver decidido; informe 0,00 para isenção.</p>
+        <p class="payment-help">Crianças são isentas neste evento. O sistema não gera cobranças para elas. Caso existam lançamentos anteriores, os valores originais são preservados para conferência.</p>
         <div class="payment-panels" aria-live="polite">
           <div><strong id="paymentDue">R$ 0,00</strong><span>Total previsto (valores definidos)</span></div>
           <div><strong id="paymentReceived">R$ 0,00</strong><span>Recebido</span></div>
@@ -295,7 +295,7 @@ body{background:var(--bg);color:var(--white)}
 <span class="hero-eyebrow" id="heroEventTitle">LeRunners • Domingo 08/11</span>
 <h1>Corrida do 17º BPM/I<span>Carne na chapa com a equipe</span></h1>
 <p id="heroMessage" class="hero-blurb">Depois da corrida, alcatra em tirinhas na chapa.</p>
-<div class="facts"><p><b>R$ 30 por adulto</b> para carne e descartáveis. Crianças: preço definido pelo organizador.</p><p>Cada um leva sua bebida. Haverá chope gratuito no evento, mas a fila pode ser grande.</p></div>
+<div class="facts"><p><b>R$ 30 por adulto</b> para carne e descartáveis. Crianças: grátis.</p><p>Cada um leva sua bebida. Haverá chope gratuito no evento, mas a fila pode ser grande.</p></div>
 <p class="place"><b id="heroPlace">Confraternização pós-prova</b> • <span id="heroTime">Local e horário a confirmar</span></p>
 <a class="primary-btn" href="#confirmar">Responder à enquete</a></div></header>  <section class="layout" id="confirmar">
     <div class="panel">
@@ -338,6 +338,6 @@ body{background:var(--bg);color:var(--white)}
 </div>
 <div id="toast" class="toast" role="status" hidden></div>
 <div id="mediaModal" class="modal" role="dialog" aria-modal="true" aria-label="Visualizar mídia" hidden><button class="modal-close" id="closeMedia" type="button" aria-label="Fechar">×</button><figure id="mediaFigure"></figure></div>
-<script type="module" src="app.js?v=20261105-whatsapp-horario"></script>
+<script type="module" src="app.js?v=20261105-criancas-gratis"></script>
 </body>
 </html>

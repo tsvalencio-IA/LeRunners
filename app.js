@@ -1,6 +1,6 @@
 /* LeRunners • corrida 17º BPM/I em 08/11/2026. Dados dos eventos anteriores preservados. */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-import { initPayments, refreshPayments } from './payments.js';
+import { initPayments, refreshPayments } from './payments.js?v=20261105-criancas-gratis';
 import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 import { getDatabase, ref, push, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js';
 
@@ -252,7 +252,7 @@ function whatsappEventDetails(){
 function shareWhatsApp(){
   const groups=currentList.filter(e=>tally(e).sim>0).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
   const count=groups.reduce((n,e)=>n+tally(e).sim,0);
-  let message='🏃 *LERUNNERS | CORRIDA 17º BPM/I + CHURRASCO*\n📅 *Domingo, 08/11/2026*\n🥩 Alcatra em tirinhas na chapa após a prova\n💰 R$ 30 por adulto (referência); crianças: organização define\n🥤 Cada um leva sua bebida\n'+whatsappEventDetails()+'\n\n';
+  let message='🏃 *LERUNNERS | CORRIDA 17º BPM/I + CHURRASCO*\n📅 *Domingo, 08/11/2026*\n🥩 Alcatra em tirinhas na chapa após a prova\n💰 R$ 30 por adulto; crianças grátis\n🥤 Cada um leva sua bebida\n'+whatsappEventDetails()+'\n\n';
   message+='✅ *CONFIRMADOS NO CHURRASCO* ('+count+' pessoas)\n\n';
   message+=groups.length?groups.map((g,i)=>{
     const guests=g.guests.filter(p=>p.status==='sim').map(p=>p.name+(p.type==='crianca'?' (criança)':''));
@@ -262,7 +262,7 @@ function shareWhatsApp(){
   whatsapp(message);
 }
 function inviteMessage(){
-  return '🏃 *LERUNNERS | CORRIDA DO 17º BPM/I*\n📅 Domingo, 08/11/2026\n🥩 Depois da prova: alcatra em tirinhas na chapa\n💰 R$ 30 por adulto (referência); crianças: organização define\n🥤 Cada um leva sua bebida. Há previsão de chope grátis no evento, mas filas grandes.\n'+whatsappEventDetails()+'\n\n*Responda à enquete:*\n'+cleanUrl()+'\n\nDepois de salvar, toque em *ENVIAR ATUALIZAÇÃO*, selecione o *GRUPO LeRunners* e toque em *ENVIAR* no WhatsApp.';
+  return '🏃 *LERUNNERS | CORRIDA DO 17º BPM/I*\n📅 Domingo, 08/11/2026\n🥩 Depois da prova: alcatra em tirinhas na chapa\n💰 R$ 30 por adulto; crianças grátis\n🥤 Cada um leva sua bebida. Há previsão de chope grátis no evento, mas filas grandes.\n'+whatsappEventDetails()+'\n\n*Responda à enquete:*\n'+cleanUrl()+'\n\nDepois de salvar, toque em *ENVIAR ATUALIZAÇÃO*, selecione o *GRUPO LeRunners* e toque em *ENVIAR* no WhatsApp.';
 }
 async function shareInvitation(){
   if(!organizerOpen)return;

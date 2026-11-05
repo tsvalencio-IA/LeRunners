@@ -2,7 +2,7 @@
  * Não armazena pagamentos no Firebase; cópia/transferência por backup JSON.
  */
 const KEY='lerunners_17bpmi_20261108_pagamentos_v1';
-let active=false,source=()=>[],ledger={adult:3000,child:null,overrides:{},received:{}};
+let active=false,source=()=>[],ledger={adult:3000,child:0,overrides:{},received:{}};
 const $=id=>document.getElementById(id);
 const brl=n=>(Number(n||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -34,17 +34,19 @@ function people(){
  return rows.sort((a,b)=>a.owner.localeCompare(b.owner,'pt-BR')||a.id.localeCompare(b.id));
 }
 function due(person){
+ // Crianças são grátis no evento de 08/11, inclusive se houver valor especial salvo antes.
+ if(person.kind==='crianca')return 0;
  if(Object.prototype.hasOwnProperty.call(ledger.overrides,person.id)){
   const override=ledger.overrides[person.id];
   if(Number.isSafeInteger(override)&&override>=0)return override;
  }
- return person.kind==='crianca'?ledger.child:ledger.adult;
+ return ledger.adult;
 }
 function collect(){
  const rows=people().map(p=>{
   const value=due(p);
   const paid=Number.isSafeInteger(ledger.received[p.id]?.amount)?ledger.received[p.id].amount:0;
-  const status=value===null?'Valor indefinido':value===0?'Isento':paid>=value?'Pago':paid>0?'Parcial':'Pendente';
+  const status=p.kind==='crianca'?(paid>0?'Pagamento infantil anterior a conferir':'Isento — grátis'):value===null?'Valor indefinido':value===0?'Isento':paid>=value?'Pago':paid>0?'Parcial':'Pendente';
   return {...p,due:value,paid,status,when:ledger.received[p.id]?.when||'',note:ledger.received[p.id]?.note||''};
  });
  const charge=rows.reduce((n,r)=>n+(r.due??0),0),received=rows.reduce((n,r)=>n+r.paid,0);
@@ -56,12 +58,17 @@ function render(){
  if(!active)return;
  const report=collect();
  $('paymentAdults').value=(ledger.adult/100).toFixed(2).replace('.',',');
- $('paymentChildren').value=ledger.child===null?'':(ledger.child/100).toFixed(2).replace('.',',');
+ $('paymentChildren').value='0,00';
  $('paymentDue').textContent=brl(report.charge);
  $('paymentReceived').textContent=brl(report.received);
  $('paymentPending').textContent=brl(report.pending);
- $('paymentUnknown').textContent=report.unknown?report.unknown+' criança(s) com valor a definir':'Todos os valores definidos';
+ const oldChildPayments=report.rows.filter(p=>p.kind==='crianca'&&p.paid>0).length;
+ $('paymentUnknown').textContent=oldChildPayments?`Crianças grátis. ${oldChildPayments} pagamento(s) infantil(is) antigo(s) precisam de conferência; os registros foram preservados.`:'Crianças grátis: sem cobrança.';
  $('paymentRows').innerHTML=report.rows.length?report.rows.map(p=>{
+  if(p.kind==='crianca'){
+   const prior=p.paid>0?'<small class="payment-status">Recebimento anterior: '+brl(p.paid)+'. Histórico preservado para conferência.</small>':'';
+   return '<section class="payment-person"><div class="payment-person-top"><div><b>'+escape(p.name)+'</b><small>Criança • Responsável: '+escape(p.owner)+'</small></div><strong>GRÁTIS — R$ 0,00</strong></div><small class="payment-status">Isenta de contribuição neste evento.</small>'+prior+'</section>';
+  }
   const isOverridden=Object.hasOwn(ledger.overrides,p.id);
   const overridden=isOverridden?ledger.overrides[p.id]:null;
   return '<section class="payment-person" data-person-id="'+escape(p.id)+'"><div class="payment-person-top"><div><b>'+escape(p.name)+'</b><small>'+escape(p.kind==='crianca'?'Criança':'Adulto')+' • Responsável: '+escape(p.owner)+'</small></div><strong>'+ (p.due===null?'A definir':brl(p.due))+'</strong></div>'+
@@ -75,20 +82,20 @@ function render(){
 }
 function setPrices(event){
  event.preventDefault();
- const adult=parseAmount($('paymentAdults').value),child=parseAmount($('paymentChildren').value,true);
- if(adult===undefined||child===undefined||adult===null){notice('Informe valores em reais com vírgula para os centavos; deixe criança em branco se ainda não definiu.',true);return;}
- const before={adult:ledger.adult,child:ledger.child};ledger.adult=adult;ledger.child=child;
+ const adult=parseAmount($('paymentAdults').value);
+ if(adult===undefined||adult===null){notice('Informe um valor válido em reais para adultos.',true);return;}
+ const before={adult:ledger.adult,child:ledger.child};ledger.adult=adult;ledger.child=0;
  if(!save()){ledger.adult=before.adult;ledger.child=before.child;return;}
- render();notice('Valores do administrador salvos neste navegador. O valor infantil em branco permanece a definir.');
+ render();notice('Preço dos adultos salvo. Crianças são grátis neste evento.');
 }
 function savePerson(event){
  const button=event.target.closest('.payment-save');if(!button)return;
  const row=button.closest('[data-person-id]');if(!row)return;
  const id=row.dataset.personId,p=people().find(q=>q.id===id);if(!p){notice('Participante não encontrado.',true);return;}
+ if(p.kind==='crianca'){notice('Crianças são grátis e não têm cobrança.',true);return;}
  const override=parseAmount(row.querySelector('.payment-override').value,true),paid=parseAmount(row.querySelector('.payment-received').value);
  if(override===undefined||paid===undefined||paid===null){notice('Valor inválido. Digite 30,00 ou deixe o valor especial vazio.',true);return;}
- const amount=override===null?(p.kind==='crianca'?ledger.child:ledger.adult):override;
- if(amount===null&&paid>0){notice('Defina primeiro o valor desta criança.',true);return;}
+ const amount=override===null?ledger.adult:override;
  if(amount!==null&&paid>amount){notice('O recebido não pode exceder o valor individual. Verifique o lançamento.',true);return;}
  const oldOverrides={...ledger.overrides},oldReceived={...ledger.received};
  if(override===null)delete ledger.overrides[id];else ledger.overrides[id]=override;
