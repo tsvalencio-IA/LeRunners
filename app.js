@@ -16,8 +16,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const DATA_PATH = 'lerunners_lista/corrida_17bpmi_20261108/respostas';
-const CONFIG_PATH = 'lerunners_config/corrida_17bpmi_20261108';
+// Reutiliza os pontos de acesso que já funcionavam nas regras existentes.
+// O evento novo é isolado pelo campo eventId, sem sobrescrever respostas de 01/11.
+const EVENT_ID = 'corrida_17bpmi_20261108';
+const DATA_PATH = 'lerunners_lista/halloween_2026/respostas';
+const CONFIG_PATH = 'lerunners_config/halloween_2026';
+const EVENT_CONFIG_PATH = `${CONFIG_PATH}/events/${EVENT_ID}`;
 const STORAGE_KEY = 'lerunners_corrida_17bpmi_20261108_my_response';
 const NAME_KEY = 'lerunners_corrida_17bpmi_20261108_name';
 const listaRef = ref(db, DATA_PATH);
@@ -91,10 +95,11 @@ function tally(record){
   return stats;
 }
 function sanitizeRecord(key,data){
-  if(!data || typeof data!=='object'||!['sim','nao','talvez'].includes(data.status))return null;
+  // Nunca carregar inscrições anteriores nesta lista, nem permitir exclusão acidental.
+  if(!data || typeof data!=='object'||data.eventId!==EVENT_ID||!['sim','nao','talvez'].includes(data.status))return null;
   const guests=normalizeGuests(data.guests,data.status,data.people,data.guestStatuses,data.guestTypes);
   return {
-    id:key,uid:String(data.uid||''),nome:String(data.nome||'').slice(0,80),
+    id:key,eventId:EVENT_ID,uid:String(data.uid||''),nome:String(data.nome||'').slice(0,80),
     status:data.status,people:Math.max(0,Math.min(10,Number(data.people)||0)),guests,guestsUncertain:Boolean(data.guestsUncertain),
     note:String(data.note||'').slice(0,260),
     timestamp:Number(data.timestamp)||0,updatedAt:Number(data.updatedAt)||0
@@ -216,7 +221,7 @@ async function saveResponse(ev){
   const invalid=guests.find(g=>g.name.length<2||g.name.length>80||!['sim','talvez','nao'].includes(g.status));
   if(invalid){toast('Preencha o nome e a confirmação de cada convidado.',true);$('guestRows').querySelector('.guest-name:placeholder-shown')?.focus();return;}
   const people=(status!=='nao'?1:0)+guests.filter(g=>g.status!=='nao').length;
-  const payload={nome,status,people,guests:guests.map(g=>g.name),guestStatuses:guests.map(g=>g.status),guestTypes:guests.map(g=>g.type),guestsUncertain,uid:auth.currentUser.uid,note:$('note').value.trim(),updatedAt:Date.now()};
+  const payload={eventId:EVENT_ID,nome,status,people,guests:guests.map(g=>g.name),guestStatuses:guests.map(g=>g.status),guestTypes:guests.map(g=>g.type),guestsUncertain,uid:auth.currentUser.uid,note:$('note').value.trim(),updatedAt:Date.now()};
   const already=currentList.find(e=>e.id===myId());
   if(already&&already.uid!==payload.uid){toast('Este registro pertence a outra sessão. Não será alterado.',true);return;}
   payload.timestamp=already?.timestamp||Date.now();
@@ -299,13 +304,14 @@ async function saveConfig(){
   const place=$('configPlace').value.trim();
   const message=$('configMessage').value.trim();
   if(!title||!time||!place||!message){toast('Preencha todos os dados do evento.',true);return;}
-  try{await set(configRef,{title,time,place,message,version:1});toast('Informações publicadas em tempo real!');}
+  // Edita somente a configuração deste evento, sem substituir a do encontro anterior.
+  try{await set(ref(db,EVENT_CONFIG_PATH),{title,time,place,message,version:1});toast('Informações publicadas em tempo real!');}
   catch(e){console.error(e);toast('Não foi possível salvar. Tente novamente.',true);}
 }
 async function deleteRecord(id){
   if(!organizerOpen)return;
   const entry=currentList.find(e=>e.id===id);
-  if(!entry)return;
+  if(!entry||entry.eventId!==EVENT_ID)return;
   if(!confirm(`Remover APENAS a resposta de ${entry.nome} da corrida de 08/11?`))return;
   try{await remove(ref(db,`${DATA_PATH}/${id}`));toast('Resposta removida.');}
   catch(e){console.error(e);toast('Não foi possível remover a resposta.',true);}
@@ -314,7 +320,15 @@ async function clearEventList(){
   if(!organizerOpen)return;
   const phrase=prompt('ATENÇÃO: apaga SOMENTE a lista desta corrida de 08/11/2026. Digite APAGAR CORRIDA 2026 para confirmar:');
   if(phrase!=='APAGAR CORRIDA 2026'){if(phrase!==null)toast('Exclusão cancelada.');return;}
-  try{await remove(listaRef);localStorage.removeItem(STORAGE_KEY);$('savedMessage').classList.remove('visible');toast('Lista da corrida apagada; histórico de outros eventos preservado.');}
+  // Jamais apagar listaRef: ela também contém as inscrições históricas de 01/11.
+  try{
+    if(currentList.some(e=>e.eventId!==EVENT_ID))throw new Error('Lista fora do evento atual');
+    const ids=currentList.map(e=>e.id);
+    for(const id of ids)await remove(ref(db,`${DATA_PATH}/${id}`));
+    localStorage.removeItem(STORAGE_KEY);
+    $('savedMessage').classList.remove('visible');
+    toast(`${ids.length} respostas da corrida removidas; histórico anterior mantido.`);
+  }
   catch(e){console.error(e);toast('Falha ao limpar a lista.',true);}
 }
 function buildReportPDF(){
@@ -513,7 +527,8 @@ async function connectLive(){
     await signInAnonymously(auth);
     setStatus('connecting','Sincronizando...');
     onValue(configRef,snapshot=>{
-      const incoming=snapshot.val();
+      // A assinatura usa o caminho antigo já autorizado; só lê o subregistro desta corrida.
+      const incoming=snapshot.val()?.events?.[EVENT_ID];
       config=(incoming && typeof incoming==='object'&& incoming.version===1)
         ? {title:String(incoming.title||defaults.title),time:String(incoming.time||defaults.time),place:String(incoming.place||defaults.place),message:String(incoming.message||defaults.message),version:1}
         : {...defaults};
