@@ -1,4 +1,4 @@
-const CACHE = 'lerunners-corrida-17bpmi-20261108-v3-firebase-compat';
+const CACHE = 'lerunners-corrida-17bpmi-20261108-v4-whatsapp-horario';
 const SHELL = ['./', './index.html', './app.js', './payments.js', './manifest.webmanifest', './assets/icones/favicon.svg', './assets/icones/icone-192.png', './assets/icones/icone-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => Promise.allSettled(SHELL.map(url => cache.add(url)))).then(() => self.skipWaiting()));

@@ -243,20 +243,26 @@ function cleanUrl(){return location.origin+location.pathname+'?v=20261108-corrid
 function whatsapp(message){
   window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
 }
+function whatsappEventDetails(){
+  // Mesmos campos exibidos no site e salvos em Informações do evento (admin).
+  const place=String(config.place||defaults.place).trim();
+  const time=String(config.time||defaults.time).trim();
+  return '📍 *Local:* '+place+'\n🕒 *Horário:* '+time;
+}
 function shareWhatsApp(){
- const groups=currentList.filter(e=>tally(e).sim>0).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
- const count=groups.reduce((n,e)=>n+tally(e).sim,0);
- let message='🏃 *LERUNNERS | CORRIDA 17º BPM/I + CHURRASCO*\n📅 *Domingo, 08/11/2026*\n🥩 Alcatra em tirinhas na chapa após a prova\n💰 R$ 30 por adulto (referência); crianças: organização define\n🥤 Cada um leva sua bebida\n📍 Local e horário do churrasco a confirmar\n\n';
- message+='✅ *CONFIRMADOS NO CHURRASCO* ('+count+' pessoas)\n\n';
- message+=groups.length?groups.map((g,i)=>{
-   const guests=g.guests.filter(p=>p.status==='sim').map(p=>p.name+(p.type==='crianca'?' (criança)':''));
-   return (i+1)+'. '+g.nome+(g.status==='sim'?'':' (responsável)')+(guests.length?'\n   + '+guests.join(', '):'');
- }).join('\n'):'Ainda aguardando confirmações.';
- message+='\n\n🔗 *Confirmar ou atualizar:*\n'+cleanUrl();
- whatsapp(message);
+  const groups=currentList.filter(e=>tally(e).sim>0).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  const count=groups.reduce((n,e)=>n+tally(e).sim,0);
+  let message='🏃 *LERUNNERS | CORRIDA 17º BPM/I + CHURRASCO*\n📅 *Domingo, 08/11/2026*\n🥩 Alcatra em tirinhas na chapa após a prova\n💰 R$ 30 por adulto (referência); crianças: organização define\n🥤 Cada um leva sua bebida\n'+whatsappEventDetails()+'\n\n';
+  message+='✅ *CONFIRMADOS NO CHURRASCO* ('+count+' pessoas)\n\n';
+  message+=groups.length?groups.map((g,i)=>{
+    const guests=g.guests.filter(p=>p.status==='sim').map(p=>p.name+(p.type==='crianca'?' (criança)':''));
+    return (i+1)+'. '+g.nome+(g.status==='sim'?'':' (responsável)')+(guests.length?'\n   + '+guests.join(', '):'');
+  }).join('\n'):'Ainda aguardando confirmações.';
+  message+='\n\n🔗 *Confirmar ou atualizar:*\n'+cleanUrl();
+  whatsapp(message);
 }
 function inviteMessage(){
- return '🏃 *LERUNNERS | CORRIDA 17º BPM/I*\n📅 Domingo, 08/11/2026\n🥩 Depois da prova: alcatra em tirinhas na chapa\n💰 R$ 30 por adulto (referência); crianças: organização define\n🥤 Cada um leva sua bebida. Há previsão de chope grátis no evento, mas filas grandes.\n📍 Churrasco: local e horário a confirmar\n\n*Responda à enquete:*\n'+cleanUrl()+'\n\nDepois de salvar, toque em *ENVIAR ATUALIZAÇÃO*, selecione o *GRUPO LeRunners* e toque em *ENVIAR* no WhatsApp.';
+  return '🏃 *LERUNNERS | CORRIDA DO 17º BPM/I*\n📅 Domingo, 08/11/2026\n🥩 Depois da prova: alcatra em tirinhas na chapa\n💰 R$ 30 por adulto (referência); crianças: organização define\n🥤 Cada um leva sua bebida. Há previsão de chope grátis no evento, mas filas grandes.\n'+whatsappEventDetails()+'\n\n*Responda à enquete:*\n'+cleanUrl()+'\n\nDepois de salvar, toque em *ENVIAR ATUALIZAÇÃO*, selecione o *GRUPO LeRunners* e toque em *ENVIAR* no WhatsApp.';
 }
 async function shareInvitation(){
   if(!organizerOpen)return;
@@ -305,7 +311,12 @@ async function saveConfig(){
   const message=$('configMessage').value.trim();
   if(!title||!time||!place||!message){toast('Preencha todos os dados do evento.',true);return;}
   // Edita somente a configuração deste evento, sem substituir a do encontro anterior.
-  try{await set(ref(db,EVENT_CONFIG_PATH),{title,time,place,message,version:1});toast('Informações publicadas em tempo real!');}
+  try{
+    await set(ref(db,EVENT_CONFIG_PATH),{title,time,place,message,version:1});
+    config={title,time,place,message,version:1};
+    updateConfigUI();
+    toast('Informações publicadas em tempo real!');
+  }
   catch(e){console.error(e);toast('Não foi possível salvar. Tente novamente.',true);}
 }
 async function deleteRecord(id){
