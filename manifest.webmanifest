@@ -1,7 +1,7 @@
 {
-  "name": "LeRunners • Encontro de Lanches e Confraternização 2026",
+  "name": "LeRunners • Corrida 17º BPM/I + Churrasco 08/11/2026",
   "short_name": "LeRunners",
-  "description": "Confirmação do encontro de lanches e confraternização da equipe, com lista em tempo real",
+  "description": "Enquete do churrasco LeRunners após a Corrida do 17º BPM/I em 08 de novembro de 2026",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,10 +1,10 @@
-const CACHE = 'lerunners-encontro-2026-v8-financeiro';
-const SHELL = ['./', './index.html', './app.js', './finance.js', './manifest.webmanifest', './assets/icones/favicon.svg', './assets/icones/icone-192.png', './assets/icones/icone-512.png', './assets/fotos/302971.jpg', './assets/fotos/76107.jpg', './assets/fotos/143240.jpg', './assets/fotos/302969.jpg'];
+const CACHE = 'lerunners-corrida-17bpmi-20261108-v1';
+const SHELL = ['./', './index.html', './app.js', './payments.js', './manifest.webmanifest', './assets/icones/favicon.svg', './assets/icones/icone-192.png', './assets/icones/icone-512.png', './assets/fotos/302971.jpg', './assets/fotos/76107.jpg', './assets/fotos/143240.jpg', './assets/fotos/75086.jpg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => Promise.allSettled(SHELL.map(url => cache.add(url)))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => (key.startsWith('lerunners-halloween-') || key.startsWith('lerunners-encontro-')) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => (key.startsWith('lerunners-halloween-') || key.startsWith('lerunners-encontro-') || key.startsWith('lerunners-corrida-17bpmi-')) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', event => {
   const req = event.request;

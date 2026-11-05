@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#111b17">
-  <meta name="description" content="Encontro de Lanches e Confraternização LeRunners: domingo, 1º de novembro, às 12h, com churrasco leve, piscina e início do preparo dos hambúrgueres às 16h.">
+  <meta name="description" content="LeRunners na 7ª Corrida do 17º BPM/I, domingo 8 de novembro de 2026. Confirme presença no churrasco pós-corrida, alcatra na chapa e contribuição para carnes e descartáveis.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Encontro de Lanches e Confraternização LeRunners • 01/11/2026">
-  <meta property="og:description" content="Domingo, 1º de novembro: encontro às 12h, churrasco leve, piscina e preparo dos hambúrgueres a partir das 16h. Confirme sua presença.">
+  <meta property="og:title" content="LeRunners • Corrida do 17º BPM/I e churrasco • 08/11/2026">
+  <meta property="og:description" content="Domingo 08/11: corrida do 17º BPM/I e confraternização com alcatra na chapa. R$ 30 por adulto; crianças a definir. Confirme sua presença.">
   <meta property="og:url" content="https://tsvalencio-ia.github.io/LeRunners/">
-  <meta property="og:image" content="https://tsvalencio-ia.github.io/LeRunners/assets/fotos/76107.jpg?v=20261101-lanches">
-  <title>Encontro de Lanches e Confraternização LeRunners • 2026</title>
+  <meta property="og:image" content="https://tsvalencio-ia.github.io/LeRunners/assets/fotos/76107.jpg?v=20261108-corrida">
+  <title>LeRunners • Corrida 17º BPM/I e Churrasco • 08/11/2026</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icones/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,6 +105,46 @@
     #financeFeedback{font-size:12px;margin:10px 0;color:#b6f1cd;min-height:18px}
     @media(max-width:850px){.finance-form-grid{grid-template-columns:1fr 1fr}}
     @media(max-width:510px){.finance-panel{padding:14px 11px}.finance-form-grid{grid-template-columns:1fr}.finance-summary{grid-template-columns:1fr}.finance-summary strong{font-size:20px}.finance-toolrow>*{flex:1;justify-content:center;text-align:center}}
+
+    /* Evento 08/11: formulário curto e orientação WhatsApp explícita. */
+    .guest-editor-controls{grid-template-columns:minmax(0,1fr) 120px 105px auto}
+    @media(max-width:710px){
+      .guest-editor-controls{grid-template-columns:minmax(0,1fr) 1fr}
+      .guest-editor-controls .guest-name{grid-column:1/-1}
+      .guest-editor-controls .guest-status{grid-column:1}
+      .guest-editor-controls .guest-type{grid-column:2}
+      .guest-editor-controls .guest-remove{grid-column:1/-1;justify-self:stretch}
+    }
+    .rsvp-share-step{margin-top:17px;padding:19px;border:2px solid #47c982;background:linear-gradient(120deg,#103f2f,#174d36);border-radius:16px;box-shadow:0 12px 35px #0005}
+    .rsvp-share-step[hidden]{display:none!important}
+    .rsvp-share-step h3{font:900 22px Outfit,sans-serif;color:#e4ffe9;margin:0 0 7px}
+    .rsvp-share-step p{font-size:13px;color:#dbf4e4;margin:6px 0 13px}
+    .rsvp-share-step ol{padding-left:21px;margin:9px 0 13px;color:#efffed;font-weight:700;font-size:13px}
+    .rsvp-share-step li{padding:3px 0}
+    .whatsapp-cta{background:#24ce70!important;color:#072514!important;font-size:15px!important;font-weight:900!important;min-height:54px;width:100%;border:0!important;box-shadow:0 9px 22px #071b1277}
+    .share-help{padding:15px;border:1px solid #41865c;border-radius:12px;background:#173626;color:#d9f5e2;margin-top:12px;font-size:13px}
+    .share-help strong{color:white}
+    .payment-panel{padding:19px;background:#15291f;border:1px solid #4b795f;border-radius:17px;margin:22px 0}
+    .payment-panel h3{font-size:23px;color:#fff4dd;margin:5px 0 10px}
+    .payment-panel .payment-help{font-size:12px;color:#d1e6d7;line-height:1.6}
+    .payment-panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+    .payment-panels>div{padding:13px;background:#244132;border:1px solid #477b58;border-radius:12px}
+    .payment-panels strong{font:900 22px Outfit,sans-serif;color:#ffe1a0;display:block;overflow-wrap:anywhere}
+    .payment-panels span{color:#d0e6d8;font-size:11px}
+    .payment-person{margin:11px 0;padding:13px;border:1px solid #54745d;background:#1d3527;border-radius:13px}
+    .payment-person-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .payment-person-top small,.payment-status{display:block;color:#c4e2cd;font-size:11px;margin-top:3px}
+    .payment-person-top>strong{color:#ffe3a7;font-size:17px}
+    .payment-person-row{display:flex;gap:9px;align-items:end;flex-wrap:wrap;margin:10px 0}
+    .payment-person-row label{flex:1 1 190px;font-weight:800;font-size:12px;color:#f9e8dc;min-width:0}
+    .payment-person-row .control{margin-top:5px;background:#14281c}
+    .payment-person-row button{min-height:48px}
+    .payment-tools{display:flex;flex-wrap:wrap;gap:9px;margin:13px 0}
+    .payment-tools>*{max-width:100%}
+    #paymentMessage{font-size:12px;min-height:22px;color:#bbf1d0}
+    #paymentImport[hidden]{display:none!important}
+    .rsvp-price{padding:11px 14px;border-radius:10px;border:1px solid #57805c;background:#1b3927;color:#e5f8e7;font-size:13px;margin-bottom:16px}
+    @media(max-width:650px){.payment-panels{grid-template-columns:1fr}.payment-panel{padding:14px 12px}.hero h1{font-size:clamp(36px,10vw,58px)}.hero h1 span{font-size:.54em}.payment-tools>*{flex:1}}
   </style>
 </head>
 <body>
@@ -117,59 +157,47 @@
     <div class="admin-header"><div><span class="eyebrow">Acesso reservado</span><h2 class="heading">Organização do evento</h2></div><button class="tiny-btn" id="closeAdminBtn" type="button">Fechar ✕</button></div>
     <div class="admin-dashboard">
       <div class="admin-metrics">
-        <div><strong id="countBurger">0 respostas</strong><span>Hambúrguer tradicional / tanto faz</span></div>
-        <div><strong id="countVeggie">0 respostas</strong><span>Preferência vegetariana</span></div>
+        <div><strong id="countAdults">0</strong><span>Adultos confirmados</span></div>
+        <div><strong id="countChildren">0</strong><span>Crianças confirmadas</span></div>
         <div><strong id="countRegistrations">0</strong><span>Inscrições registradas</span></div>
-        <div><strong id="countBringing">0</strong><span>Contribuições informadas</span></div>
+        <div><strong id="countConfirmedGroups">0</strong><span>Grupos com participantes confirmados</span></div>
       </div>
-      <h3>O que cada pessoa pretende levar</h3>
-      <div id="bringSummary" class="summary"></div>
       <div id="adminGuestList" class="admin-guest-list" aria-live="polite"></div>
       <div class="admin-actions">
         <button class="secondary-btn" id="pdfBtn" type="button">↓ Exportar relatório PDF</button>
         <button class="green-btn" id="inviteBtn" type="button">↗ Enviar convite com foto</button><button class="secondary-btn" id="copyInviteBtn" type="button">⧉ Copiar link de confirmação</button>
-        <a class="secondary-btn" href="assets/fotos/76107.jpg?v=20261101-lanches" download="LeRunners-Confraternizacao-Foto-do-Grupo.jpg">↓ Baixar foto do encontro</a>
+        <a class="secondary-btn" href="assets/fotos/76107.jpg?v=20261108-corrida" download="LeRunners_FotoEquipe.jpg">↓ Baixar foto do encontro</a>
       </div>
-      <img class="invite-preview" src="assets/fotos/76107.jpg?v=20261101-lanches" alt="Fotografia original do grupo LeRunners na confraternização" loading="lazy">
+      <img class="invite-preview" src="assets/fotos/76107.jpg?v=20261108-corrida" alt="Fotografia original do grupo LeRunners na confraternização" loading="lazy">
     </div>
 
-      <section class="finance-panel" id="financePanel" aria-labelledby="financeTitle">
-        <span class="eyebrow">Somente no painel do organizador</span>
-        <h3 id="financeTitle" class="heading">Despesas das compras e rateio</h3>
-        <p class="finance-help"><strong>Armazenamento neste navegador:</strong> valores e notas ficam no dispositivo usado para lançar. Não são enviados para a lista pública nem para o Firebase. Use <b>Exportar backup</b> após lançar as notas para não perder os comprovantes e poder restaurá-los em outro aparelho.</p>
-        <form id="financeForm" autocomplete="off">
-          <input id="financeEditId" type="hidden">
-          <div class="finance-form-grid">
-            <div class="field"><label for="financeDescription">Descrição da compra *</label><input class="control" id="financeDescription" maxlength="110" placeholder="Ex.: carne, pão, queijo, molhos" required></div>
-            <div class="field"><label for="financeStore">Estabelecimento (opcional)</label><input class="control" id="financeStore" maxlength="100" placeholder="Nome do mercado"></div>
-            <div class="field"><label for="financeAmount">Valor total da nota (R$) *</label><input class="control" id="financeAmount" inputmode="decimal" placeholder="Ex.: 245,80" required></div>
-            <div class="field"><label for="financeDate">Data da compra *</label><input class="control" id="financeDate" type="date" required></div>
-            <div class="field finance-full"><label for="financeNote">Observação (opcional)</label><input class="control" id="financeNote" maxlength="280" placeholder="Ex.: compra de ingredientes para os lanches"></div>
-            <div class="field finance-full"><label for="financeFile">Foto ou PDF da nota fiscal (opcional, até 5 MB)</label><input class="control" id="financeFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"><span class="hint" id="financeExistingReceipt"></span></div>
+      <section class="payment-panel" id="paymentPanel">
+        <span class="eyebrow">Administração • Corrida de 08/11</span>
+        <h3 class="heading">Valores e controle de pagamentos</h3>
+        <p class="payment-help">Somente neste navegador: o painel registra quem pagou, quanto pagou e quanto está pendente. Os pagamentos não são enviados para o Firebase nem aparecem na lista pública. Exporte um backup após atualizar.</p>
+        <form id="paymentPrices">
+          <div class="columns-2">
+            <div class="field"><label for="paymentAdults">Valor por adulto (R$)</label><input class="control" id="paymentAdults" inputmode="decimal" value="30,00" required></div>
+            <div class="field"><label for="paymentChildren">Valor por criança (R$) — opcional</label><input class="control" id="paymentChildren" inputmode="decimal" placeholder="A definir / 0,00 se isenta"></div>
           </div>
-          <div class="finance-toolrow"><button class="primary-btn" type="submit" id="financeSaveBtn">Salvar despesa</button><button class="secondary-btn" id="financeCancelEdit" type="button" hidden>Cancelar edição</button></div>
+          <button class="primary-btn" type="submit">Salvar valores</button>
         </form>
-        <p id="financeFeedback" role="status" aria-live="polite"></p>
-        <h4>Notas e despesas lançadas</h4>
-        <div id="financeExpenses"></div>
-        <h4>Quem entra no rateio</h4>
-        <p class="finance-help">São selecionados inicialmente os titulares e convidados com resposta <strong>Sim</strong>. Desmarque quem não deve pagar; isso não muda a lista de presença. Cada pessoa marcada tem uma cota igual.</p>
-        <div id="financePayers"></div>
-        <div class="finance-summary" aria-live="polite">
-          <div><strong id="financeTotal">R$ 0,00</strong><span>Total das despesas</span></div>
-          <div><strong id="financeCount">0</strong><span>Pessoas incluídas no rateio</span></div>
-          <div><strong id="financeEach">R$ 0,00</strong><span>Valor por pessoa (antes dos ajustes de centavos)</span></div>
+        <p class="payment-help">Você também pode definir um valor individual diferente para cada criança. Deixe o valor infantil vazio enquanto não estiver decidido; informe 0,00 para isenção.</p>
+        <div class="payment-panels" aria-live="polite">
+          <div><strong id="paymentDue">R$ 0,00</strong><span>Total previsto (valores definidos)</span></div>
+          <div><strong id="paymentReceived">R$ 0,00</strong><span>Recebido</span></div>
+          <div><strong id="paymentPending">R$ 0,00</strong><span>Pendente</span></div>
         </div>
-        <p class="finance-help"><strong>Conferência:</strong> <span id="financeCheck">R$ 0,00</span></p>
-        <h4>Valor por responsável e seus convidados</h4>
-        <div id="financeGroups"></div>
-        <div class="finance-toolrow">
-          <button id="financePdfBtn" class="primary-btn" type="button" disabled>↓ Gerar PDF das despesas e rateio</button>
-          <button id="financeBackupBtn" class="secondary-btn" type="button">↓ Exportar backup com notas</button>
-          <label class="secondary-btn" for="financeImportFile">↑ Importar backup</label>
-          <input id="financeImportFile" type="file" accept="application/json,.json" hidden>
+        <p id="paymentUnknown" class="payment-help"></p>
+        <h4>Participantes e pagamentos</h4>
+        <div id="paymentRows"></div>
+        <p id="paymentMessage" role="status" aria-live="polite"></p>
+        <div class="payment-tools">
+          <button id="paymentPdfBtn" class="primary-btn" type="button">↓ Gerar PDF financeiro</button>
+          <button id="paymentBackupBtn" class="secondary-btn" type="button">↓ Exportar backup</button>
+          <label for="paymentImport" class="secondary-btn">↑ Importar backup</label>
+          <input type="file" id="paymentImport" accept="application/json,.json" hidden>
         </div>
-        <p class="finance-help">O PDF detalha cada compra, o total por pessoa e a soma por responsável. Fotos de notas são incluídas como anexos no PDF; arquivos PDF originais permanecem disponíveis para download pelo botão “Ver nota”.</p>
       </section>
     <h3>Informações do evento</h3>
     <div class="columns-2">
@@ -178,58 +206,56 @@
       <div class="field"><label for="configPlace">Local</label><input class="control" id="configPlace" maxlength="160"></div>
       <div class="field"><label for="configMessage">Mensagem do evento</label><input class="control" id="configMessage" maxlength="230"></div>
     </div>
-    <div class="admin-actions"><button type="button" class="primary-btn" id="saveConfigBtn">Salvar informações</button><button type="button" class="danger" id="clearBtn">Apagar lista do encontro</button></div>
+    <div class="admin-actions"><button type="button" class="primary-btn" id="saveConfigBtn">Salvar informações</button><button type="button" class="danger" id="clearBtn">Apagar lista desta corrida</button></div>
   </section>
   <header class="hero" id="inicio">
     <div class="hero-text">
-      <span class="hero-eyebrow" id="heroEventTitle">Encontro de Lanches e Confraternização • 2026</span>
-      <h1>LANCHES<span>&amp; Confraternização LeRunners</span></h1>
-      <p class="hero-blurb" id="heroMessage">Encontro com churrasco leve, piscina e preparo dos hambúrgueres artesanais a partir das 16h.</p>
+      <span class="hero-eyebrow" id="heroEventTitle">LeRunners • Corrida do 17º BPM/I • 2026</span>
+      <h1>CORRIDA 17º BPM<span>Churrasco LeRunners</span></h1>
+      <p class="hero-blurb" id="heroMessage">Depois da corrida, alcatra em tirinhas na chapa com a equipe. Confirme sua participação no churrasco!</p>
       <div class="detail-row">
-        <span class="detail-chip"><span class="detail-icon">📅</span><span><b>01 NOV • DOMINGO</b><small>2026 • Véspera de feriado</small></span></span>
-        <span class="detail-chip"><span class="detail-icon">📍</span><span><b id="heroPlace">Nossa chácara</b><small id="heroTime">Encontro a partir das 12h</small></span></span>
+        <span class="detail-chip"><span class="detail-icon">📅</span><span><b>08 NOV • DOMINGO</b><small>2026 • Corrida do 17º BPM/I</small></span></span>
+        <span class="detail-chip"><span class="detail-icon">🥩</span><span><b id="heroPlace">Confraternização pós-prova</b><small id="heroTime">Local e horário a confirmar pela equipe</small></span></span>
       </div>
       <div class="hero-buttons"><a class="primary-btn" href="#confirmar">🎟 Confirmar presença</a><a class="secondary-btn" href="#memorias">Ver galeria ↗</a></div>
     </div>
-    <div class="hero-media"><img src="assets/fotos/302971.jpg" alt="Hambúrguer artesanal real feito pela equipe, com queijo e alface" fetchpriority="high"><div class="hero-photo-tag">🍔 Cardápio do evento<small>Hambúrgueres artesanais</small></div></div>
+    <div class="hero-media"><img src="assets/fotos/76107.jpg" alt="Equipe LeRunners reunida em confraternização anterior" fetchpriority="high"><div class="hero-photo-tag">🥩 Pós-prova<small>Alcatra em tirinhas na chapa</small></div></div>
   </header>
   <section class="highlights" aria-label="Atrações do encontro">
-    <div class="highlight"><span class="symbol">🍔</span><span>Hambúrguer artesanal</span></div>
-    <div class="highlight"><span class="symbol">🏊</span><span>Piscina liberada</span></div>
-    <div class="highlight"><span class="symbol">🥩</span><span>Churrasco leve às 12h</span></div>
-    <div class="highlight"><span class="symbol">🤝</span><span>Amigos e confraternização</span></div>
+    <div class="highlight"><span class="symbol">🏃</span><span>Corrida do 17º BPM/I</span></div>
+    <div class="highlight"><span class="symbol">🥩</span><span>Alcatra na chapa</span></div>
+    <div class="highlight"><span class="symbol">💵</span><span>Referência: R$ 30/adulto</span></div>
+    <div class="highlight"><span class="symbol">🤝</span><span>Confraternização da equipe</span></div>
   </section>
   <section class="event-plan" id="programacao" aria-labelledby="programacaoTitulo">
-    <div class="section-top"><div><span class="eyebrow">Domingo • 01/11/2026</span><h2 class="heading" id="programacaoTitulo">Programação do encontro</h2><p>Almoço leve, piscina e hambúrgueres artesanais.</p></div></div>
+    <div class="section-top"><div><span class="eyebrow">Domingo • 08/11/2026</span><h2 class="heading" id="programacaoTitulo">Corrida + carne na chapa</h2><p>Churrasco de confraternização após a Corrida do 17º Batalhão.</p></div></div>
     <div class="event-steps">
-      <article class="event-step"><span class="time">12h • Encontro</span><h3>Almoço com churrasco leve</h3><p>Cada pessoa leva uma pequena porção de carne: por exemplo, <strong>2 bifes, 2 kaftas ou 2 a 3 gomos de linguiça</strong>. A proposta é um almoço simples e leve.</p></article>
-      <article class="event-step"><span class="time">Tarde • Lazer</span><h3>Chácara e piscina</h3><p>O espaço e a piscina ficam disponíveis para quem quiser aproveitar durante a tarde.</p></article>
-      <article class="event-step"><span class="time">16h • Preparação</span><h3>Hambúrgueres artesanais</h3><p>Começaremos a preparar os lanches às <strong>16h</strong>. Esse é o início do preparo, não um horário fixo para servir.</p></article>
+      <article class="event-step"><span class="time">06h30</span><h3>Início das largadas</h3><p>Desafio 17 km. As provas de 5 e 10 km largam a partir das 07h05, conforme a organização. <a href="https://corrida17bpmi.com.br/" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">Confira a programação oficial</a>.</p></article>
+      <article class="event-step"><span class="time">Depois da prova</span><h3>Alcatra em tirinhas na chapa</h3><p>Confraternização da equipe LeRunners. Local e horário do churrasco serão informados pelos organizadores do grupo.</p></article>
+      <article class="event-step"><span class="time">R$ 30</span><h3>Contribuição de referência por adulto</h3><p>Para comprar as carnes e os descartáveis. O administrador definirá o valor das crianças e controlará os pagamentos.</p></article>
     </div>
     <div class="event-info-grid">
-      <div class="event-info"><strong>Bebidas e sobremesas</strong><p>Cada participante leva sua própria bebida. Quem puder também pode colaborar com doces ou sobremesas para compartilhar.</p></div>
-      <div class="event-info"><strong>Organização dos hambúrgueres</strong><p>Previsão de cerca de <strong>1,5 lanche por pessoa</strong>, com unidades adicionais para quem quiser repetir. O custo dos hambúrgueres será dividido entre os participantes.</p></div>
+      <div class="event-info"><strong>🥤 Bebidas</strong><p>Cada um leva sua bebida. Há previsão de chope gratuito no evento da corrida, mas a fila costuma ser grande. Se quiser sua bebida preferida, leve a sua.</p></div>
+      <div class="event-info"><strong>📍 Local da corrida</strong><p>Av. Sabino Cardoso Filho, 2500, Vila Elvira, São José do Rio Preto. O local do churrasco ainda precisa ser confirmado pela equipe.</p></div>
     </div>
-    <p class="event-plan-foot">As quantidades são estimativas para o planejamento das compras.</p>
+    <p class="event-plan-foot">Este formulário é para a confraternização da equipe, não substitui a inscrição oficial na corrida.</p>
   </section>
-  <section id="memorias" aria-label="Fotos das confraternizações e hambúrgueres">
-    <div class="section-top"><div><span class="eyebrow">Galeria da equipe</span><h2 class="heading">Confraternização LeRunners</h2><p>Registros da confraternização anterior e do espaço do evento.</p></div></div>
-    <div class="gallery">
-      <button class="gallery-tile large" data-photo="assets/fotos/76107.jpg" data-caption="Confraternização anterior • equipe reunida" type="button" aria-label="Ampliar foto da equipe"><img loading="lazy" src="assets/fotos/76107.jpg" alt="Fotografia da equipe reunida na área da churrasqueira"><span class="caption">Confraternização anterior</span></button>
-      <button class="gallery-tile" data-photo="assets/fotos/143240.jpg" data-caption="Piscina da chácara em dia de confraternização" type="button" aria-label="Ampliar foto da piscina"><img loading="lazy" class="pool" src="assets/fotos/143240.jpg" alt="Integrantes do grupo na piscina da chácara"><span class="caption">Piscina da chácara</span></button>
-      <button class="gallery-tile" data-photo="assets/fotos/302970.jpg" data-caption="Bastidores da preparação dos hambúrgueres e espetinhos" type="button" aria-label="Ampliar fotos do preparo"><img loading="lazy" src="assets/fotos/302970.jpg" alt="Colagem real de preparo de hambúrgueres, queijos e espetinhos"><span class="caption">Hambúrgueres do cardápio</span></button>
-      <button class="gallery-tile" data-photo="assets/fotos/75086.jpg" data-caption="Amigos reunidos no espaço da churrasqueira" type="button" aria-label="Ampliar foto de amigos"><img loading="lazy" src="assets/fotos/75086.jpg" alt="Amigos reunidos em frente ao balcão da churrasqueira"><span class="caption">Equipe LeRunners</span></button>
-      <button class="gallery-tile" data-video="assets/videos/chacara-confraternizacao.mp4" type="button" aria-label="Assistir vídeo da chácara"><img loading="lazy" src="assets/fotos/46938.jpg" alt="Piscina da chácara vista em foto vertical"><span class="video-overlay" aria-hidden="true">▶</span><span class="caption">▶ Conheça a chácara</span></button>
+  <section id="memorias" aria-label="Fotos anteriores da equipe">
+    <div class="section-top"><div><span class="eyebrow">Memórias LeRunners</span><h2 class="heading">Nossa equipe reunida</h2><p>Fotos originais de encontros anteriores, apenas como lembrança.</p></div></div>
+    <div class="gallery" style="grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:220px">
+      <button class="gallery-tile" data-photo="assets/fotos/76107.jpg" data-caption="Encontro anterior da equipe" type="button" aria-label="Ampliar foto do grupo"><img loading="lazy" src="assets/fotos/76107.jpg" alt="Foto original de confraternização anterior"><span class="caption">Equipe LeRunners</span></button>
+      <button class="gallery-tile" data-photo="assets/fotos/75086.jpg" data-caption="Amigos LeRunners em confraternização anterior" type="button" aria-label="Ampliar foto dos amigos"><img loading="lazy" src="assets/fotos/75086.jpg" alt="Amigos reunidos em encontro anterior"><span class="caption">Amigos e histórias</span></button>
     </div>
-    <p class="remember">Toque nas imagens para ampliar ou assistir ao vídeo.</p>
+    <p class="remember">Toque para ampliar as fotos.</p>
   </section>
   <section class="layout" id="confirmar">
     <div class="panel">
-      <div class="form-top"><span class="eyebrow">Lista oficial em tempo real</span><h2 class="heading">Confirme sua presença</h2><p>Informe seu nome completo, sua resposta e os nomes dos convidados, se houver.</p></div>
+      <div class="form-top"><span class="eyebrow">Enquete LeRunners • 08/11</span><h2 class="heading">Você vai ao churrasco?</h2><p>Preencha sua resposta e, se necessário, os acompanhantes. Depois, envie a atualização ao grupo LeRunners no WhatsApp.</p></div>
       <form class="form-body" id="rsvpForm" novalidate>
         <div id="savedMessage" class="saved-chip" role="status"></div>
+        <p class="rsvp-price">🥩 Contribuição de referência: <strong>R$ 30 por adulto</strong>, para carnes e descartáveis. Crianças: valor definido pela organização. Cada um leva sua bebida.</p>
         <div class="field"><label for="userName">Seu nome <span aria-hidden="true">*</span></label><input class="control" id="userName" maxlength="80" minlength="3" type="text" autocomplete="name" placeholder="Nome e sobrenome" required></div>
-        <fieldset class="field" style="border:0;padding:0;min-width:0"><legend class="label">Você vai participar? *</legend><div class="option-grid">
+        <fieldset class="field" style="border:0;padding:0;min-width:0"><legend class="label">Você participa do churrasco pós-corrida? *</legend><div class="option-grid">
           <label class="choice good"><input type="radio" name="status" value="sim" required><span><em>🎉</em>Sim, eu vou!</span></label>
           <label class="choice bad"><input type="radio" name="status" value="nao"><span><em>😢</em>Não poderei</span></label>
           <label class="choice"><input type="radio" name="status" value="talvez"><span><em>🤔</em>Talvez</span></label>
@@ -237,34 +263,27 @@
         <div id="attendingFields">
           <div class="field"><label for="guestCount">Deseja levar convidados?</label><select id="guestCount" class="control"><option value="0">Não, somente eu</option><option value="unknown">Não sei ainda</option><option value="1">1 convidado</option><option value="2">2 convidados</option><option value="3">3 convidados</option><option value="4">4 convidados</option><option value="5">5 convidados</option><option value="6">6 convidados</option><option value="7">7 convidados</option><option value="8">8 convidados</option><option value="9">9 convidados</option></select></div>
           <div class="field" id="guestNamesBlock" hidden><div class="label">Convidados e confirmações individuais *</div><div id="guestRows"></div><span class="hint">Cada convidado fica no seu grupo. Você poderá alterar a presença ou remover convidados depois.</span></div>
-          <div class="field"><label for="burger">Preferência de hambúrguer</label><select id="burger" class="control" required><option value="" selected disabled>Selecione uma opção</option><option value="tradicional">Tradicional</option><option value="vegetariano">Vegetariano</option><option value="ambos">Tanto faz</option><option value="nao-vou-comer">Não vou comer</option></select></div>
-          <fieldset class="field" id="bringFieldset" style="border:0;padding:0;min-width:0"><legend class="label">Pretende levar algo? <span class="hint">(opcional, escolha quantas opções quiser)</span></legend><div id="bringChoices" class="bring-grid">
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Bebida"><span>🥤 Bebida para compartilhar</span></label>
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Sobremesa"><span>🍰 Sobremesa</span></label>
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Doces"><span>🍬 Doces</span></label>
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Gelo"><span>🧊 Gelo</span></label>
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Decoração"><span>🎈 Decoração</span></label>
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Descartáveis"><span>🍽️ Descartáveis</span></label>
-            <label class="bring-choice"><input type="checkbox" name="bring" value="Outro"><span>➕ Outro (explique no recado)</span></label>
-          </div><span class="hint">Cada pessoa leva sua própria bebida. Se quiser contribuir com itens extras, marque acima; caso ainda não tenha decidido, deixe em branco.</span></fieldset>
+
         </div>
         <div class="field"><label for="note">Observações para a organização <span class="hint">(opcional)</span></label><textarea class="control" id="note" maxlength="260" placeholder="Ex.: vou chegar mais tarde, vou levar sobremesa..." rows="3"></textarea><span class="hint">As observações serão destinadas à organização.</span></div>
-        <button class="primary-btn save-btn" type="submit" id="submitBtn">📩 ENVIAR MINHA RESPOSTA</button>
-        <p class="notice">Você poderá atualizar sua confirmação neste dispositivo.</p>
+        <button class="primary-btn save-btn" type="submit" id="submitBtn">✅ 1. SALVAR MINHA RESPOSTA</button>
+        <p class="notice">Sua confirmação fica salva no site. Você poderá atualizá-la neste mesmo dispositivo.</p>
+        <div class="rsvp-share-step" id="shareStep" hidden role="status" aria-live="polite"><h3>✅ Pronto! Falta avisar o grupo.</h3><p><strong>Você salvou sua resposta no site.</strong> Agora envie a atualização no WhatsApp para todos saberem:</p><ol><li>Toque no botão verde abaixo.</li><li>No WhatsApp, procure e escolha o <strong>GRUPO LeRunners</strong> (não um contato individual).</li><li>Toque em <strong>ENVIAR</strong> dentro do WhatsApp.</li></ol><button type="button" class="primary-btn whatsapp-cta" id="shareAfterSaveBtn">🟢 2. ENVIAR ATUALIZAÇÃO NO GRUPO LERUNNERS</button><p class="notice">Abrir o WhatsApp não envia sozinho. É necessário escolher o grupo e confirmar o envio.</p></div>
       </form>
     </div>
     <aside class="side" aria-label="Resumo do evento">
       <div class="numbers"><div class="metric wide"><strong id="countPeople">0</strong><span>Pessoas previstas (Sim + Talvez)</span></div><div class="metric"><strong id="countYes">0</strong><span>Pessoas confirmadas</span></div><div class="metric"><strong id="countMaybe">0</strong><span>Aguardando confirmação</span></div><div class="metric"><strong id="countNo">0</strong><span>Não vão</span></div></div>
       <div class="side-card"><span class="eyebrow">Participação</span><h3 class="heading" style="margin-top:8px">Acompanhe as confirmações</h3><p>A lista de participantes é atualizada automaticamente.</p><a class="secondary-btn" style="width:100%" href="#lista">Ver lista de presença ↓</a></div>
-      <div class="side-card"><span class="eyebrow">1º de novembro</span><h3 class="heading" style="margin-top:8px">Lanches e Confraternização LeRunners</h3><p>12h: encontro e churrasco leve. 16h: início do preparo dos hambúrgueres. Piscina durante a tarde.</p><img class="side-image" src="assets/fotos/302969.jpg" alt="Hambúrgueres previstos para o evento" loading="lazy"></div>
+      <div class="side-card"><span class="eyebrow">Domingo • 08/11</span><h3 class="heading" style="margin-top:8px">Corrida + Churrasco LeRunners</h3><p>Depois da corrida do 17º BPM/I, teremos alcatra em tirinhas na chapa. R$ 30 por adulto é o valor de referência; o valor infantil será definido no painel administrativo.</p><img class="side-image" src="assets/fotos/76107.jpg" alt="Fotografia da equipe em confraternização anterior" loading="lazy"></div>
     </aside>
   </section>
   <section class="list-panel" id="lista">
-    <div class="list-header"><div><span class="eyebrow">Lista de presença</span><h2 class="heading">Participantes</h2><p style="color:#cfbaca;font-size:13px;margin:0">Veja as confirmações em tempo real.</p></div><div class="list-buttons"><button class="green-btn" id="shareListBtn" type="button">↗ Atualizar lista no WhatsApp</button></div></div>
+    <div class="list-header"><div><span class="eyebrow">Lista de presença</span><h2 class="heading">Participantes</h2><p style="color:#cfbaca;font-size:13px;margin:0">Veja as confirmações em tempo real.</p></div><div class="list-buttons"><button class="green-btn" id="shareListBtn" type="button">🟢 ENVIAR LISTA ATUALIZADA NO WHATSAPP</button></div></div>
+    <p class="share-help"><strong>Como avisar o grupo:</strong> toque no botão verde acima → escolha o grupo <strong>LeRunners</strong> no WhatsApp → toque em <strong>Enviar</strong>. Apenas abrir o WhatsApp não publica a mensagem.</p>
     <div class="list-tools"><label class="sr-only" for="searchInput">Buscar participante</label><input class="control" type="search" id="searchInput" placeholder="Buscar participante..."><label class="sr-only" for="statusFilter">Filtrar por resposta</label><select class="control" id="statusFilter"><option value="sim" selected>Confirmados</option><option value="todos">Todas respostas</option><option value="talvez">Talvez</option><option value="nao">Não vão</option></select></div>
     <div id="guestList" class="guest-list" aria-live="polite"><div class="empty">Carregando lista de participantes...</div></div>
   </section>
-  <footer class="section-foot">Confraternização LeRunners • 01/11/2026 <br>Powered by <b>thIAguinho Soluções Digitais</b></footer>
+  <footer class="section-foot">Corrida do 17º BPM/I • Churrasco LeRunners • 08/11/2026 <br>Powered by <b>thIAguinho Soluções Digitais</b></footer>
 </div>
 <div id="loginOverlay" class="login-overlay" hidden>
   <form id="loginForm" class="login-card" autocomplete="off">
